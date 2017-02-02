@@ -22,24 +22,27 @@ public class MainRenderer implements GLSurfaceView.Renderer
     private float[] mViewMatrix = new float[16];
     private float[] mProjectionMatrix = new float[16];
     private float[] mModelMatrix = new float[16];
+    private float[] mMVPMatrix = new float[16];
+
+
+    //Shader Handles
+    private int programHandle;
 
     //Uniform Handles
-    private int mMVPMatrixHandle, mPositionHandle, mColourHandle;
+    private int mMVPMatrixHandle;
     @Override
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config)
     {
-        mTriangle = new Triangle(1);
+        mTriangle = new Triangle();
         Matrix.setLookAtM(mViewMatrix, 0,
                 0.0f, 0.0f, 1.5f, //EYE x,y,z
                 0.0f, 0.0f, -5.0f, //LOOKING DIRECTION x,y,z
                 0.0f, 1.0f, 0.0f); //Define 'UP' direction)
 
         ShaderBuilder shaderBuilder = new ShaderBuilder();
-        int programHandle = shaderBuilder.LoadProgram();
+        programHandle = shaderBuilder.LoadProgram();
 
         mMVPMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVPMatrix");
-        mColourHandle = GLES20.glGetAttribLocation(programHandle, "a_Colour");
-        mPositionHandle = GLES20.glGetAttribLocation(programHandle, "a_Position");
 
         GLES20.glUseProgram(programHandle);
     }
@@ -69,6 +72,11 @@ public class MainRenderer implements GLSurfaceView.Renderer
 
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 0.0f, 1.0f);
-        mTriangle.drawTriangle();
+
+        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
+
+        mTriangle.drawTriangle(programHandle);
     }
 }

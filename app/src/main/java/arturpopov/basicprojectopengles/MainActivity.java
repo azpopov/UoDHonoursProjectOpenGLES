@@ -21,7 +21,6 @@ public class MainActivity extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
         mglSurfaceView = new GLSurfaceView(this);
 
         //Version Check

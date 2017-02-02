@@ -7,6 +7,7 @@ package arturpopov.basicprojectopengles;
 
 public final class LogTag
 {
-    public static String UNSUPPORTEDES2 = "MainActivity";
-    public static String SHADERS = "Shaders";
+    public static String UNSUPPORTEDES2 = "LogMainActivity";
+    public static String SHADERS = "LogShaders";
+    public static String TEST = "testingLog";
 }
