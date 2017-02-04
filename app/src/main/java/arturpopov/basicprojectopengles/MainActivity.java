@@ -16,13 +16,13 @@ import java.util.logging.Logger;
 public class MainActivity extends Activity
 {
     private GLSurfaceView mglSurfaceView;
-
+    private static Context mContext;
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         mglSurfaceView = new GLSurfaceView(this);
-
+        mContext = this;
         //Version Check
         final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         final ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
@@ -53,5 +53,9 @@ public class MainActivity extends Activity
     {
         super.onResume();
         mglSurfaceView.onResume();
+    }
+    public static Context getContext()
+    {
+        return mContext;
     }
 }
