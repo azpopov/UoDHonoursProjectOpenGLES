@@ -16,11 +16,8 @@ public class Triangle implements IPrimitive
     private final FloatBuffer mVerticeBuffer;
     private final FloatBuffer mColourBuffer;
 
-    private final int mPositionOffset = 0;
-    private final int mColourOffset = 0;
-
-    Integer mPositionHandle;
-    Integer mColourHandle;
+    private Integer mPositionHandle;
+    private Integer mColourHandle;
 
 
     public Triangle()
@@ -55,9 +52,14 @@ public class Triangle implements IPrimitive
             mPositionHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_Position");
             mColourHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_Colour");
         }
+
+        int mPositionOffset = 0;
+
         mVerticeBuffer.position(mPositionOffset);
         GLES20.glVertexAttribPointer(mPositionHandle, POSITION_SIZE, GLES20.GL_FLOAT, false, POSITION_STRIDE_BYTES, mVerticeBuffer);
         GLES20.glEnableVertexAttribArray(mPositionHandle);
+
+        int mColourOffset = 0;
 
         mColourBuffer.position(mColourOffset);
         GLES20.glVertexAttribPointer(mColourHandle, COLOUR_SIZE, GLES20.GL_FLOAT, false, COLOUR_STRIDE_BYTES, mColourBuffer);

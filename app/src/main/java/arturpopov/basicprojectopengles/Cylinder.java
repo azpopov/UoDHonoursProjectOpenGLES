@@ -9,6 +9,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 /**
+ *
  * Created by arturpopov on 06/02/2017.
  */
 
@@ -16,20 +17,18 @@ public class Cylinder implements IPrimitive
 {
     private FloatBuffer mVerticeBuffer;
     private FloatBuffer mColourBuffer;
-    private ShortBuffer mIndiceBuffer;
 
     private int length, radius, sidesOfCylinder;
-    private float r,g,b,a;
+    private float r, g, b, a;
 
     private float[] vetriceData;
     private float[] colourData;
-    private short[] indiceData;
 
-    Integer mPositionHandle;
-    Integer mColourHandle;
+    private Integer mPositionHandle;
+    private Integer mColourHandle;
 
-    final int buffers[] = new int[3]; //buffer[0] is Vertex [1] is colour and [2] is normals (not implemented normals yet)
-    final int ibo[] = new int[1];
+    private final int buffers[] = new int[3]; //buffer[0] is Vertex [1] is colour and [2] is normals (not implemented normals yet)
+    private final int ibo[] = new int[1];
     Cylinder()
     {
         length = 10;
@@ -105,7 +104,7 @@ public class Cylinder implements IPrimitive
 
         mColourBuffer.position(0);
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[1]);
-        GLES20.glVertexAttribPointer(mColourHandle, COLOUR_SIZE, GLES20.GL_FLOAT, false, COLOUR_STRIDE_BYTES, 0); //TODO Maybe put stride to 0 ?
+        GLES20.glVertexAttribPointer(mColourHandle, COLOUR_SIZE, GLES20.GL_FLOAT, false, COLOUR_STRIDE_BYTES, 0);
         GLES20.glEnableVertexAttribArray(mColourHandle);
 
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
@@ -182,7 +181,7 @@ public class Cylinder implements IPrimitive
             colourData[i * 4] = r;
             colourData[i * 4 + 1] = g;
             colourData[i * 4 + 2] = b;
-            colourData[i * 4 + 3] = 1.f;
+            colourData[i * 4 + 3] = a;
         }
     }
 
@@ -196,10 +195,9 @@ public class Cylinder implements IPrimitive
 
     private void setIndices()
     {
-        indiceData = new short[(sidesOfCylinder * 4) + 6];
+        short[] indiceData = new short[(sidesOfCylinder * 4) + 6];
         // fill "indices" to define triangle strips
         int index = 0;		// Current index
-        final int firstCircleIndex = 0;
         final int firstCircleCondition = sidesOfCylinder + 1;
         // Define indices for the first triangle fan of front circle
         for (int i = index; i < firstCircleCondition; i++)
@@ -232,7 +230,7 @@ public class Cylinder implements IPrimitive
         indiceData[index] = (short)stripCondition;
 
 
-        mIndiceBuffer = ByteBuffer
+        ShortBuffer mIndiceBuffer = ByteBuffer
                 .allocateDirect(indiceData.length * BYTES_PER_SHORT).order(ByteOrder.nativeOrder())
                 .asShortBuffer();
         mIndiceBuffer.put(indiceData).position(0);

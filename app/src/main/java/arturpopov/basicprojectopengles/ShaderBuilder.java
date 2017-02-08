@@ -1,12 +1,12 @@
 package arturpopov.basicprojectopengles;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.opengl.GLES20;
 import android.util.Log;
+
 import org.apache.commons.io.IOUtils;
-import java.io.FileInputStream;
+
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
@@ -14,20 +14,20 @@ import java.nio.charset.StandardCharsets;
  * Created by arturpopov on 01/02/2017.
  */
 
-public class ShaderBuilder
+class ShaderBuilder
 {
     /**
      * Loads, Links Vertex & Fragment Shader.
      * RuntimeException on Failure.
      * @return program
      */
-    public int LoadProgram(String shaderName)
+    public int LoadProgram(String shaderName, Context context)
     {
         int programHandle = GLES20.glCreateProgram();
         if(programHandle != 0)
         {
-            GLES20.glAttachShader(programHandle, LoadVertexShader(shaderName));
-            GLES20.glAttachShader(programHandle, LoadFragmentShader(shaderName));
+            GLES20.glAttachShader(programHandle, LoadVertexShader(shaderName, context));
+            GLES20.glAttachShader(programHandle, LoadFragmentShader(shaderName, context));
 
             GLES20.glBindAttribLocation(programHandle, 0, "a_Position");
             GLES20.glBindAttribLocation(programHandle, 1, "a_Colour");
@@ -48,9 +48,8 @@ public class ShaderBuilder
     }
 
 
-    private String readShaderFile(String fileName)
+    private String readShaderFile(String fileName, Context context)
     {
-        Context context = MainActivity.getContext();
         if(context == null)
         {
             Log.d(LogTag.CONTEXT, "Context null");
@@ -73,10 +72,10 @@ public class ShaderBuilder
         return everything;
     }
 
-    public int LoadVertexShader(String shaderName)
+    public int LoadVertexShader(String shaderName, Context context)
     {
         int vertexShaderHandle = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
-        String vertexShader = readShaderFile(shaderName + ".vert");
+        String vertexShader = readShaderFile(shaderName + ".vert", context);
         if(vertexShaderHandle != 0)
         {
             GLES20.glShaderSource(vertexShaderHandle, vertexShader);
@@ -99,10 +98,10 @@ public class ShaderBuilder
         }
         return vertexShaderHandle;
     }
-    public int LoadFragmentShader(String shaderName)
+    public int LoadFragmentShader(String shaderName, Context context)
     {
         int fragmentShaderHandle = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
-        String fragmentShader = readShaderFile(shaderName + ".frag");
+        String fragmentShader = readShaderFile(shaderName + ".frag", context);
         if(fragmentShaderHandle != 0)
         {
             GLES20.glShaderSource(fragmentShaderHandle, fragmentShader);

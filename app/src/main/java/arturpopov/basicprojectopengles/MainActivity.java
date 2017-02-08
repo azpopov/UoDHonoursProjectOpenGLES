@@ -7,8 +7,6 @@ import android.content.pm.ConfigurationInfo;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
-
-import java.util.logging.Logger;
 /**
  * Created by arturpopov on 31/01/2017.
  */
@@ -16,7 +14,7 @@ import java.util.logging.Logger;
 public class MainActivity extends Activity
 {
     private GLSurfaceView mglSurfaceView;
-    private static Context mContext;
+    private Context mContext;
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -36,7 +34,7 @@ public class MainActivity extends Activity
         else
         {
             mglSurfaceView.setEGLContextClientVersion(2);
-            mglSurfaceView.setRenderer(new MainRenderer());
+            mglSurfaceView.setRenderer(new MainRenderer(mContext));
             setContentView(mglSurfaceView);
         }
     }
@@ -53,9 +51,5 @@ public class MainActivity extends Activity
     {
         super.onResume();
         mglSurfaceView.onResume();
-    }
-    public static Context getContext()
-    {
-        return mContext;
     }
 }
