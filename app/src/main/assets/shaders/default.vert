@@ -8,6 +8,6 @@ varying vec4 v_Color;
 void main()
  {
     v_Color = a_Colour;
-    gl_Position = u_MVPMatrix   	* a_Position;
+    gl_Position = u_MVPMatrix   * a_Position;
 
 }

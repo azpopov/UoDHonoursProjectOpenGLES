@@ -1,6 +1,5 @@
 package arturpopov.basicprojectopengles;
 
-import android.graphics.Shader;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -18,6 +17,7 @@ public class MainRenderer implements GLSurfaceView.Renderer
     //Class Members
     //Display Objects
     private Triangle mTriangle;
+    private Cylinder mCylinder;
     //Matrices
     private float[] mViewMatrix = new float[16];
     private float[] mProjectionMatrix = new float[16];
@@ -34,7 +34,11 @@ public class MainRenderer implements GLSurfaceView.Renderer
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config)
     {
         GLES20.glClearColor(0.5f, 0.5f, 0.5f, 0.5f);
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         mTriangle = new Triangle();
+        mCylinder = new Cylinder();
+        mCylinder.setSize(10, 5, 400); //TODO throwaway code.
+        mCylinder.initialize();
         Matrix.setLookAtM(mViewMatrix, 0,
                 0.0f, 0.0f, 1.5f, //EYE x,y,z
                 0.0f, 0.0f, -5.0f, //LOOKING DIRECTION x,y,z
@@ -75,12 +79,12 @@ public class MainRenderer implements GLSurfaceView.Renderer
         Matrix.setIdentityM(mModelMatrix, 0);
 
         Matrix.translateM(mModelMatrix, 0, 0.0f, -1.0f, 0.0f);
-        Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 0.0f, 1.0f);
-
+        Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 1.0f, 0.0f, 0.0f);
+        Matrix.scaleM(mModelMatrix, 0 , 0.1f, 0.1f, 0.1f);
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
-
-        mTriangle.drawTriangle(programHandle);
+        mCylinder.draw(programHandle);
+        //mTriangle.draw(programHandle);
     }
 }

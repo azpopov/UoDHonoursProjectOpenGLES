@@ -11,4 +11,5 @@ public final class LogTag
     public static String SHADERS = "LogShaders";
     public static String TEST = "testingLog";
     public static String CONTEXT = "LogContextError";
+    public static String PRIMITIVE = "LogPrimitiveError";
 }
