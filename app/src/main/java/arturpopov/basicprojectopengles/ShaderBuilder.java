@@ -1,14 +1,8 @@
 package arturpopov.basicprojectopengles;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.opengl.GLES20;
 import android.util.Log;
-
-import org.apache.commons.io.IOUtils;
-
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Created by arturpopov on 01/02/2017.
@@ -48,34 +42,12 @@ class ShaderBuilder
     }
 
 
-    private String readShaderFile(String fileName, Context context)
-    {
-        if(context == null)
-        {
-            Log.d(LogTag.CONTEXT, "Context null");
-            throw new RuntimeException("Context Null");
-        }
 
-        AssetManager assetManager = context.getAssets();
-        String everything;
-        try
-        {
-            InputStream inputStream = assetManager.open("shaders/"+fileName);
-            everything = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
-        }
-        catch (java.io.IOException e)
-        {
-            Log.d(LogTag.SHADERS, "Failed to open Shader File");
-            throw new RuntimeException("Failed to open Shader File");
-        }
-
-        return everything;
-    }
 
     public int LoadVertexShader(String shaderName, Context context)
     {
         int vertexShaderHandle = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
-        String vertexShader = readShaderFile(shaderName + ".vert", context);
+        String vertexShader = FileReader.readFile(context.getResources().getString(R.string.relativeShaderPath) + shaderName + ".vert", context);
         if(vertexShaderHandle != 0)
         {
             GLES20.glShaderSource(vertexShaderHandle, vertexShader);
@@ -101,7 +73,7 @@ class ShaderBuilder
     public int LoadFragmentShader(String shaderName, Context context)
     {
         int fragmentShaderHandle = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
-        String fragmentShader = readShaderFile(shaderName + ".frag", context);
+        String fragmentShader = FileReader.readFile(context.getResources().getString(R.string.relativeShaderPath) + shaderName + ".frag", context);
         if(fragmentShaderHandle != 0)
         {
             GLES20.glShaderSource(fragmentShaderHandle, fragmentShader);

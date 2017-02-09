@@ -61,6 +61,8 @@ class MainRenderer implements GLSurfaceView.Renderer
         ShaderBuilder shaderBuilder = new ShaderBuilder();
         programHandle = shaderBuilder.LoadProgram("default", mContext);
 
+        ObjectLoader.loadObjFile("testBamboo.obj", mContext);
+
         mMVPMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVPMatrix");
         GLES20.glUseProgram(programHandle);
     }

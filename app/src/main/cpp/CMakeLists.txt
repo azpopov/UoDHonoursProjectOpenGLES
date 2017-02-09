@@ -10,6 +10,15 @@ cmake_minimum_required(VERSION 3.4.1)
 # and CMake builds them for you. When you build your app, Gradle
 # automatically packages shared libraries with your APK.
 
+add_library(  # Specifies the name of the library.
+                          object_loader
+
+                          # Sets the library as a shared library.
+                          STATIC
+
+                          # Provides a relative path to your source file(s).
+                          object_loader.cpp )
+
 add_library( # Specifies the name of the library.
              object_loader
 
@@ -17,4 +26,4 @@ add_library( # Specifies the name of the library.
              SHARED
 
              # Provides a relative path to your source file(s).
-             src/main/cpp/object_loader.cpp )
+             object_loader.cpp )

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">BasicProjectOpenGLes</string>
+    <string name="relativeShaderPath">shaders/</string>
 </resources>
