@@ -197,7 +197,7 @@ public class ObjectLoader
         resultList.add(normalDataFinal);
         resultList.add(tangentsDataFinal);
         resultList.add(biTangentsDataFinal);
-        return IndexObject(resultList);
+        return resultList;
     }
 
 
@@ -242,17 +242,14 @@ public class ObjectLoader
 
                 for (int j = 0; j < result.get(indexVertices).size()/3; j++)
                 {
-                    if
-                            (
-                                    isNear(comparingVertex[0], result.get(indexVertices).get(j * 3) + 0) &&
-                                    isNear(comparingVertex[1], result.get(indexVertices).get(j * 3) + 1) &&
-                                    isNear(comparingVertex[2], result.get(indexVertices).get(j * 3) + 2) &&
-                                    isNear(comparingUV[0], result.get(indexUvs).get(j * 3) + 0) &&
-                                    isNear(comparingUV[1], result.get(indexUvs).get(j * 3) + 1) &&
-                                    isNear(comparingNormal[0], result.get(indexNormals).get(j * 3) + 0) &&
-                                    isNear(comparingNormal[1], result.get(indexNormals).get(j * 3) + 1) &&
-                                    isNear(comparingNormal[2], result.get(indexNormals).get(j * 3) + 2)
-                            )
+                    if(isNear(comparingVertex[0], result.get(indexVertices).get((j * 3) + 0)) &&
+                                    isNear(comparingVertex[1], result.get(indexVertices).get((j * 3) + 1)) &&
+                                    isNear(comparingVertex[2], result.get(indexVertices).get((j * 3) + 2)) &&
+                                    isNear(comparingUV[0], result.get(indexUvs).get((j * 2) + 0)) &&
+                                    isNear(comparingUV[1], result.get(indexUvs).get((j * 2) + 1)) &&
+                                    isNear(comparingNormal[0], result.get(indexNormals).get((j * 3) + 0)) &&
+                                    isNear(comparingNormal[1], result.get(indexNormals).get((j * 3) + 1)) &&
+                                    isNear(comparingNormal[2], result.get(indexNormals).get((j * 3) + 2)))
                     {
                         index = j;
                         break;
@@ -315,7 +312,7 @@ public class ObjectLoader
                                 in.get(indexBiTangents).get((i * 3) + 1),
                                 in.get(indexBiTangents).get((i * 3) + 2)
                         });
-                Collections.addAll(result.get(indexIndices), (float)result.get(indexIndices).size()-1.0f);
+                Collections.addAll(result.get(indexIndices), (float)result.get(indexIndices).size());
             }
         }
         return result;
