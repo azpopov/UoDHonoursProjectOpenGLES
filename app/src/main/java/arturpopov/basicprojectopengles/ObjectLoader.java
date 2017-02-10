@@ -17,6 +17,14 @@ import java.util.Vector;
 
 public class ObjectLoader
 {
+    public static final int VERTEX_ARRAY_INDEX = 0;
+    public static final int TEXTURE_COORDINATE_ARRAY_INDEX = 1;
+    public static final int NORMAL_ARRAY_INDEX = 2;
+    public static final int TANGENT_ARRAY_INDEX = 3;
+    public static final int BITANGENT_ARRAY_INDEX = 4;
+    public static final int INDICE_ARRAY_INDEX = 5;
+
+
     static ArrayList<ArrayList<Float>> loadObjFile(String fileName, Context context)
     {
         if (context == null)
@@ -197,59 +205,53 @@ public class ObjectLoader
         resultList.add(normalDataFinal);
         resultList.add(tangentsDataFinal);
         resultList.add(biTangentsDataFinal);
-        return resultList;
+        return IndexObject(resultList);
     }
 
 
     public static ArrayList<ArrayList<Float>> IndexObject(ArrayList<ArrayList<Float>> in)
     {
         ArrayList<ArrayList<Float>> result = new ArrayList<>();
-        final int indexVertices = 0;
         result.add(new ArrayList<Float>());
-        final int indexUvs = 1;
         result.add(new ArrayList<Float>());
-        final int indexNormals = 2;
         result.add(new ArrayList<Float>());
-        final int indexTangents = 3;
         result.add(new ArrayList<Float>());
-        final int indexBiTangents = 4;
         result.add(new ArrayList<Float>());
-        final int indexIndices = 5;
         result.add(new ArrayList<Float>());
 
 
-        for (int i = 0; i < in.get(indexVertices).size()/3; i++)
+        for (int i = 0; i < in.get(VERTEX_ARRAY_INDEX).size()/3; i++)
         {
             int index = -1;
             {
                 Float[] comparingVertex = new Float[]
                         {
-                                in.get(indexVertices).get((i * 3) + 0),
-                                in.get(indexVertices).get((i * 3) + 1),
-                                in.get(indexVertices).get((i * 3) + 2)
+                                in.get(VERTEX_ARRAY_INDEX).get((i * 3) + 0),
+                                in.get(VERTEX_ARRAY_INDEX).get((i * 3) + 1),
+                                in.get(VERTEX_ARRAY_INDEX).get((i * 3) + 2)
                         };
 
                 Float[] comparingUV = new Float[]
                         {
-                                in.get(indexUvs).get((i * 2) + 0), in.get(indexUvs).get((i * 2) + 1)
+                                in.get(TEXTURE_COORDINATE_ARRAY_INDEX).get((i * 2) + 0), in.get(TEXTURE_COORDINATE_ARRAY_INDEX).get((i * 2) + 1)
                         };
                 Float[] comparingNormal = new Float[]
                         {
-                                in.get(indexNormals).get((i * 3) + 0),
-                                in.get(indexNormals).get((i * 3) + 1),
-                                in.get(indexNormals).get((i * 3) + 2)
+                                in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 0),
+                                in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 1),
+                                in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 2)
                         };
 
-                for (int j = 0; j < result.get(indexVertices).size()/3; j++)
+                for (int j = 0; j < result.get(VERTEX_ARRAY_INDEX).size()/3; j++)
                 {
-                    if(isNear(comparingVertex[0], result.get(indexVertices).get((j * 3) + 0)) &&
-                                    isNear(comparingVertex[1], result.get(indexVertices).get((j * 3) + 1)) &&
-                                    isNear(comparingVertex[2], result.get(indexVertices).get((j * 3) + 2)) &&
-                                    isNear(comparingUV[0], result.get(indexUvs).get((j * 2) + 0)) &&
-                                    isNear(comparingUV[1], result.get(indexUvs).get((j * 2) + 1)) &&
-                                    isNear(comparingNormal[0], result.get(indexNormals).get((j * 3) + 0)) &&
-                                    isNear(comparingNormal[1], result.get(indexNormals).get((j * 3) + 1)) &&
-                                    isNear(comparingNormal[2], result.get(indexNormals).get((j * 3) + 2)))
+                    if(isNear(comparingVertex[0], result.get(VERTEX_ARRAY_INDEX).get((j * 3) + 0)) &&
+                                    isNear(comparingVertex[1], result.get(VERTEX_ARRAY_INDEX).get((j * 3) + 1)) &&
+                                    isNear(comparingVertex[2], result.get(VERTEX_ARRAY_INDEX).get((j * 3) + 2)) &&
+                                    isNear(comparingUV[0], result.get(TEXTURE_COORDINATE_ARRAY_INDEX).get((j * 2) + 0)) &&
+                                    isNear(comparingUV[1], result.get(TEXTURE_COORDINATE_ARRAY_INDEX).get((j * 2) + 1)) &&
+                                    isNear(comparingNormal[0], result.get(NORMAL_ARRAY_INDEX).get((j * 3) + 0)) &&
+                                    isNear(comparingNormal[1], result.get(NORMAL_ARRAY_INDEX).get((j * 3) + 1)) &&
+                                    isNear(comparingNormal[2], result.get(NORMAL_ARRAY_INDEX).get((j * 3) + 2)))
                     {
                         index = j;
                         break;
@@ -260,59 +262,59 @@ public class ObjectLoader
             }
             if(index > -1)
             {
-                result.get(indexIndices).add((float)index);
+                result.get(INDICE_ARRAY_INDEX).add((float)index);
                 Float[] newTangent = {
-                        result.get(indexTangents).get((index * 3) + 0) + in.get(indexTangents).get((index * 3) + 0),
-                        result.get(indexTangents).get((index * 3) + 1) + in.get(indexTangents).get((index * 3) + 1),
-                        result.get(indexTangents).get((index * 3) + 2) + in.get(indexTangents).get((index * 3) + 2),
+                        result.get(TANGENT_ARRAY_INDEX).get((index * 3) + 0) + in.get(TANGENT_ARRAY_INDEX).get((index * 3) + 0),
+                        result.get(TANGENT_ARRAY_INDEX).get((index * 3) + 1) + in.get(TANGENT_ARRAY_INDEX).get((index * 3) + 1),
+                        result.get(TANGENT_ARRAY_INDEX).get((index * 3) + 2) + in.get(TANGENT_ARRAY_INDEX).get((index * 3) + 2),
                 };
-                Collections.addAll(result.get(indexTangents),newTangent);
+                Collections.addAll(result.get(TANGENT_ARRAY_INDEX),newTangent);
                 Float[] newBiTangent = {
-                        result.get(indexBiTangents).get((index * 3) + 0) + in.get(indexBiTangents).get((index * 3) + 0),
-                        result.get(indexBiTangents).get((index * 3) + 1) + in.get(indexBiTangents).get((index * 3) + 1),
-                        result.get(indexBiTangents).get((index * 3) + 2) + in.get(indexBiTangents).get((index * 3) + 2),
+                        result.get(BITANGENT_ARRAY_INDEX).get((index * 3) + 0) + in.get(BITANGENT_ARRAY_INDEX).get((index * 3) + 0),
+                        result.get(BITANGENT_ARRAY_INDEX).get((index * 3) + 1) + in.get(BITANGENT_ARRAY_INDEX).get((index * 3) + 1),
+                        result.get(BITANGENT_ARRAY_INDEX).get((index * 3) + 2) + in.get(BITANGENT_ARRAY_INDEX).get((index * 3) + 2),
                 };
-                Collections.addAll(result.get(indexBiTangents),newBiTangent);
+                Collections.addAll(result.get(BITANGENT_ARRAY_INDEX),newBiTangent);
 
             }
             else
             {
-                Collections.addAll(result.get(indexVertices), new Float[]
+                Collections.addAll(result.get(VERTEX_ARRAY_INDEX), new Float[]
                         {
-                                in.get(indexVertices).get((i * 3) + 0),
-                                in.get(indexVertices).get((i * 3) + 1),
-                                in.get(indexVertices).get((i * 3) + 2)
+                                in.get(VERTEX_ARRAY_INDEX).get((i * 3) + 0),
+                                in.get(VERTEX_ARRAY_INDEX).get((i * 3) + 1),
+                                in.get(VERTEX_ARRAY_INDEX).get((i * 3) + 2)
                         });
-                Collections.addAll(result.get(indexUvs), new Float[]
+                Collections.addAll(result.get(TEXTURE_COORDINATE_ARRAY_INDEX), new Float[]
                         {
-                                in.get(indexUvs).get((i * 2) + 0),
-                                in.get(indexUvs).get((i * 2) + 1)
+                                in.get(TEXTURE_COORDINATE_ARRAY_INDEX).get((i * 2) + 0),
+                                in.get(TEXTURE_COORDINATE_ARRAY_INDEX).get((i * 2) + 1)
                         });
-                Collections.addAll(result.get(indexNormals), new Float[]
+                Collections.addAll(result.get(NORMAL_ARRAY_INDEX), new Float[]
                         {
-                                in.get(indexNormals).get((i * 3) + 0),
-                                in.get(indexNormals).get((i * 3) + 1),
-                                in.get(indexNormals).get((i * 3) + 2)
+                                in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 0),
+                                in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 1),
+                                in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 2)
                         });
-                Collections.addAll(result.get(indexNormals), new Float[]
+                Collections.addAll(result.get(NORMAL_ARRAY_INDEX), new Float[]
                         {
-                                in.get(indexNormals).get((i * 3) + 0),
-                                in.get(indexNormals).get((i * 3) + 1),
-                                in.get(indexNormals).get((i * 3) + 2)
+                                in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 0),
+                                in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 1),
+                                in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 2)
                         });
-                Collections.addAll(result.get(indexTangents), new Float[]
+                Collections.addAll(result.get(TANGENT_ARRAY_INDEX), new Float[]
                         {
-                                in.get(indexTangents).get((i * 3) + 0),
-                                in.get(indexTangents).get((i * 3) + 1),
-                                in.get(indexTangents).get((i * 3) + 2)
+                                in.get(TANGENT_ARRAY_INDEX).get((i * 3) + 0),
+                                in.get(TANGENT_ARRAY_INDEX).get((i * 3) + 1),
+                                in.get(TANGENT_ARRAY_INDEX).get((i * 3) + 2)
                         });
-                Collections.addAll(result.get(indexBiTangents), new Float[]
+                Collections.addAll(result.get(BITANGENT_ARRAY_INDEX), new Float[]
                         {
-                                in.get(indexBiTangents).get((i * 3) + 0),
-                                in.get(indexBiTangents).get((i * 3) + 1),
-                                in.get(indexBiTangents).get((i * 3) + 2)
+                                in.get(BITANGENT_ARRAY_INDEX).get((i * 3) + 0),
+                                in.get(BITANGENT_ARRAY_INDEX).get((i * 3) + 1),
+                                in.get(BITANGENT_ARRAY_INDEX).get((i * 3) + 2)
                         });
-                Collections.addAll(result.get(indexIndices), (float)result.get(indexIndices).size());
+                Collections.addAll(result.get(INDICE_ARRAY_INDEX), (float)result.get(INDICE_ARRAY_INDEX).size());
             }
         }
         return result;
