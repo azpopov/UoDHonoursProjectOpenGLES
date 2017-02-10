@@ -6,5 +6,5 @@ package arturpopov.basicprojectopengles;
 
 public class Object
 {
-    
+
 }
