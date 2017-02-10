@@ -91,15 +91,39 @@ public class ObjectLoader
                 {
                     faceValues[i] = Integer.parseInt(finalSplit[i]) - 1;
                 }
-                vectorDataFinal.add(vectorDataTemp.get(faceValues[0]));
-                textureCoordFinal.add(textureCoordTemp.get(faceValues[1]));
-                normalDataFinal.add(normalDataTemp.get(faceValues[2]));
-                vectorDataFinal.add(vectorDataTemp.get(faceValues[3]));
-                textureCoordFinal.add(textureCoordTemp.get(faceValues[4]));
-                normalDataFinal.add(normalDataTemp.get(faceValues[5]));
-                vectorDataFinal.add(vectorDataTemp.get(faceValues[6]));
-                textureCoordFinal.add(textureCoordTemp.get(faceValues[7]));
-                normalDataFinal.add(normalDataTemp.get(faceValues[8]));
+                vectorDataFinal.add(vectorDataTemp.get(faceValues[0]*3));
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[0] * 3) + 1));
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[0] * 3) + 2));
+
+                textureCoordFinal.add(textureCoordTemp.get(faceValues[1] * 2));
+                textureCoordFinal.add(textureCoordTemp.get((faceValues[1] * 2) + 1));
+
+                normalDataFinal.add(normalDataTemp.get((faceValues[2] * 3) + 0));
+                normalDataFinal.add(normalDataTemp.get((faceValues[2] * 3) + 1));
+                normalDataFinal.add(normalDataTemp.get((faceValues[2] * 3) + 2));
+
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[3] * 3) + 0));
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[3] * 3) + 1));
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[3] * 3) + 2));
+
+                textureCoordFinal.add(textureCoordTemp.get((faceValues[4] * 2) + 0));
+                textureCoordFinal.add(textureCoordTemp.get((faceValues[4] * 2) + 1));
+
+                normalDataFinal.add(normalDataTemp.get((faceValues[5] * 3) + 0));
+                normalDataFinal.add(normalDataTemp.get((faceValues[5] * 3) + 1));
+                normalDataFinal.add(normalDataTemp.get((faceValues[5] * 3) + 2));
+
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[6] * 3) + 0));
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[6] * 3) + 1));
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[6] * 3) + 2));
+
+                textureCoordFinal.add(textureCoordTemp.get((faceValues[7] * 2) + 0));
+                textureCoordFinal.add(textureCoordTemp.get((faceValues[7] * 2) + 1));;
+
+                normalDataFinal.add(normalDataTemp.get((faceValues[8] * 3) + 0));
+                normalDataFinal.add(normalDataTemp.get((faceValues[8] * 3) + 1));
+                normalDataFinal.add(normalDataTemp.get((faceValues[8] * 3) + 2));
+
                 tangentIndex += 3;
             } else if (Objects.equals(line.charAt(0), 'o') || line.isEmpty())
             {
@@ -107,19 +131,40 @@ public class ObjectLoader
                 //	opengl - tutorial.org
                 for (int i = objectIndex; i < tangentIndex - 1; i += 3)
                 {
-                    Float[] v0 = {vectorDataFinal.get((i * 3) + 0), vectorDataFinal.get((i * 3) + 1), vectorDataFinal.get((i * 3) + 2)};
-                    Float[] v1 = {vectorDataFinal.get(((i + 1) * 3) + 0), vectorDataFinal.get(((i + 1) * 3) + 1), vectorDataFinal.get(((i + 1) * 3) + 2)};
-                    Float[] v2 = {vectorDataFinal.get(((i + 2) * 3) + 0), vectorDataFinal.get(((i + 2) * 3) + 1), vectorDataFinal.get(((i + 2) * 3) + 2)};
+                    Float[] v0 = {
+                            vectorDataFinal.get((i * 3) + 0),
+                            vectorDataFinal.get((i * 3) + 1),
+                            vectorDataFinal.get((i * 3) + 2)
+                    };
+                    Float[] v1 = {
+                            vectorDataFinal.get(((i + 1) * 3) + 0),
+                            vectorDataFinal.get(((i + 1) * 3) + 1),
+                            vectorDataFinal.get(((i + 1) * 3) + 2)
+                    };
+                    Float[] v2 = {
+                            vectorDataFinal.get(((i + 2) * 3) + 0),
+                            vectorDataFinal.get(((i + 2) * 3) + 1),
+                            vectorDataFinal.get(((i + 2) * 3) + 2)
+                    };
 
-                    Float[] uv0 = {textureCoordFinal.get((i * 3) + 0), textureCoordFinal.get((i * 3) + 1), textureCoordFinal.get((i * 3) + 2)};
-                    Float[] uv1 = {textureCoordFinal.get(((i + 1) * 3) + 0), textureCoordFinal.get(((i + 1) * 3) + 1), textureCoordFinal.get(((i + 1) * 3) + 2)};
-                    Float[] uv2 = {textureCoordFinal.get(((i + 2) * 3) + 0), textureCoordFinal.get(((i + 2) * 3) + 1), textureCoordFinal.get(((i + 2) * 3) + 2)};
+                    Float[] uv0 = {
+                            textureCoordFinal.get((i * 2)),
+                            textureCoordFinal.get((i * 2) + 1)
+                    };
+                    Float[] uv1 = {
+                            textureCoordFinal.get(((i + 1) * 2) + 0),
+                            textureCoordFinal.get(((i + 1) * 2) + 1)
+                    };
+                    Float[] uv2 = {
+                            textureCoordFinal.get(((i + 2) * 2) + 0),
+                            textureCoordFinal.get(((i + 2) * 2) + 1)
+                    };
 
                     Float[] deltaPos1 = {v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2]};
                     Float[] deltaPos2 = {v2[0] - v0[0], v2[1] - v0[1], v2[2] - v0[2]};
 
-                    Float[] deltaUV1 = {uv1[0] - uv0[0], uv1[1] - uv0[1], uv1[2] - uv0[2]};
-                    Float[] deltaUV2 = {uv2[0] - uv0[0], uv2[1] - uv0[1], uv2[2] - uv0[2]};
+                    Float[] deltaUV1 = {uv1[0] - uv0[0], uv1[1] - uv0[1]};
+                    Float[] deltaUV2 = {uv2[0] - uv0[0], uv2[1] - uv0[1]};
 
                     float r = 1.0f / (deltaUV1[0] * deltaUV2[1] - deltaUV1[1] * deltaUV2[0]);
                     Float[] tangent = {
