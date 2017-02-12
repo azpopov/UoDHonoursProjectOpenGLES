@@ -19,6 +19,7 @@ class MainRenderer implements GLSurfaceView.Renderer
     //Display Objects
     private Triangle mTriangle;
     private Cylinder mCylinder;
+    private ObjectContainer bambooObj;
     //Matrices
     private float[] mViewMatrix = new float[16];
     private float[] mProjectionMatrix = new float[16];
@@ -27,10 +28,10 @@ class MainRenderer implements GLSurfaceView.Renderer
 
     private Context mContext;
     //Shader Handles
-    private int programHandle;
+    private int programDefaultHandle, programNormalMapHandle;
 
     //Uniform Handles
-    private int mMVPMatrixHandle;
+    private int mMVPMatrixHandle, mViewMatrixHandle, mModelMatrixHandle, mModelView3x3Matrix, mLightPositionWorldSpaceHandle;
 
 
     MainRenderer(Context mContext)
@@ -59,12 +60,21 @@ class MainRenderer implements GLSurfaceView.Renderer
 
 
         ShaderBuilder shaderBuilder = new ShaderBuilder();
-        programHandle = shaderBuilder.LoadProgram("default", mContext);
+        programDefaultHandle = shaderBuilder.LoadProgram("default", mContext);
+        programNormalMapHandle = shaderBuilder.LoadProgram("normalMapped", mContext);
 
-        ObjectLoader.loadObjFile("testBamboo.obj", mContext);
 
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVPMatrix");
-        GLES20.glUseProgram(programHandle);
+
+        bambooObj = new ObjectContainer();
+        bambooObj.initialize("testBamboo.obj", mContext);
+
+
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(programDefaultHandle, "u_MVPMatrix");
+        mModelMatrixHandle = GLES20.glGetUniformLocation(programNormalMapHandle, "u_ModelMatrix");
+        mViewMatrixHandle = GLES20.glGetUniformLocation(programNormalMapHandle, "u_ViewMatrix");
+        mLightPositionWorldSpaceHandle = GLES20.glGetUniformLocation(programNormalMapHandle, "u_LightPositionWorldSpace");
+
+        GLES20.glUseProgram(programDefaultHandle);
     }
 
     @Override
@@ -89,7 +99,9 @@ class MainRenderer implements GLSurfaceView.Renderer
 
         //Demonstration of model.
         long time = SystemClock.uptimeMillis() % 10000L;
-        float angleInDegrees = (360.0f / 10000.0f) * ((int)time);
+        float angleInDegrees = (360.0f / 10000.0f) * ((int) time);
+        float[] lightPosition = {0.0f, 0.0f, 4.0f};
+
 
         Matrix.setIdentityM(mModelMatrix, 0);
 
@@ -99,6 +111,11 @@ class MainRenderer implements GLSurfaceView.Renderer
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
-        mCylinder.draw(programHandle);
+        GLES20.glUniformMatrix4fv(mModelMatrixHandle, 1, false, mModelMatrix, 0);
+        GLES20.glUniformMatrix4fv(mViewMatrixHandle, 1, false, mViewMatrix, 0);
+        GLES20.glUniformMatrix4fv(mLightPositionWorldSpaceHandle, 1, false, lightPosition, 0);
+        //mCylinder.draw(programDefaultHandle);
+        bambooObj.draw(programNormalMapHandle);
+
     }
 }

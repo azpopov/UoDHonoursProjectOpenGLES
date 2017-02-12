@@ -10,6 +10,12 @@ import android.util.Log;
 
 class ShaderBuilder
 {
+    public static final String POSITION_HANDLE = "a_Position";
+    public static final String COLOUR_HANDLE = "a_Colour";
+    public static final String NORMAL_HANDLE = "a_Normal";
+    public static final String TANGENT_HANDLE = "a_Tangent";
+    public static final String BITANGENT_HANDLE = "a_BiTangent";
+    public static final String TEXTURE_COORDINATE_HANDLE = "a_UV";
     /**
      * Loads, Links Vertex & Fragment Shader.
      * RuntimeException on Failure.
@@ -22,10 +28,21 @@ class ShaderBuilder
         {
             GLES20.glAttachShader(programHandle, LoadVertexShader(shaderName, context));
             GLES20.glAttachShader(programHandle, LoadFragmentShader(shaderName, context));
-
-            GLES20.glBindAttribLocation(programHandle, 0, "a_Position");
-            GLES20.glBindAttribLocation(programHandle, 1, "a_Colour");
-
+            GLES20.glBindAttribLocation(programHandle, 0, POSITION_HANDLE);
+            if (shaderName.contains("default"))
+            {
+                GLES20.glBindAttribLocation(programHandle, 1, COLOUR_HANDLE);
+            } else if (shaderName.contains("normalMapped"))
+            {
+                GLES20.glBindAttribLocation(programHandle, 1, TEXTURE_COORDINATE_HANDLE);
+                GLES20.glBindAttribLocation(programHandle, 2, NORMAL_HANDLE);
+                GLES20.glBindAttribLocation(programHandle, 3, TANGENT_HANDLE);
+                GLES20.glBindAttribLocation(programHandle, 4, BITANGENT_HANDLE);
+            }
+            else
+            {
+                Log.d(LogTag.SHADERS, "Log: Unrecognized shader filename");
+            }
             GLES20.glLinkProgram(programHandle);
         }
 
@@ -33,8 +50,9 @@ class ShaderBuilder
         GLES20.glGetProgramiv(programHandle, GLES20.GL_LINK_STATUS, linkStatus, 0);
         if(linkStatus[0] == 0)
         {
+            String infoLog = GLES20.glGetProgramInfoLog (programHandle);
+            Log.d(LogTag.SHADERS, "Error Creating Program." + infoLog);
             GLES20.glDeleteProgram(programHandle);
-            Log.d(LogTag.SHADERS, "Error Creating Program.");
             throw new RuntimeException("Error Creating Program");
         }
 
