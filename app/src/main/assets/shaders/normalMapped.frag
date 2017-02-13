@@ -12,7 +12,7 @@ varying vec3 EyeDirectionTangentspace;
 // Values that stay constant for the whole mesh.
 uniform sampler2D u_DiffuseTextureSampler;
 uniform sampler2D u_NormalTextureSampler;
-uniform sampler2D u_SpecularTextureSampler;
+
 uniform mat4 u_ViewMatrix;
 uniform mat4 u_ModelMatrix;
 uniform mat3 u_MV3x3;
@@ -28,10 +28,10 @@ void main(){
 	// Material properties
 	vec3 MaterialDiffuseColor = texture2D( u_DiffuseTextureSampler, UV ).rgb;
 	vec3 MaterialAmbientColor = vec3(0.1,0.1,0.1) * MaterialDiffuseColor;
-	vec3 MaterialSpecularColor = texture2D( u_SpecularTextureSampler, UV ).rgb * 0.3;
+	vec3 MaterialSpecularColor = LightColor.rgb * 0.3;
 
 	// Local normal, in tangent space. V tex coordinate is inverted because normal map is in TGA (not in DDS) for better quality
-	vec3 TextureNormal_tangentspace = normalize(texture2D( u_NormalTextureSampler, vec2(UV.x,-UV.y) ).rgb*2.0 - 1.0);
+	vec3 TextureNormal_tangentspace = normalize(texture2D( u_NormalTextureSampler, UV ).rgb*2.0 - 1.0);
 
 	// Distance to the light
 	float distance = length( u_LightPositionWorldspace - PositionWorldspace );

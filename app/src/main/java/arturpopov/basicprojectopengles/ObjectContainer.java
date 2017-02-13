@@ -20,8 +20,10 @@ public class ObjectContainer implements IPrimitive
     private FloatBuffer mVerticeBuffer, mTexCoordBuffer, mNormalBuffer, mTangentBuffer, mBiTangentBuffer;
     private ShortBuffer mIndexBuffer;
     private Integer verticeHandle, texCoordHandle, normalHandle, tangentHandle, biTangentHandle;
+    public Integer mNormalTextureHandler, mDiffuseTextureHandler;
 
     private int[] buffers = new int[6];
+
     public void initialize(String fileName, Context context)
     {
         ArrayList<ArrayList<Float>> objData = ObjectLoader.loadObjFile(fileName, context);
@@ -123,21 +125,35 @@ public class ObjectContainer implements IPrimitive
     @Override
     public void draw(int pProgramHandle)
     {
+
         if (mVerticeBuffer == null)
         {
             Log.d(LogTag.PRIMITIVE, "Attempted to draw Uninitialized Cylinder");
         }
-        if(verticeHandle == null || texCoordHandle == null || normalHandle == null || tangentHandle == null || biTangentHandle == null)
+
+        GLES20.glUseProgram(pProgramHandle);
+
+        if(verticeHandle == null || texCoordHandle == null || normalHandle == null || tangentHandle == null || biTangentHandle == null || mNormalTextureHandler == null)
         {
             verticeHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_Position");
             texCoordHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_UV");
             normalHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_Normal");
             tangentHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_Tangent");
             biTangentHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_BiTangent");
+            mNormalTextureHandler = GLES20.glGetUniformLocation(pProgramHandle, "u_NormalTextureSampler");
+            mDiffuseTextureHandler = GLES20.glGetUniformLocation(pProgramHandle, "u_DiffuseTextureSampler");
         }
         mVerticeBuffer.position(0);
 
-        GLES20.glUseProgram(pProgramHandle);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mDiffuseTextureHandler);
+        GLES20.glUniform1i(mDiffuseTextureHandler, 0);
+
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mNormalTextureHandler);
+        GLES20.glUniform1i(mNormalTextureHandler, 1);
+
+
 
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[0]);
         GLES20.glVertexAttribPointer(verticeHandle, POSITION_SIZE, GLES20.GL_FLOAT, false, 0, 0);
@@ -167,7 +183,8 @@ public class ObjectContainer implements IPrimitive
 
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, buffers[5]);
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndexBuffer.capacity(), GLES20.GL_UNSIGNED_SHORT, 0);
-
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
     }
+
+
 }
