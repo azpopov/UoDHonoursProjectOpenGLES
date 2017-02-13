@@ -165,14 +165,10 @@ public class ObjectContainer implements IPrimitive
 
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, mVerticeBuffer.capacity());
-//        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
-//        GLES20.glDrawElements(GLES20.GL_TRIANGLE_FAN, sidesOfCylinder + 2, GLES20.GL_UNSIGNED_SHORT, 0);
-//
-//        GLES20.glDrawElements(GLES20.GL_TRIANGLE_FAN, sidesOfCylinder + 2, GLES20.GL_UNSIGNED_SHORT, (sidesOfCylinder + 2)* BYTES_PER_SHORT);
-//        GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, (sidesOfCylinder*2)+2, GLES20.GL_UNSIGNED_SHORT, ((sidesOfCylinder + 2) * 2) * BYTES_PER_SHORT);
-//        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
-//        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-//        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, buffers[5]);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndexBuffer.capacity(), GLES20.GL_UNSIGNED_SHORT, 0);
+
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+
     }
 }
