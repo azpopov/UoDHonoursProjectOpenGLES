@@ -169,6 +169,5 @@ public class ObjectContainer implements IPrimitive
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndexBuffer.capacity(), GLES20.GL_UNSIGNED_SHORT, 0);
 
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-
     }
 }

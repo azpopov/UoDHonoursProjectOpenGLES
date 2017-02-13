@@ -10,38 +10,21 @@ import android.util.Log;
 
 class ShaderBuilder
 {
-    public static final String POSITION_HANDLE = "a_Position";
-    public static final String COLOUR_HANDLE = "a_Colour";
-    public static final String NORMAL_HANDLE = "a_Normal";
-    public static final String TANGENT_HANDLE = "a_Tangent";
-    public static final String BITANGENT_HANDLE = "a_BiTangent";
-    public static final String TEXTURE_COORDINATE_HANDLE = "a_UV";
     /**
      * Loads, Links Vertex & Fragment Shader.
      * RuntimeException on Failure.
      * @return program
      */
-    public int LoadProgram(String shaderName, Context context)
+    public int LoadProgram(String shaderName, Context context, String[] attributes)
     {
         int programHandle = GLES20.glCreateProgram();
         if(programHandle != 0)
         {
             GLES20.glAttachShader(programHandle, LoadVertexShader(shaderName, context));
             GLES20.glAttachShader(programHandle, LoadFragmentShader(shaderName, context));
-            GLES20.glBindAttribLocation(programHandle, 0, POSITION_HANDLE);
-            if (shaderName.contains("default"))
+            for(int i = 0; i < attributes.length; i++)
             {
-                GLES20.glBindAttribLocation(programHandle, 1, COLOUR_HANDLE);
-            } else if (shaderName.contains("normalMapped"))
-            {
-                GLES20.glBindAttribLocation(programHandle, 1, TEXTURE_COORDINATE_HANDLE);
-                GLES20.glBindAttribLocation(programHandle, 2, NORMAL_HANDLE);
-                GLES20.glBindAttribLocation(programHandle, 3, TANGENT_HANDLE);
-                GLES20.glBindAttribLocation(programHandle, 4, BITANGENT_HANDLE);
-            }
-            else
-            {
-                Log.d(LogTag.SHADERS, "Log: Unrecognized shader filename");
+                GLES20.glBindAttribLocation(programHandle, i, attributes[i]);
             }
             GLES20.glLinkProgram(programHandle);
         }

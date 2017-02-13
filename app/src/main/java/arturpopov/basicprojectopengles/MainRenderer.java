@@ -60,8 +60,8 @@ class MainRenderer implements GLSurfaceView.Renderer
 
 
         ShaderBuilder shaderBuilder = new ShaderBuilder();
-        programDefaultHandle = shaderBuilder.LoadProgram("default", mContext);
-        programNormalMapHandle = shaderBuilder.LoadProgram("normalMapped", mContext);
+        programDefaultHandle = shaderBuilder.LoadProgram("default", mContext, new String[]{"a_Position", "a_Colour"});
+        programNormalMapHandle = shaderBuilder.LoadProgram("normalMapped", mContext, new String[]{"a_Position", "a_UV", "a_Normal","a_Tangent","a_BiTangent"});
 
 
 
