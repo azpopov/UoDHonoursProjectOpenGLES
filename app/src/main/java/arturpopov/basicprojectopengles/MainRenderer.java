@@ -113,7 +113,7 @@ class MainRenderer implements GLSurfaceView.Renderer
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
         GLES20.glUniformMatrix4fv(mModelMatrixHandle, 1, false, mModelMatrix, 0);
         GLES20.glUniformMatrix4fv(mViewMatrixHandle, 1, false, mViewMatrix, 0);
-        GLES20.glUniformMatrix4fv(mLightPositionWorldSpaceHandle, 1, false, lightPosition, 0);
+        GLES20.glUniform3fv(mLightPositionWorldSpaceHandle, 1, lightPosition, 0);
         //mCylinder.draw(programDefaultHandle);
         bambooObj.draw(programNormalMapHandle);
 

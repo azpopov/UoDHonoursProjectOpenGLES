@@ -21,6 +21,7 @@ uniform mat4 u_ModelMatrix;
 uniform mat3 u_MV3x3Matrix;
 uniform vec3 u_LightPositionWorldSpace;
 
+
 void main(){
 
 	// Output position of the vertex, in clip space : MVP * position
@@ -51,21 +52,22 @@ void main(){
                       		vertexBitangent_cameraspace,
                       		vertexNormal_cameraspace
                       	);
-	mat3 TBN = tran(tempMatrix); // You can use dot products instead of building this matrix and transposing it. See References for details.
+
+    highp vec3 i0 = vertexTangent_cameraspace;
+    highp vec3 i1 = vertexBitangent_cameraspace;
+    highp vec3 i2 = vertexNormal_cameraspace;
+
+      highp mat3 outMatrix = mat3(
+                      vec3(i0.x, i1.x, i2.x),
+                      vec3(i0.y, i1.y, i2.y),
+                      vec3(i0.z, i1.z, i2.z)
+                      );
+	//mat3 TBN = mat3(transpose(tempMatrix)); // You can use dot products instead of building this matrix and transposing it. See References for details.
 
 
-	LightDirectionTangentspace = TBN * LightDirectionCameraspace;
-	EyeDirectionTangentspace =  TBN * EyeDirectionCameraspace;
+	LightDirectionTangentspace = outMatrix * LightDirectionCameraspace;
+	EyeDirectionTangentspace =  outMatrix * EyeDirectionCameraspace;
 
 
 }
 
-mat3 tran(mat3 m)
-{
-    return mat3
-    (
-      m[0][0],m[1][0],m[2][0],
-      m[0][1],m[1][1],m[2][1],
-      m[0][2],m[1][2],m[2][2]
-    );
-}

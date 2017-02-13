@@ -45,8 +45,12 @@ void main(){
 	//  - light is at the vertical of the triangle -> 1
 	//  - light is perpendicular to the triangle -> 0
 	//  - light is behind the triangle -> 0
-	float cosTheta = clamp( dot( n,l ), 0,1 );
-
+	float dotN = n.x + n.y + n.z;
+    if (dotN < 0.0)
+        dotN = 0.0;
+    else if (dotN > 1.0)
+        dotN = 1.0;
+    float cosTheta = dotN;
 	// Eye vector (towards the camera)
 	vec3 E = normalize(EyeDirectionTangentspace);
 	// Direction in which the triangle reflects the light
@@ -55,14 +59,18 @@ void main(){
 	// clamped to 0
 	//  - Looking into the reflection -> 1
 	//  - Looking elsewhere -> < 1
-	float cosAlpha = clamp( dot( E,R ), 0,1 );
-
+    float dotER = E.x * R.x + E.y * R.y + E.z * R.z;
+    if (dotER < 0.0)
+        dotER = 0.0;
+    else if (dotER > 1.0)
+        dotER = 1.0;
+    float cosAlpha = dotER;
 	gl_FragColor  = vec4(
 		// Ambient : simulates indirect lighting
 		MaterialAmbientColor +
 		// Diffuse : "color" of the object
 		MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance*distance) +
 		// Specular : reflective highlight, like a mirror
-		MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance),1.0f);
+		MaterialSpecularColor * LightColor * LightPower * (cosAlpha* cosAlpha* cosAlpha* cosAlpha* cosAlpha) / (distance*distance),1.0);
 
 }
