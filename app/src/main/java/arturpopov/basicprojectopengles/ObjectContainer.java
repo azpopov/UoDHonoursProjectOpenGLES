@@ -9,7 +9,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * Created by arturpopov on 10/02/2017.
@@ -20,14 +19,13 @@ public class ObjectContainer implements IPrimitive
     private FloatBuffer mVerticeBuffer, mTexCoordBuffer, mNormalBuffer, mTangentBuffer, mBiTangentBuffer;
     private ShortBuffer mIndexBuffer;
     private Integer verticeHandle, texCoordHandle, normalHandle, tangentHandle, biTangentHandle;
-    public Integer mNormalTextureHandler, mDiffuseTextureHandler;
+    public Integer mNormalMapTextureDataHandle, mDiffuseTextureDataHandle, mNormalMapTextureUniform, mDiffuseTextureUniform;
 
     private int[] buffers = new int[6];
 
     public void initialize(String fileName, Context context)
     {
         ArrayList<ArrayList<Float>> objData = ObjectLoader.loadObjFile(fileName, context);
-        objData = ObjectLoader.IndexObject(objData);
 
         GLES20.glGenBuffers(6, buffers, 0);
 
@@ -102,23 +100,6 @@ public class ObjectContainer implements IPrimitive
         GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mBiTangentBuffer.capacity() * BYTES_PER_FLOAT,
                 mBiTangentBuffer, GLES20.GL_STATIC_DRAW);
 
-
-        mIndexBuffer = ByteBuffer
-                .allocateDirect(objData.get(ObjectLoader.INDICE_ARRAY_INDEX).size() * BYTES_PER_SHORT).order(ByteOrder.nativeOrder())
-                .asShortBuffer();
-        i = 0;
-        short[] shortValues = new short[objData.get(ObjectLoader.INDICE_ARRAY_INDEX).size()];
-        for (Float f : objData.get(ObjectLoader.INDICE_ARRAY_INDEX))
-        {
-            shortValues[i++] = (short)(f != null ? f : Float.NaN);
-        }
-        mIndexBuffer.put(shortValues).position(0);
-        // Generate a buffer for the indices
-        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, buffers[5]);
-        GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer.capacity() * BYTES_PER_SHORT, mIndexBuffer, GLES20.GL_STATIC_DRAW);
-
-
-        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
     }
 
@@ -133,28 +114,27 @@ public class ObjectContainer implements IPrimitive
 
         GLES20.glUseProgram(pProgramHandle);
 
-        if(verticeHandle == null || texCoordHandle == null || normalHandle == null || tangentHandle == null || biTangentHandle == null || mNormalTextureHandler == null)
+        if (verticeHandle == null || texCoordHandle == null || normalHandle == null || tangentHandle == null || biTangentHandle == null || mDiffuseTextureUniform == null || mNormalMapTextureUniform == null)
         {
             verticeHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_Position");
             texCoordHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_UV");
             normalHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_Normal");
             tangentHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_Tangent");
             biTangentHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_BiTangent");
-            mNormalTextureHandler = GLES20.glGetUniformLocation(pProgramHandle, "u_NormalTextureSampler");
-            mDiffuseTextureHandler = GLES20.glGetUniformLocation(pProgramHandle, "u_DiffuseTextureSampler");
+            mDiffuseTextureUniform = GLES20.glGetUniformLocation(pProgramHandle, "u_DiffuseTextureSampler");
+            mNormalMapTextureUniform = GLES20.glGetUniformLocation(pProgramHandle, "u_NormalTextureSampler");
+        }
+
+        if (mDiffuseTextureDataHandle != 0)
+        {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mDiffuseTextureDataHandle);
+            GLES20.glUniform1i(mDiffuseTextureUniform, 0);
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mNormalMapTextureDataHandle);
+            GLES20.glUniform1i(mNormalMapTextureUniform, 1);
         }
         mVerticeBuffer.position(0);
-
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mDiffuseTextureHandler);
-        GLES20.glUniform1i(mDiffuseTextureHandler, 0);
-
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mNormalTextureHandler);
-        GLES20.glUniform1i(mNormalTextureHandler, 1);
-
-
-
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[0]);
         GLES20.glVertexAttribPointer(verticeHandle, POSITION_SIZE, GLES20.GL_FLOAT, false, 0, 0);
         GLES20.glEnableVertexAttribArray(verticeHandle);
@@ -179,11 +159,10 @@ public class ObjectContainer implements IPrimitive
         GLES20.glVertexAttribPointer(biTangentHandle, POSITION_SIZE, GLES20.GL_FLOAT, false, 0, 0);
         GLES20.glEnableVertexAttribArray(biTangentHandle);
 
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
-        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, buffers[5]);
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndexBuffer.capacity(), GLES20.GL_UNSIGNED_SHORT, 0);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, mVerticeBuffer.capacity() / 3);
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
     }
 
 

@@ -3,13 +3,9 @@ package arturpopov.basicprojectopengles;
 import android.content.Context;
 import android.util.Log;
 
-import java.lang.reflect.Array;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
-import java.util.Vector;
 
 /**
  * Created by arturpopov on 09/02/2017.
@@ -205,7 +201,7 @@ public class ObjectLoader
         resultList.add(normalDataFinal);
         resultList.add(tangentsDataFinal);
         resultList.add(biTangentsDataFinal);
-        return IndexObject(resultList);
+        return resultList;
     }
 
 

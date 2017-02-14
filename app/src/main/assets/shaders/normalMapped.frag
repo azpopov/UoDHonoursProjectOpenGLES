@@ -16,7 +16,7 @@ uniform sampler2D u_NormalTextureSampler;
 uniform mat4 u_ViewMatrix;
 uniform mat4 u_ModelMatrix;
 uniform mat3 u_MV3x3;
-uniform vec3 u_LightPositionWorldspace;
+uniform vec3 u_LightPositionWorldSpace;
 
 void main(){
 
@@ -26,15 +26,15 @@ void main(){
 	float LightPower = 40.0;
 
 	// Material properties
-	vec3 MaterialDiffuseColor = texture2D( u_DiffuseTextureSampler, UV ).rgb;
+	vec3 MaterialDiffuseColor = texture2D( u_DiffuseTextureSampler, vec2(UV.x, -UV.y) ).rgb;
 	vec3 MaterialAmbientColor = vec3(0.1,0.1,0.1) * MaterialDiffuseColor;
-	vec3 MaterialSpecularColor = LightColor.rgb * 0.3;
+	vec3 MaterialSpecularColor = LightColor.rgb * vec3(0.3, 0.3, 0.3);
 
 	// Local normal, in tangent space. V tex coordinate is inverted because normal map is in TGA (not in DDS) for better quality
-	vec3 TextureNormal_tangentspace = normalize(texture2D( u_NormalTextureSampler, UV ).rgb*2.0 - 1.0);
+	vec3 TextureNormal_tangentspace = normalize(texture2D( u_NormalTextureSampler, vec2(UV.x, -UV.y)).rgb*2.0 - 1.0);
 
 	// Distance to the light
-	float distance = length( u_LightPositionWorldspace - PositionWorldspace );
+	float distance = length( u_LightPositionWorldSpace - PositionWorldspace );
 
 	// Normal of the computed fragment, in camera space
 	vec3 n = TextureNormal_tangentspace;
@@ -45,7 +45,7 @@ void main(){
 	//  - light is at the vertical of the triangle -> 1
 	//  - light is perpendicular to the triangle -> 0
 	//  - light is behind the triangle -> 0
-	float dotN = n.x + n.y + n.z;
+	float dotN = n.x * l.x + n.y * l.y + n.z * l.z;
     if (dotN < 0.0)
         dotN = 0.0;
     else if (dotN > 1.0)
@@ -65,12 +65,13 @@ void main(){
     else if (dotER > 1.0)
         dotER = 1.0;
     float cosAlpha = dotER;
-	gl_FragColor  = vec4(
-		// Ambient : simulates indirect lighting
-		MaterialAmbientColor +
-		// Diffuse : "color" of the object
-		MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance*distance) +
-		// Specular : reflective highlight, like a mirror
-		MaterialSpecularColor * LightColor * LightPower * (cosAlpha* cosAlpha* cosAlpha* cosAlpha* cosAlpha) / (distance*distance),1.0);
+
+		gl_FragColor  = vec4(
+        		// Ambient : simulates indirect lighting
+        		MaterialAmbientColor +
+        		// Diffuse : "color" of the object
+        		MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance*distance) +
+        		// Specular : reflective highlight, like a mirror
+        		MaterialSpecularColor * LightColor * LightPower * (cosAlpha* cosAlpha* cosAlpha* cosAlpha* cosAlpha) / (distance*distance),1.0);
 
 }
