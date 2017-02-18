@@ -8,6 +8,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.os.SystemClock;
+import android.renderscript.Matrix4f;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -115,11 +116,9 @@ class MainRenderer implements GLSurfaceView.Renderer
         Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 1.0f, 0.0f, 0.0f);
         Matrix.scaleM(mModelMatrix, 0 , 0.1f, 0.1f, 0.1f);
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-        float[] matrix3f = {
-                mMVPMatrix[0], mMVPMatrix[1], mMVPMatrix[2], mMVPMatrix[4], mMVPMatrix[5],
-                mMVPMatrix[6], mMVPMatrix[8], mMVPMatrix[9], mMVPMatrix[10]
-        }; //
-        GLES20.glUniformMatrix3fv(mModelView3x3MatrixHandle, 1, false, matrix3f, 0);
+        Matrix4f matrix4f = new Matrix4f(mMVPMatrix);
+        matrix4f.inverseTranspose();
+        GLES20.glUniformMatrix3fv(mModelView3x3MatrixHandle, 1, false, matrix4f.getArray(), 0);
 
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
@@ -128,7 +127,6 @@ class MainRenderer implements GLSurfaceView.Renderer
         GLES20.glUniform3fv(mLightPositionWorldSpaceHandle, 1, lightPosition, 0);
 
 
-        //mCylinder.draw(programDefaultHandle);
         bambooObj.draw(programNormalMapHandle);
 
     }

@@ -100,6 +100,7 @@ public class ObjectContainer implements IPrimitive
         GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mBiTangentBuffer.capacity() * BYTES_PER_FLOAT,
                 mBiTangentBuffer, GLES20.GL_STATIC_DRAW);
 
+
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
     }
 

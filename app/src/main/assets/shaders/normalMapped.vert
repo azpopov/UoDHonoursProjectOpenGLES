@@ -14,11 +14,12 @@ varying vec3 LightDirectionCameraspace;
 varying vec3 LightDirectionTangentspace;
 varying vec3 EyeDirectionTangentspace;
 
+
 // Values that stay constant for the whole mesh.
 uniform mat4 u_MVP;
 uniform mat4 u_ViewMatrix;
 uniform mat4 u_ModelMatrix;
-uniform mat3 u_MV3x3Matrix;
+uniform mat3 u_MV3x3;
 uniform vec3 u_LightPositionWorldSpace;
 
 
@@ -43,9 +44,9 @@ void main(){
 	UV = a_UV;
 
 	// model to camera = ModelView
-	vec3 vertexTangent_cameraspace = u_MV3x3Matrix * a_Tangent;
-	vec3 vertexBitangent_cameraspace = u_MV3x3Matrix * a_BiTangent;
-	vec3 vertexNormal_cameraspace = u_MV3x3Matrix * a_Normal;
+	vec3 vertexTangent_cameraspace = u_MV3x3 * a_Tangent;
+	vec3 vertexBitangent_cameraspace = u_MV3x3 * a_BiTangent;
+	vec3 vertexNormal_cameraspace = u_MV3x3 * a_Normal;
 
     mat3 tempMatrix = mat3(
                       		vertexTangent_cameraspace,
@@ -53,14 +54,13 @@ void main(){
                       		vertexNormal_cameraspace
                       	);
 
-    highp vec3 i0 = vertexTangent_cameraspace;
-    highp vec3 i1 = vertexBitangent_cameraspace;
-    highp vec3 i2 = vertexNormal_cameraspace;
-
-      highp mat3 outMatrix = mat3(
-                      vec3(i0.x, i1.x, i2.x),
-                      vec3(i0.y, i1.y, i2.y),
-                      vec3(i0.z, i1.z, i2.z)
+    vec3 i0 = vertexTangent_cameraspace;
+    vec3 i1 = vertexBitangent_cameraspace;
+    vec3 i2 = vertexNormal_cameraspace;
+    mat3 outMatrix = mat3(
+                      i0.x, i1.x, i2.x,
+                     i0.y, i1.y, i2.y,
+                      i0.z, i1.z, i2.z
                       );
 	//mat3 TBN = mat3(transpose(tempMatrix)); // You can use dot products instead of building this matrix and transposing it. See References for details.
 
