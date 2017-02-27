@@ -32,7 +32,7 @@ class MainRenderer implements GLSurfaceView.Renderer
 
     private Context mContext;
     //Shader Handles
-    private int programDefaultHandle, programNormalMapHandle;
+    private int programDefaultHandle, programNormalMapHandle, mMVPNormalShaderHandle;
 
     //Uniform Handles
     private int mMVPMatrixHandle, mViewMatrixHandle, mModelMatrixHandle, mModelView3x3MatrixHandle, mLightPositionWorldSpaceHandle;
@@ -76,12 +76,12 @@ class MainRenderer implements GLSurfaceView.Renderer
 
 
         mMVPMatrixHandle = GLES20.glGetUniformLocation(programDefaultHandle, "u_MVPMatrix");
+
+        mMVPNormalShaderHandle = GLES20.glGetUniformLocation(programNormalMapHandle, "u_MVPMatrix");
         mModelMatrixHandle = GLES20.glGetUniformLocation(programNormalMapHandle, "u_ModelMatrix");
         mViewMatrixHandle = GLES20.glGetUniformLocation(programNormalMapHandle, "u_ViewMatrix");
         mLightPositionWorldSpaceHandle = GLES20.glGetUniformLocation(programNormalMapHandle, "u_LightPositionWorldSpace");
         mModelView3x3MatrixHandle = GLES20.glGetUniformLocation(programNormalMapHandle, "u_MV3x3");
-
-        GLES20.glUseProgram(programDefaultHandle);
     }
 
     @Override
@@ -116,16 +116,22 @@ class MainRenderer implements GLSurfaceView.Renderer
         Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 1.0f, 0.0f, 0.0f);
         Matrix.scaleM(mModelMatrix, 0 , 0.1f, 0.1f, 0.1f);
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-        Matrix4f matrix4f = new Matrix4f(mMVPMatrix);
-        matrix4f.inverseTranspose();
-        GLES20.glUniformMatrix3fv(mModelView3x3MatrixHandle, 1, false, matrix4f.getArray(), 0);
 
+        Matrix4f matrixMV3x3 = new Matrix4f(mMVPMatrix);
+        matrixMV3x3.inverseTranspose();
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+
+        GLES20.glUseProgram(programDefaultHandle);
+
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
+
+        GLES20.glUseProgram(programNormalMapHandle);
+
+        GLES20.glUniformMatrix4fv(mMVPNormalShaderHandle, 1, false, mMVPMatrix, 0);
         GLES20.glUniformMatrix4fv(mModelMatrixHandle, 1, false, mModelMatrix, 0);
         GLES20.glUniformMatrix4fv(mViewMatrixHandle, 1, false, mViewMatrix, 0);
         GLES20.glUniform3fv(mLightPositionWorldSpaceHandle, 1, lightPosition, 0);
-
+        GLES20.glUniformMatrix3fv(mModelView3x3MatrixHandle, 1, false, matrixMV3x3.getArray(), 0);
 
         bambooObj.draw(programNormalMapHandle);
 

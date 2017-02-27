@@ -31,9 +31,11 @@ class ShaderBuilder
 
         final int[] linkStatus = new int[1];
         GLES20.glGetProgramiv(programHandle, GLES20.GL_LINK_STATUS, linkStatus, 0);
+
         if(linkStatus[0] == 0)
         {
-            String infoLog = GLES20.glGetShaderInfoLog (programHandle);
+            String infoLog = GLES20.glGetProgramInfoLog (programHandle);
+            infoLog = GLES20.glGetShaderInfoLog(programHandle);
             Log.d(LogTag.SHADERS, "Error Creating Program." + infoLog);
             GLES20.glDeleteProgram(programHandle);
             throw new RuntimeException("Error Creating Program");

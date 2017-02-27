@@ -14,6 +14,7 @@ varying vec3 EyeDirectionTangentspace;
 uniform sampler2D u_DiffuseTextureSampler;
 uniform sampler2D u_NormalTextureSampler;
 
+uniform mat4 u_MVPMatrix;
 uniform mat4 u_ViewMatrix;
 uniform mat4 u_ModelMatrix;
 uniform mat3 u_MV3x3;
@@ -24,7 +25,7 @@ void main(){
 	// Light emission properties
 	// You probably want to put them as uniforms
 	vec3 LightColor = vec3(1,1,1);
-	float LightPower = 40.0;
+	float LightPower = 50.0;
 
 	// Material properties
 	vec3 MaterialDiffuseColor = texture2D( u_DiffuseTextureSampler, vec2(UV.x, -UV.y) ).rgb;

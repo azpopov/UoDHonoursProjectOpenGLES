@@ -1,5 +1,7 @@
 #version 100
 
+precision mediump float;
+
 attribute vec4 a_Position;
 attribute vec2 a_UV;
 attribute vec3 a_Normal;
@@ -16,7 +18,7 @@ varying vec3 EyeDirectionTangentspace;
 
 
 // Values that stay constant for the whole mesh.
-uniform mat4 u_MVP;
+uniform mat4 u_MVPMatrix;
 uniform mat4 u_ViewMatrix;
 uniform mat4 u_ModelMatrix;
 uniform mat3 u_MV3x3;
@@ -26,7 +28,7 @@ uniform vec3 u_LightPositionWorldSpace;
 void main(){
 
 	// Output position of the vertex, in clip space : MVP * position
-	gl_Position =  u_MVP * a_Position;
+	gl_Position =  u_MVPMatrix * a_Position;
 
 	// Position of the vertex, in worldspace : ModelMatrix * position
 	PositionWorldspace = (u_ModelMatrix * a_Position).xyz;
