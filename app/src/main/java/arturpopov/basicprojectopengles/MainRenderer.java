@@ -20,22 +20,27 @@ import javax.microedition.khronos.opengles.GL10;
 class MainRenderer implements GLSurfaceView.Renderer
 {
     //Class Members
+    private int width = 100, height = 100;
+
     //Display Objects
-    private Triangle mTriangle;
     private Cylinder mCylinder;
     private ObjectContainer bambooObj;
+
     //Matrices
     private float[] mViewMatrix = new float[16];
     private float[] mProjectionMatrix = new float[16];
     private float[] mModelMatrix = new float[16];
     private float[] mMVPMatrix = new float[16];
+    private float[] mVPMatrix = new float[16];
 
     private Context mContext;
+
     //Shader Handles
     private int programDefaultHandle, programNormalMapHandle, mMVPNormalShaderHandle;
 
     //Uniform Handles
     private int mMVPMatrixHandle, mViewMatrixHandle, mModelMatrixHandle, mModelView3x3MatrixHandle, mLightPositionWorldSpaceHandle;
+
 
 
     MainRenderer(Context mContext)
@@ -68,7 +73,6 @@ class MainRenderer implements GLSurfaceView.Renderer
         programNormalMapHandle = shaderBuilder.LoadProgram("normalMapped", mContext, new String[]{"a_Position", "a_UV", "a_Normal","a_Tangent","a_BiTangent"});
 
 
-
         bambooObj = new ObjectContainer();
         bambooObj.initialize("testBamboo.obj", mContext);
         bambooObj.mDiffuseTextureDataHandle = loadTexture(mContext, R.drawable.bamboo);
@@ -88,6 +92,10 @@ class MainRenderer implements GLSurfaceView.Renderer
     public void onSurfaceChanged(GL10 glUnused, int width, int height)
     {
         GLES20.glViewport(0,0, width, height);
+
+        this.width = width;
+        this.height = height;
+
         final float ratio = (float) width / height;
         final float left = -ratio;
         final float right = ratio;
@@ -104,11 +112,15 @@ class MainRenderer implements GLSurfaceView.Renderer
     {
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
+
+
         //Demonstration of model.
         long time = SystemClock.uptimeMillis() % 10000L;
         float angleInDegrees = (360.0f / 10000.0f) * ((int) time);
         float[] lightPosition = {0.0f, 0.0f, 4.0f};
 
+        Matrix.setIdentityM(mVPMatrix, 0);
+        Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
         Matrix.setIdentityM(mModelMatrix, 0);
 
@@ -120,6 +132,8 @@ class MainRenderer implements GLSurfaceView.Renderer
         Matrix4f matrixMV3x3 = new Matrix4f(mMVPMatrix);
         matrixMV3x3.inverseTranspose();
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+
+
 
         GLES20.glUseProgram(programDefaultHandle);
 
@@ -134,6 +148,9 @@ class MainRenderer implements GLSurfaceView.Renderer
         GLES20.glUniformMatrix3fv(mModelView3x3MatrixHandle, 1, false, matrixMV3x3.getArray(), 0);
 
         bambooObj.draw(programNormalMapHandle);
+
+
+
 
     }
 
