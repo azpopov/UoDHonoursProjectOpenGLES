@@ -1,6 +1,8 @@
 package arturpopov.basicprojectopengles;
 
 import android.icu.text.MessagePattern;
+import android.test.mock.MockContentProvider;
+import android.test.mock.MockContext;
 
 import org.junit.Test;
 
@@ -13,12 +15,13 @@ import java.util.Random;
 import java.util.Vector;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 public class ParticleGeneratorTest
 {
     @Test
     public void sortsReverseWithTwoParticles() throws Exception {
-        ParticleGenerator gen = new ParticleGenerator();
+        ParticleGenerator gen = new ParticleGenerator(new MockContext());
 
         Particle particle1 = new Particle();
         particle1.distanceCamera = 5.f;
@@ -40,7 +43,7 @@ public class ParticleGeneratorTest
 
     @Test
     public void sortsReverseWithZeroParticles() throws Exception {
-        ParticleGenerator gen = new ParticleGenerator();
+        ParticleGenerator gen = new ParticleGenerator(new MockContext());
 
 
         List<Particle> expected = Arrays.asList();
@@ -58,7 +61,7 @@ public class ParticleGeneratorTest
     @Test
     public void sortsReverseWithManyParticles() throws Exception
     {
-        ParticleGenerator gen = new ParticleGenerator();
+        ParticleGenerator gen = new ParticleGenerator(new MockContext());
 
         Random rnd = new Random();
         rnd.setSeed(12345);
@@ -86,6 +89,119 @@ public class ParticleGeneratorTest
         List<Particle> actual = gen.particleContainer;
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
+
+    @Test
+    public void findUnusedParticleWhereFirstCheck()
+    {
+        ParticleGenerator gen = new ParticleGenerator(new MockContext());
+        Particle particle1 = new Particle();
+        particle1.timeToLive = -1.f;
+
+        Particle particle2 = new Particle();
+        particle2.timeToLive = 2.f;
+
+
+        List<Particle> exampleList = Arrays.asList( particle1, particle2 );
+        int expected = 0;
+
+        gen.particleContainer = exampleList;
+
+        int actual = gen.findUnusedParticle();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void findUnusedParticleWhereSecond()
+    {
+        ParticleGenerator gen = new ParticleGenerator(new MockContext());
+        Particle particle1 = new Particle();
+        particle1.timeToLive = 2.f;
+
+        Particle particle2 = new Particle();
+        particle2.timeToLive = -12.f;
+
+
+        List<Particle> exampleList = Arrays.asList( particle1, particle2 );
+        int expected = 1;
+
+        gen.particleContainer = exampleList;
+
+        int actual = gen.findUnusedParticle();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void findUnusedParticleWhereInBetween()
+    {
+        ParticleGenerator gen = new ParticleGenerator(new MockContext());
+        Particle particle1 = new Particle();
+        particle1.timeToLive = 2.f;
+
+        Particle particle2 = new Particle();
+        particle2.timeToLive = -12.f;
+
+        Particle particle3 = new Particle();
+        particle3.timeToLive = 5.f;
+
+        List<Particle> exampleList = Arrays.asList( particle1, particle2, particle3 );
+        int expected = 1;
+
+        gen.particleContainer = exampleList;
+
+        int actual = gen.findUnusedParticle();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void findUnusedParticleWhereNone()
+    {
+        ParticleGenerator gen = new ParticleGenerator(new MockContext());
+        Particle particle1 = new Particle();
+        particle1.timeToLive = 2.f;
+
+        Particle particle2 = new Particle();
+        particle2.timeToLive = 12.f;
+
+        Particle particle3 = new Particle();
+        particle3.timeToLive = 5.f;
+
+        List<Particle> exampleList = Arrays.asList( particle1, particle2, particle3 );
+        int expected = 0;
+
+        gen.particleContainer = exampleList;
+
+        int actual = gen.findUnusedParticle();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void findUnusedParticleWhereLastUsedNonZero()
+    {
+        ParticleGenerator gen = new ParticleGenerator(new MockContext());
+        Particle particle1 = new Particle();
+        particle1.timeToLive = -2.f;
+
+        Particle particle2 = new Particle();
+        particle2.timeToLive = 12.f;
+
+        Particle particle3 = new Particle();
+        particle3.timeToLive = -5.f;
+
+        List<Particle> exampleList = Arrays.asList( particle1, particle2, particle3 );
+        int expected = 2;
+
+        gen.particleContainer = exampleList;
+        gen.lastUsedParticleIndex = 1;
+
+        int actual = gen.findUnusedParticle();
+
+        assertEquals(expected, actual);
+    }
+
 
 
 }
