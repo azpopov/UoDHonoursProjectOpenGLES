@@ -1,5 +1,8 @@
 package arturpopov.basicprojectopengles;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Created by arturpopov on 02/03/2017.
  */
@@ -22,13 +25,17 @@ public class ParticleGenerator
 
     double lastTime;
 
-    Particle[] ParticleContainer = new Particle[2000];
+    List<Particle> particleContainer;
 
     float[] particulePositionDataSize, particleColourDataSize;
 
     void create(int programHandle)
     {
         this.programHandle = programHandle;
+        for (int i = 0; i < MAX_PARTICLES; i++)
+        {
+            particleContainer.add(new Particle());
+        }
     }
 
     int findUnusedParticle()
@@ -40,7 +47,7 @@ public class ParticleGenerator
 
     void sortParticles()
     {
-
+        Collections.sort(particleContainer);
     }
 
 
@@ -68,7 +75,7 @@ class Particle implements Comparable<Particle>
     @Override
     public int compareTo(Particle other)
     {
-        float result = this.distanceCamera - other.distanceCamera;
+        float result = other.distanceCamera - this.distanceCamera; //Reverse Order
         return (int)result;
     }
 
