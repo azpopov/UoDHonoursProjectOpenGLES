@@ -228,6 +228,27 @@ public class ParticleGeneratorTest
         Assert.assertArrayEquals(expectedArray, result, 0.01f);
     }
 
+    @Test
+    public void checkDirectionGenerator()
+    {
+        ParticleGenerator gen = new ParticleGenerator(new MockContext());
+        float[] exampleArray = new float[]
+                {
+                        0.07f, 0.f, -0.07f, 0.f,
+                        0.f, 0.1f, 0.f, 0.f,
+                        0.07f, 0.f, 0.07f, 0.f,
+                        0.84f,0.33f, -0.55f, 1.f
+                };
+        float[] expectedArray = new float[]
+                {
+                        7.14f, 0.f, 7.14f, 0.f,
+                        0.f, 10.f, 0.f, 0.f,
+                        -7.14f, 0.f, 7.14f,0.f,
+                        -9.92f, -3.3f,-2.07f, 1.f
+                };
+
+        float[] result = gen.getRandomSphericalDirection();
+    }
 
 
 }
