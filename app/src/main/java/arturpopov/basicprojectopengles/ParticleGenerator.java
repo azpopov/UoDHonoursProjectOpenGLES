@@ -3,13 +3,12 @@ package arturpopov.basicprojectopengles;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.util.Log;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.Collections;
 import java.util.List;
-
+import Jama.*;
 
 /**
  * Created by arturpopov on 02/03/2017.
@@ -144,6 +143,35 @@ public class ParticleGenerator
         double currentTime = System.nanoTime();
         double deltaTime = currentTime - lastTime;
         lastTime = currentTime;
+
+        GLES20.glBindBuffer(programHandle, vertexArrayID[0]);
+
+
+        float[] cameraPosition = GetInverse(viewMatrix);
+
+    }
+
+    public float[] GetInverse(float[] toInverse)
+    {
+        float[] result = new float[toInverse.length];
+        int sqRoot =  (int)Math.sqrt(toInverse.length);
+        double[][] jagged = new double[sqRoot][sqRoot];
+        int k = 0;
+        for(int i = 0; i < sqRoot; i++)
+        {
+            for(int j = 0; j < sqRoot; j++)
+            {
+                jagged[i][j] = toInverse[k++];
+            }
+        }
+        Matrix m = new Matrix(jagged);
+        double[] resultingDoubleArray = m.inverse().getRowPackedCopy();
+
+        for(int i = 0; i < resultingDoubleArray.length; i++)
+        {
+            result[i] = (float)resultingDoubleArray[i];
+        }
+        return result;
     }
 
     void defineUniforms()

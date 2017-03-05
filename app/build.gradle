@@ -27,4 +27,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.1.0'
     compile 'commons-io:commons-io:2.5'
     testCompile 'junit:junit:4.12'
+    compile files('libs/Jama-1.0.3.jar')
 }

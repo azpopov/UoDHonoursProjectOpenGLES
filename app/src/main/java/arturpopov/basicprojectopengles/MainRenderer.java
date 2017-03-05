@@ -41,6 +41,7 @@ class MainRenderer implements GLSurfaceView.Renderer
     //Uniform Handles
     private int mMVPMatrixHandle, mViewMatrixHandle, mModelMatrixHandle, mModelView3x3MatrixHandle, mLightPositionWorldSpaceHandle;
 
+    float eyeX, eyeY, eyeZ;
 
 
     MainRenderer(Context mContext)
@@ -61,8 +62,14 @@ class MainRenderer implements GLSurfaceView.Renderer
         mCylinder.setSize(10, 5, 400);
 
         mCylinder.initialize();
+
+        eyeX = 0.0f;
+
+        eyeY = 0.0f;
+
+        eyeZ = 1.5f;
         Matrix.setLookAtM(mViewMatrix, 0,
-                0.0f, 0.0f, 1.5f, //EYE x,y,z
+                eyeX, eyeY, eyeZ, //EYE x,y,z
                 0.0f, 0.0f, -5.0f, //LOOKING DIRECTION x,y,z
                 0.0f, 1.0f, 0.0f); //Define 'UP' direction)
 

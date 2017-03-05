@@ -4,6 +4,7 @@ import android.icu.text.MessagePattern;
 import android.test.mock.MockContentProvider;
 import android.test.mock.MockContext;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -13,6 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
+
+import dalvik.annotation.TestTargetClass;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -200,6 +203,29 @@ public class ParticleGeneratorTest
         int actual = gen.findUnusedParticle();
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void checkInverse()
+    {
+        ParticleGenerator gen = new ParticleGenerator(new MockContext());
+        float[] exampleArray = new float[]
+                {
+                        0.07f, 0.f, -0.07f, 0.f,
+                        0.f, 0.1f, 0.f, 0.f,
+                        0.07f, 0.f, 0.07f, 0.f,
+                        0.84f,0.33f, -0.55f, 1.f
+                };
+        float[] expectedArray = new float[]
+                {
+                        7.14f, 0.f, 7.14f, 0.f,
+                        0.f, 10.f, 0.f, 0.f,
+                        -7.14f, 0.f, 7.14f,0.f,
+                        -9.92f, -3.3f,-2.07f, 1.f
+                };
+
+        float[] result = gen.GetInverse(exampleArray);
+        Assert.assertArrayEquals(expectedArray, result, 0.01f);
     }
 
 
