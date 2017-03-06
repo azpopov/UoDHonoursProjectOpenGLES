@@ -2,7 +2,6 @@ package arturpopov.basicprojectopengles;
 
 import android.content.Context;
 import android.opengl.GLES20;
-import android.renderscript.Matrix3f;
 import android.util.Log;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -174,10 +173,10 @@ public class ParticleGenerator
                     mainDirection[1] + rndDirection[1]*spreadF,
                     mainDirection[2] + rndDirection[2]*spreadF,
             };
-            particleContainer.get(particleIndex).r = (rnd.nextInt() % 50);
-            particleContainer.get(particleIndex).g = (rnd.nextInt() % 50);
-            particleContainer.get(particleIndex).b = (rnd.nextInt() % 256);
-            particleContainer.get(particleIndex).a = (rnd.nextInt() % 300)/3;
+            particleContainer.get(particleIndex).r = (byte)(rnd.nextInt() % 50);
+            particleContainer.get(particleIndex).g = (byte)(rnd.nextInt() % 50);
+            particleContainer.get(particleIndex).b = (byte)(rnd.nextInt() % 256);
+            particleContainer.get(particleIndex).a = (byte)((rnd.nextInt() % 300)/3);
 
             particleContainer.get(particleIndex).size = ((rnd.nextInt() % 1000) / 2000.f) + 0.1f;
 
@@ -194,12 +193,91 @@ public class ParticleGenerator
                 p.speed[1] = p.speed[1] - 9.81f * (float)deltaTime * 0.5f;
                 p.position = new float[]
                         {
-                                p.position[0] * (float)deltaTime,
-                                p.position[1] * (float)deltaTime,
-                                p.position[2] * (float)deltaTime,
+                                p.position[0] + (p.speed[0] * (float)deltaTime),
+                                p.position[1] + (p.speed[1] * (float)deltaTime),
+                                p.position[2] + (p.speed[2] * (float)deltaTime),
                         };
+                p.distanceCamera = squaredLengthVector3(new float[]
+                        {
+                                p.position[0] - cameraPosition[0],
+                                p.position[1] - cameraPosition[1],
+                                p.position[2] - cameraPosition[2]
+                        });
+                particulePositionDataSize[4 * particuleCount + 0] = p.position[0];
+                particulePositionDataSize[4 * particuleCount + 1] = p.position[1];
+                particulePositionDataSize[4 * particuleCount + 2] = p.position[2];
+                particulePositionDataSize[4 * particuleCount + 3] = p.size;
+
+                particuleColourDataSize[4 * particuleCount + 0] = p.r;
+                particuleColourDataSize[4 * particuleCount + 1] = p.g;
+                particuleColourDataSize[4 * particuleCount + 2] = p.b;
+                particuleColourDataSize[4 * particuleCount + 3] = p.a;
+
+
             }
+            else
+            {
+                p.distanceCamera = -1.f;
+            }
+            particuleCount++;
         }
+        sortParticles();
+
+        //UPDATE BUFFERS
+
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, particlePositionBufferHandle[0]);
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, MAX_PARTICLES * 4 * BYTES_PER_FLOAT, null, GLES20.GL_STREAM_DRAW);
+        FloatBuffer mParticulePositionBuffer = ByteBuffer.allocateDirect(particulePositionDataSize.length * BYTES_PER_FLOAT)
+                .order(ByteOrder.nativeOrder()).asFloatBuffer();
+        mParticulePositionBuffer.put(particulePositionDataSize).position(0);
+        GLES20.glBufferSubData(GLES20.GL_ARRAY_BUFFER, 0, particuleCount * BYTES_PER_FLOAT * 4, mParticulePositionBuffer);
+
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, particleColourHandle[0]);
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, MAX_PARTICLES * 4 * BYTES_PER_FLOAT, null, GLES20.GL_STREAM_DRAW);
+        ByteBuffer mParticuleColourBuffer = ByteBuffer.allocateDirect(particuleColourDataSize.length * BYTES_PER_FLOAT)
+                .order(ByteOrder.nativeOrder());
+        mParticuleColourBuffer.put(particuleColourDataSize).position(0);
+        GLES20.glBufferSubData(GLES20.GL_ARRAY_BUFFER, 0, particuleCount * 4, mParticuleColourBuffer);
+
+        GLES20.glEnable(GLES20.GL_BLEND);
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+
+        GLES20.glUseProgram(programHandle);
+
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
+        GLES20.glUniform1i(textureID, 1);
+        GLES20.glUniform3f(cameraRightWorldSpaceID, viewMatrix[0], viewMatrix[1], viewMatrix[2]); //TODO confirm correct
+        GLES20.glUniform3f(cameraUpWorldSpaceID, viewMatrix[4], viewMatrix[5], viewMatrix[6]); //ALSO
+        GLES20.glUniformMatrix4fv(
+                viewProjectionMatrixID, 1, false, viewProjectionMatrix, 0
+        );
+
+
+        GLES20.glEnableVertexAttribArray(0);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, billboardBufferHandle[0]);
+        GLES20.glVertexAttribPointer(0, 3, GLES20.GL_FLOAT, false, 0, 0);
+
+        GLES20.glEnableVertexAttribArray(1);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, particlePositionBufferHandle[0]);
+        GLES20.glVertexAttribPointer(
+                1, 4, GLES20.GL_FLOAT, false, 0, 0
+        );
+
+        GLES20.glEnableVertexAttribArray(2);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, particleColourHandle[0]);
+        GLES20.glVertexAttribPointer(
+                2, 4, GLES20.GL_UNSIGNED_BYTE, true, 0, 0
+        );
+
+        for(int i  = 0; i < particuleCount; i++) // TODO
+        {
+            GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+        }
+        GLES20.glDisable(GLES20.GL_BLEND);
+
+
+
     }
 
     public float[] GetInverse(float[] toInverse)
@@ -240,6 +318,12 @@ public class ParticleGenerator
         return result = new float[]{(float)(x/k), (float)(y/k), (float)(z/k)};
     }
 
+    public static float squaredLengthVector3(float[] vector)
+    {
+        float result = vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2];
+        return result;
+    }
+
     void defineUniforms()
     {
         GLES20.glBindBuffer(programHandle, vertexArrayID[0]);
@@ -258,10 +342,10 @@ public class ParticleGenerator
 class Particle implements Comparable<Particle>
 {
     protected float[] position = new float[3], speed = new float[3];
-    protected int r;
-    protected int g;
-    protected int b;
-    protected int a;
+    protected byte r;
+    protected byte g;
+    protected byte b;
+    protected byte a;
     protected float size, angle, weight;
     float timeToLive;
     float distanceCamera;

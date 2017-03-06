@@ -1,7 +1,5 @@
 package arturpopov.basicprojectopengles;
 
-import android.icu.text.MessagePattern;
-import android.test.mock.MockContentProvider;
 import android.test.mock.MockContext;
 
 import org.junit.Assert;
@@ -9,13 +7,9 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
-
-import dalvik.annotation.TestTargetClass;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -229,26 +223,23 @@ public class ParticleGeneratorTest
     }
 
     @Test
-    public void checkDirectionGenerator()
+    public void ensureSquaredLengthWorks()
     {
-        ParticleGenerator gen = new ParticleGenerator(new MockContext());
-        float[] exampleArray = new float[]
+        float[] exampleVector = new float[]
                 {
-                        0.07f, 0.f, -0.07f, 0.f,
-                        0.f, 0.1f, 0.f, 0.f,
-                        0.07f, 0.f, 0.07f, 0.f,
-                        0.84f,0.33f, -0.55f, 1.f
+                        9.98f,
+                       3.39f,
+                        -7.99f
                 };
-        float[] expectedArray = new float[]
-                {
-                        7.14f, 0.f, 7.14f, 0.f,
-                        0.f, 10.f, 0.f, 0.f,
-                        -7.14f, 0.f, 7.14f,0.f,
-                        -9.92f, -3.3f,-2.07f, 1.f
-                };
+        float expected = 173.49f;
 
-        float[] result = gen.getRandomSphericalDirection();
+        float actual = ParticleGenerator.squaredLengthVector3(exampleVector);
+
+        assertEquals(expected, actual, 2.f);
+
     }
+
+
 
 
 }
