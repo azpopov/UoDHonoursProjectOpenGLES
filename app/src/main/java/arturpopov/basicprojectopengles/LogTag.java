@@ -7,4 +7,5 @@ final class LogTag
     public static final String CONTEXT = "LogContextError";
     public static final String PRIMITIVE = "LogPrimitiveError";
     public static final String TEXTURE = "LogTexture";
+    public static final String TOUCH_EVENT = "LogTouchEvent";
 }

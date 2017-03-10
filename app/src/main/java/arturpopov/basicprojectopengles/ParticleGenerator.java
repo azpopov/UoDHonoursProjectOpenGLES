@@ -99,7 +99,7 @@ public class ParticleGenerator
 
         defineUniformHandles();
 
-        mArrayUniformHandles[TEXTURE_SAMPLER_HANDLE_INDEX] = MainRenderer.loadTexture(mContext, toLoadTextureID);
+        mArrayUniformHandles[TEXTURE_SAMPLER_HANDLE_INDEX] = TextureLoader.loadTexture(mContext, toLoadTextureID);
 
         if(mArrayUniformHandles[TEXTURE_SAMPLER_HANDLE_INDEX] == 0)
         {

@@ -17,13 +17,12 @@ import java.util.ArrayList;
 public class ObjectContainer implements IPrimitive
 {
     private FloatBuffer mVerticeBuffer, mTexCoordBuffer, mNormalBuffer, mTangentBuffer, mBiTangentBuffer;
-    private ShortBuffer mIndexBuffer;
     private Integer verticeHandle, texCoordHandle, normalHandle, tangentHandle, biTangentHandle;
     public Integer mNormalMapTextureDataHandle, mDiffuseTextureDataHandle, mNormalMapTextureUniform, mDiffuseTextureUniform;
 
     private int[] buffers = new int[6];
 
-    public void initialize(String fileName, Context context)
+    public void initialize(String fileName, Context context, int textureDefault, int textureNormalMap)
     {
         ArrayList<ArrayList<Float>> objData = ObjectLoader.loadObjFile(fileName, context);
 
@@ -102,6 +101,9 @@ public class ObjectContainer implements IPrimitive
 
 
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+
+        mDiffuseTextureDataHandle = TextureLoader.loadTexture(context, textureDefault);
+        mNormalMapTextureDataHandle = TextureLoader.loadTexture(context, textureNormalMap);
     }
 
     @Override

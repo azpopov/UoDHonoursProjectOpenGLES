@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">BasicProjectOpenGLes</string>
+    <string name="app_name">OpenGLESAPopov</string>
     <string name="relativeShaderPath">shaders/</string>
 </resources>

@@ -22,7 +22,7 @@ public class MainActivity extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        mglSurfaceView = new GLSurfaceView(this);
+        mglSurfaceView = new MainSurfaceView(this);
         mContext = this;
         //Version Check
         final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);

@@ -2,6 +2,7 @@ package arturpopov.basicprojectopengles;
 
 import android.content.Context;
 import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.util.Log;
 
 /**
@@ -17,33 +18,58 @@ class ShaderBuilder
      */
     public int LoadProgram(String shaderName, Context context, String[] attributes)
     {
-        int programHandle = GLES20.glCreateProgram();
+        int programHandle = GLES30.glCreateProgram();
         if(programHandle != 0)
         {
-            GLES20.glAttachShader(programHandle, LoadVertexShader(shaderName, context));
-            GLES20.glAttachShader(programHandle, LoadFragmentShader(shaderName, context));
+            GLES30.glAttachShader(programHandle, LoadVertexShader(shaderName, context));
+            GLES30.glAttachShader(programHandle, LoadFragmentShader(shaderName, context));
             for(int i = 0; i < attributes.length; i++)
             {
-                GLES20.glBindAttribLocation(programHandle, i, attributes[i]);
+                GLES30.glBindAttribLocation(programHandle, i, attributes[i]);
             }
-            GLES20.glLinkProgram(programHandle);
+            GLES30.glLinkProgram(programHandle);
         }
 
-        final int[] linkStatus = new int[1];
-        GLES20.glGetProgramiv(programHandle, GLES20.GL_LINK_STATUS, linkStatus, 0);
-
-        if(linkStatus[0] == 0)
-        {
-            String infoLog = GLES20.glGetProgramInfoLog (programHandle);
-            infoLog = GLES20.glGetShaderInfoLog(programHandle);
-            Log.d(LogTag.SHADERS, "Error Creating Program." + infoLog);
-            GLES20.glDeleteProgram(programHandle);
-            throw new RuntimeException("Error Creating Program");
-        }
+        linkProgram(programHandle);
 
         return programHandle;
     }
 
+    private void linkProgram(int programHandle)
+    {
+        final int[] linkStatus = new int[1];
+        GLES30.glGetProgramiv(programHandle, GLES20.GL_LINK_STATUS, linkStatus, 0);
+        int[] length = new int[1];
+        GLES30.glGetProgramiv(programHandle, GLES20.GL_INFO_LOG_LENGTH, length, 0);
+        if(linkStatus[0] == 0)
+        {
+            int err;
+            while((err = GLES30.glGetError()) != GLES30.GL_NO_ERROR)
+            {
+                int err2 = err;
+            }
+            String infoLog;
+            infoLog = GLES30.glGetProgramInfoLog(programHandle);
+            Log.d(LogTag.SHADERS, "Error Creating Program." + infoLog);
+            GLES20.glDeleteProgram(programHandle);
+            throw new RuntimeException("Error Creating Program");
+        }
+    }
+
+    public int LoadProgram(String shaderName, Context context)
+    {
+        int programHandle = GLES30.glCreateProgram();
+        if(programHandle != 0)
+        {
+            GLES30.glAttachShader(programHandle, LoadVertexShader(shaderName, context));
+            GLES30.glAttachShader(programHandle, LoadFragmentShader(shaderName, context));
+            GLES30.glLinkProgram(programHandle);
+        }
+
+        linkProgram(programHandle);
+
+        return programHandle;
+    }
 
 
 
