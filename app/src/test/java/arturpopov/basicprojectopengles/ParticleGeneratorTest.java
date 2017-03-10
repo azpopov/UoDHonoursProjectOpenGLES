@@ -30,11 +30,11 @@ public class ParticleGeneratorTest
 
         List<Particle> exampleList = Arrays.asList(particle2, particle1);
 
-        gen.particleContainer = exampleList;
+        gen.mParticleContainer = exampleList;
 
         gen.sortParticles();
 
-        List<Particle> actual = gen.particleContainer;
+        List<Particle> actual = gen.mParticleContainer;
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
 
@@ -47,11 +47,11 @@ public class ParticleGeneratorTest
 
         List<Particle> exampleList = Arrays.asList();
 
-        gen.particleContainer = exampleList;
+        gen.mParticleContainer = exampleList;
 
         gen.sortParticles();
 
-        List<Particle> actual = gen.particleContainer;
+        List<Particle> actual = gen.mParticleContainer;
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
 
@@ -79,11 +79,44 @@ public class ParticleGeneratorTest
             exampleList.set(index, exampleList.get(i));
             exampleList.set(i, a);
         }
-        gen.particleContainer = exampleList;
+        gen.mParticleContainer = exampleList;
 
         gen.sortParticles();
 
-        List<Particle> actual = gen.particleContainer;
+        List<Particle> actual = gen.mParticleContainer;
+        assertArrayEquals(expected.toArray(), actual.toArray());
+    }
+
+    @Test
+    public void sortsReverseWhenNearEpsilonDifference()
+    {
+        ParticleGenerator gen = new ParticleGenerator(new MockContext());
+
+        Random rnd = new Random();
+        rnd.setSeed(12345);
+        List<Particle> expected = new Vector<>();
+        for (int i = 500; i > 0; i--)
+        {
+            Particle particle = new Particle();
+            particle.distanceCamera = Math.ulp(1.f) * (float) i;
+            expected.add(particle);
+        }
+        List<Particle> exampleList = new ArrayList<>(expected);
+
+        //http://stackoverflow.com/questions/1519736/random-shuffling-of-an-array
+        for (int i = expected.size() - 1; i > 0; i--)
+        {
+            int index = rnd.nextInt(i + 1);
+            // Simple swap
+            Particle a = exampleList.get(index);
+            exampleList.set(index, exampleList.get(i));
+            exampleList.set(i, a);
+        }
+        gen.mParticleContainer = exampleList;
+
+        gen.sortParticles();
+
+        List<Particle> actual = gen.mParticleContainer;
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
 
@@ -101,7 +134,7 @@ public class ParticleGeneratorTest
         List<Particle> exampleList = Arrays.asList( particle1, particle2 );
         int expected = 0;
 
-        gen.particleContainer = exampleList;
+        gen.mParticleContainer = exampleList;
 
         int actual = gen.findUnusedParticle();
 
@@ -122,7 +155,7 @@ public class ParticleGeneratorTest
         List<Particle> exampleList = Arrays.asList( particle1, particle2 );
         int expected = 1;
 
-        gen.particleContainer = exampleList;
+        gen.mParticleContainer = exampleList;
 
         int actual = gen.findUnusedParticle();
 
@@ -145,12 +178,13 @@ public class ParticleGeneratorTest
         List<Particle> exampleList = Arrays.asList( particle1, particle2, particle3 );
         int expected = 1;
 
-        gen.particleContainer = exampleList;
+        gen.mParticleContainer = exampleList;
 
         int actual = gen.findUnusedParticle();
 
         assertEquals(expected, actual);
     }
+
 
     @Test
     public void findUnusedParticleWhereNone()
@@ -168,7 +202,7 @@ public class ParticleGeneratorTest
         List<Particle> exampleList = Arrays.asList( particle1, particle2, particle3 );
         int expected = 0;
 
-        gen.particleContainer = exampleList;
+        gen.mParticleContainer = exampleList;
 
         int actual = gen.findUnusedParticle();
 
@@ -191,7 +225,7 @@ public class ParticleGeneratorTest
         List<Particle> exampleList = Arrays.asList( particle1, particle2, particle3 );
         int expected = 2;
 
-        gen.particleContainer = exampleList;
+        gen.mParticleContainer = exampleList;
         gen.lastUsedParticleIndex = 1;
 
         int actual = gen.findUnusedParticle();
@@ -218,7 +252,7 @@ public class ParticleGeneratorTest
                         -9.92f, -3.3f,-2.07f, 1.f
                 };
 
-        float[] result = gen.GetInverse(exampleArray);
+        float[] result = gen.getInverse(exampleArray);
         Assert.assertArrayEquals(expectedArray, result, 0.01f);
     }
 

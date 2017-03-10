@@ -1,14 +1,15 @@
-#version 100
+#version 300 es
+
 precision mediump float;
 
 // Input vertex data, different for all executions of this shader.
-attribute vec3 squareVertices;
-attribute vec4 xyzs; // Position of the center of the particule and size of the square
-attribute vec4 color; // Position of the center of the particule and size of the square
+layout(location = 0) in vec3 squareVertices;
+layout(location = 1) in vec4 xyzs; // Position of the center of the particule and size of the square
+layout(location = 2) in vec4 color; // Position of the center of the particule and size of the square
 
 // Output data ; will be interpolated for each fragment.
-varying vec2 UV;
-varying vec4 particlecolor;
+out vec2 UV;
+out vec4 particlecolor;
 
 // Values that stay constant for the whole mesh.
 uniform vec3 u_CameraRightWorldSpace;
@@ -26,9 +27,11 @@ void main()
 		+ u_CameraUpWorldSpace * squareVertices.y * particleSize;
 
 	// Output position of the vertex
+	gl_PointSize = 10.0;
 	gl_Position = u_ViewProjectionMatrix * vec4(vertexPosition_worldspace, 1.0);
 
 	// UV of the vertex. No special space for this one.
 	UV = squareVertices.xy + vec2(0.5, 0.5);
 	particlecolor = color;
+
 }
