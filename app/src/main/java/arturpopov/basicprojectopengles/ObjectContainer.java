@@ -2,6 +2,7 @@ package arturpopov.basicprojectopengles;
 
 import android.content.Context;
 import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
@@ -163,9 +164,12 @@ public class ObjectContainer implements IPrimitive
         GLES20.glEnableVertexAttribArray(biTangentHandle);
 
 
+        GLES30.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES30.glDepthFunc(GLES20.GL_LESS);
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, mVerticeBuffer.capacity() / 3);
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        GLES30.glDisable(GLES20.GL_DEPTH_TEST);
     }
 
 

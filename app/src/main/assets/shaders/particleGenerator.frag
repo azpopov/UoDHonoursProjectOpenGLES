@@ -12,6 +12,7 @@ uniform sampler2D u_TextureSampler;
 
 void main(){
 	// Output color = color of the texture at the specified UV
+
 	FragColor = (texture(u_TextureSampler, UV ) * particlecolor) ;
 
 }

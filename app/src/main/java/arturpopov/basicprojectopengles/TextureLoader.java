@@ -3,6 +3,7 @@ package arturpopov.basicprojectopengles;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
@@ -25,7 +26,12 @@ public class TextureLoader
             options.inScaled = false;   // No pre-scaling
 
             // Read in the resource
-            final Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), resourceId, options);
+            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), resourceId, options);
+
+            Matrix mirrorMatrix = new Matrix();
+            mirrorMatrix.preScale(1.0f, -1.0f);
+
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mirrorMatrix, false);
 
             // Bind to the texture in OpenGL
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle[0]);

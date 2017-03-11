@@ -34,7 +34,7 @@ class MainRenderer implements GLSurfaceView.Renderer
     //Uniform Handles
     private int mMVPMatrixHandle, mViewMatrixHandle, mModelMatrixHandle, mModelView3x3MatrixHandle, mLightPositionWorldSpaceHandle;
 
-    float eyeX, eyeY, eyeZ;
+    public float eyeX, eyeY, eyeZ;
 
 
     MainRenderer(Context mContext)
@@ -55,20 +55,17 @@ class MainRenderer implements GLSurfaceView.Renderer
         eyeX = 0.0f;
         eyeY = 0.0f;
         eyeZ = 3.f;
-        Matrix.setLookAtM(mViewMatrix, 0,
-                eyeX, eyeY, eyeZ, //EYE x,y,z
-                0.0f, 0.0f, 0.0f, //LOOKING DIRECTION x,y,z
-                0.0f, 1.0f, 0.0f); //Define 'UP' direction)
+
 
 
         BuildShaders();
 
-//        bambooObj = new ObjectContainer();
-//        bambooObj.initialize("testBamboo.obj", mContext, R.drawable.bamboo, R.drawable.bamboo_normal_map);
+       bambooObj = new ObjectContainer();
+        bambooObj.initialize("testBamboo.obj", mContext, R.drawable.bamboo, R.drawable.bamboo_normal_map);
 
         defineUniformHandles();
-//        particleGenerator = new ParticleGenerator(mContext);
-//        particleGenerator.create(programParticlesHandle, R.drawable.droplet);
+        particleGenerator = new ParticleGenerator(mContext);
+        particleGenerator.create(programParticlesHandle, R.drawable.droplet);
 
     }
 
@@ -111,7 +108,14 @@ class MainRenderer implements GLSurfaceView.Renderer
     public void onDrawFrame(GL10 glUnused)
     {
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
+        //Matrix.setIdentityM(mViewMatrix, 0);
+        //Matrix.translateM(mViewMatrix, 0 ,eyeX, eyeY, eyeZ);
+        Matrix.setLookAtM(mViewMatrix, 0,
+                0.f, 0.f, 3.f, //EYE x,y,z
+                0.0f, 0.0f, 0.0f, //LOOKING DIRECTION x,y,z
+                0.0f, 1.0f, 0.0f); //Define 'UP' direction)
 
+        Matrix.translateM(mViewMatrix, 0, eyeX, eyeY, 0.f);
         //Demonstration of model.
         long time = SystemClock.uptimeMillis() % 10000L;
         float angleInDegrees = (360.0f / 10000.0f) * ((int) time);
@@ -134,7 +138,7 @@ class MainRenderer implements GLSurfaceView.Renderer
 
         updateDefaultUniforms();
         updateNormalMappingUniforms(lightPosition, matrixMV3x3);
-        //bambooObj.draw(programNormalMapHandle); //debug ONLY
+        bambooObj.draw(programNormalMapHandle); //debug ONLY
     }
 
     private void updateDefaultUniforms()

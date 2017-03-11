@@ -50,13 +50,17 @@ public class MainSurfaceView extends GLSurfaceView {
                     break;
                 case MotionEvent.ACTION_MOVE:
                     mVelocityTracker.addMovement(event);
-                    mVelocityTracker.computeCurrentVelocity(1000);
+                    mVelocityTracker.computeCurrentVelocity(1);
                     Log.d(LogTag.TOUCH_EVENT, "X velocity: " +
                             VelocityTrackerCompat.getXVelocity(mVelocityTracker,
                                     pointerId));
                     Log.d(LogTag.TOUCH_EVENT, "Y velocity: " +
                             VelocityTrackerCompat.getYVelocity(mVelocityTracker,
                                     pointerId));
+                    mRenderer.eyeX += VelocityTrackerCompat.getXVelocity(mVelocityTracker,
+                            pointerId);
+                    mRenderer.eyeY += VelocityTrackerCompat.getYVelocity(mVelocityTracker,
+                            pointerId);
                     this.invalidate();
                     break;
                 case MotionEvent.ACTION_CANCEL:

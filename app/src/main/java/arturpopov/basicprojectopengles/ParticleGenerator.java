@@ -1,6 +1,7 @@
 package arturpopov.basicprojectopengles;
 
 import android.content.Context;
+import android.opengl.GLES20;
 import android.opengl.GLES30;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -36,7 +37,7 @@ public class ParticleGenerator
     }
 
     @SuppressWarnings("WeakerAccess")
-    public final float spread = 0.2f;
+    public final float spread = 0.5f;
 
     //Other Ints
     int lastUsedParticleIndex;
@@ -46,7 +47,7 @@ public class ParticleGenerator
     private final int[] mArrayUniformHandles = new int[UNIFORM_COUNT];
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final int MAX_PARTICLES = 2000, PARTICLE_SPAWN_LIMIT = (int)(0.016f * 2000);
+    private final int MAX_PARTICLES = 1000, PARTICLE_SPAWN_LIMIT = (int)(0.016f * 2000);
     private double mLastTime, deltaTime;
 
     List<Particle> mParticleContainer = new ArrayList<>();
@@ -128,6 +129,7 @@ public class ParticleGenerator
         GLES30.glUseProgram(programHandle);
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
         GLES30.glDepthFunc(GLES30.GL_LESS);
+
         GLES30.glBindVertexArray(mArrayVertexHandles[VERTEX_ARRAY_ID_INDEX]);
 
         double currentTime = System.nanoTime();
@@ -146,15 +148,14 @@ public class ParticleGenerator
 
         updateBuffers(particuleCount);
 
-        GLES30.glEnable(GLES30.GL_BLEND);
-        GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
+
 
         GLES30.glActiveTexture(GLES30.GL_TEXTURE1);
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mArrayUniformHandles[TEXTURE_SAMPLER_HANDLE_INDEX]);
 
         updateUniforms(viewProjectionMatrix, viewMatrix);
         setVertexAttributes(particuleCount);
-        GLES30.glDisable(GLES30.GL_BLEND);
+
 
     }
 
@@ -170,6 +171,11 @@ public class ParticleGenerator
 
     private void setVertexAttributes(int particuleCount)
     {
+        GLES30.glEnable(GLES30.GL_BLEND);
+        GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE_MINUS_SRC_ALPHA);
+        GLES30.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES30.glDepthFunc(GLES20.GL_LESS);
+
         GLES30.glEnableVertexAttribArray(0);
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mArrayVertexHandles[BILLBOARD_BUFFER_HANDLE_INDEX]);
         GLES30.glVertexAttribPointer(0, 3, GLES30.GL_FLOAT, false, 0, 0);
@@ -196,6 +202,9 @@ public class ParticleGenerator
         GLES30.glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
         GLES30.glVertexAttribDivisor(1, 0); // positions : one per quad (its center)                 -> 1
         GLES30.glVertexAttribDivisor(2, 0); // color : one per quad                                  -> 1
+
+        GLES30.glDisable(GLES30.GL_BLEND);
+        GLES30.glDisable(GLES20.GL_DEPTH_TEST);
     }
 
     private void updateBuffers(int particuleCount)
@@ -269,7 +278,7 @@ public class ParticleGenerator
         int newParticles = (int)(deltaTime * 2000);
         if(newParticles > PARTICLE_SPAWN_LIMIT)
             newParticles = PARTICLE_SPAWN_LIMIT;
-
+        Log.d(LogTag.PARTICLE_EFFECT, "\nNewParticleCount: " +newParticles);
         for(int i = 0; i < newParticles; i++)
         {
             int particleIndex = findUnusedParticle();
@@ -318,7 +327,6 @@ public class ParticleGenerator
 
     private float[] getRandomSphericalDirection()
     {
-        float[] result = new float[3];
         double x = rnd.nextFloat() -0.5, y = rnd.nextFloat() -0.5, z = rnd.nextFloat() -0.5;
         double k = Math.sqrt(x*x + y*y + z*z);
         while(k < 0.2 || k > 0.3)
@@ -328,7 +336,7 @@ public class ParticleGenerator
             z = rnd.nextFloat() -0.5;
             k = Math.sqrt(x*x + y*y + z*z);
         }
-        return result = new float[]{(float)(x/k), (float)(y/k), (float)(z/k)};
+        return new float[]{(float)(x/k), (float)(y/k), (float)(z/k)};
     }
 
     static float squaredLengthVector3(float[] vector)
