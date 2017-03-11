@@ -6,4 +6,6 @@ package arturpopov.basicprojectopengles;
 
 public class CelShadedParticleGenerator
 {
+
+    
 }

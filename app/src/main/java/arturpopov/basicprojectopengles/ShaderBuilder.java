@@ -16,7 +16,7 @@ class ShaderBuilder
      * RuntimeException on Failure.
      * @return program
      */
-    public int LoadProgram(String shaderName, Context context, String[] attributes)
+    public static int LoadProgram(String shaderName, Context context, String[] attributes)
     {
         int programHandle = GLES30.glCreateProgram();
         if(programHandle != 0)
@@ -35,7 +35,7 @@ class ShaderBuilder
         return programHandle;
     }
 
-    private void linkProgram(int programHandle)
+    private static void linkProgram(int programHandle)
     {
         final int[] linkStatus = new int[1];
         GLES30.glGetProgramiv(programHandle, GLES20.GL_LINK_STATUS, linkStatus, 0);
@@ -56,7 +56,7 @@ class ShaderBuilder
         }
     }
 
-    public int LoadProgram(String shaderName, Context context)
+    public static int LoadProgram(String shaderName, Context context)
     {
         int programHandle = GLES30.glCreateProgram();
         if(programHandle != 0)
@@ -73,7 +73,7 @@ class ShaderBuilder
 
 
 
-    public int LoadVertexShader(String shaderName, Context context)
+    public static int LoadVertexShader(String shaderName, Context context)
     {
         int vertexShaderHandle = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
         String vertexShader = FileReader.readFile(context.getResources().getString(R.string.relativeShaderPath) + shaderName + ".vert", context);
@@ -99,7 +99,7 @@ class ShaderBuilder
         }
         return vertexShaderHandle;
     }
-    public int LoadFragmentShader(String shaderName, Context context)
+    public static int LoadFragmentShader(String shaderName, Context context)
     {
         int fragmentShaderHandle = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
         String fragmentShader = FileReader.readFile(context.getResources().getString(R.string.relativeShaderPath) + shaderName + ".frag", context);

@@ -58,12 +58,13 @@ public class ParticleGenerator
 
     private final Random rnd = new Random();
 
-    void create(int programHandle, int toLoadTextureID)
+    void create( int toLoadTextureID)
     {
         GLES30.glUseProgram(programHandle);
 
         rnd.setSeed(1000);
-        this.programHandle = programHandle;
+
+        programHandle = ShaderBuilder.LoadProgram("particleGenerator", mContext);
         for (int i = 0; i < MAX_PARTICLES; i++)
         {
             mParticleContainer.add(new Particle());

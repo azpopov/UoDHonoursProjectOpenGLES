@@ -65,7 +65,7 @@ class MainRenderer implements GLSurfaceView.Renderer
 
         defineUniformHandles();
         particleGenerator = new ParticleGenerator(mContext);
-        particleGenerator.create(programParticlesHandle, R.drawable.droplet);
+        particleGenerator.create(R.drawable.droplet);
 
     }
 
@@ -82,10 +82,9 @@ class MainRenderer implements GLSurfaceView.Renderer
 
     private void BuildShaders()
     {
-        ShaderBuilder shaderBuilder = new ShaderBuilder();
-        programParticlesHandle = shaderBuilder.LoadProgram("particleGenerator", mContext);
-        programDefaultHandle = shaderBuilder.LoadProgram("default", mContext, new String[]{"a_Position", "a_Colour"});
-        programNormalMapHandle = shaderBuilder.LoadProgram("normalMapped", mContext, new String[]{"a_Position", "a_UV", "a_Normal","a_Tangent","a_BiTangent"});
+        programParticlesHandle = ShaderBuilder.LoadProgram("particleGenerator", mContext);
+        programDefaultHandle = ShaderBuilder.LoadProgram("default", mContext, new String[]{"a_Position", "a_Colour"});
+        programNormalMapHandle = ShaderBuilder.LoadProgram("normalMapped", mContext, new String[]{"a_Position", "a_UV", "a_Normal","a_Tangent","a_BiTangent"});
     }
 
     @Override
