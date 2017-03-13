@@ -3,7 +3,6 @@ package arturpopov.basicprojectopengles;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLES30;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -14,18 +13,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import Jama.*;
-
-import static java.lang.Float.compare;
-
 @SuppressWarnings("PointlessArithmeticExpression")
 public class ParticleGenerator
 {
     private static final int BYTES_PER_FLOAT = 4;
 
     private static final int VERTEX_ARRAY_ID_INDEX = 0, BILLBOARD_BUFFER_HANDLE_INDEX = 1, PARTICULE_POSITION_HANDLE_INDEX = 2, PARTICULE_COLOUR_HANDLE_INDEX = 3;
-    private static final int TEXTURE_SAMPLER_HANDLE_INDEX = 0, CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX = 1, CAMERA_UP_WORLDSPACE_HANDLE_INDEX = 2, VIEW_PROJECTION_MATRIX_HANDLE_INDEX = 3;
-    private static final int NUMBER_HANDLES = 4, UNIFORM_COUNT = 4;
+    private static final int TEXTURE_SAMPLER_HANDLE_INDEX = 0, CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX = 1, CAMERA_UP_WORLDSPACE_HANDLE_INDEX = 2, VIEW_PROJECTION_MATRIX_HANDLE_INDEX = 3, VIEW_MATRIX_HANDLE_INDEX = 4, LIGHT_POSITION_WORLD_SPACE_HANDLE_INDEX = 5 ;
+    private static final int NUMBER_HANDLES = 4, UNIFORM_COUNT = 5;
 
     private final Context mContext;
 
@@ -60,11 +55,9 @@ public class ParticleGenerator
 
     void create( int toLoadTextureID)
     {
-        GLES30.glUseProgram(programHandle);
-
         rnd.setSeed(1000);
-
         programHandle = ShaderBuilder.LoadProgram("particleGenerator", mContext);
+        GLES30.glUseProgram(programHandle);
         for (int i = 0; i < MAX_PARTICLES; i++)
         {
             mParticleContainer.add(new Particle());
@@ -99,9 +92,9 @@ public class ParticleGenerator
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mArrayVertexHandles[PARTICULE_COLOUR_HANDLE_INDEX]);
         GLES30.glBufferData(GLES30.GL_ARRAY_BUFFER, MAX_PARTICLES * 4, null, GLES30.GL_STREAM_DRAW);
 
-        defineUniformHandles();
+        defineUniformHandles(toLoadTextureID);
 
-        mArrayUniformHandles[TEXTURE_SAMPLER_HANDLE_INDEX] = TextureLoader.loadTexture(mContext, toLoadTextureID);
+
 
         if(mArrayUniformHandles[TEXTURE_SAMPLER_HANDLE_INDEX] == 0)
         {
@@ -138,7 +131,7 @@ public class ParticleGenerator
         deltaTime = (currentTime - mLastTime) / 1000000000;
         mLastTime = currentTime;
 
-        float[] inverseView = getInverse(viewMatrix);
+        float[] inverseView = MathUtilities.getInverse(viewMatrix);
         float[] cameraPosition = Arrays.copyOfRange(inverseView, 12, inverseView.length);
 
         generateNewParticles();
@@ -151,8 +144,7 @@ public class ParticleGenerator
 
 
 
-        GLES30.glActiveTexture(GLES30.GL_TEXTURE1);
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mArrayUniformHandles[TEXTURE_SAMPLER_HANDLE_INDEX]);
+
 
         updateUniforms(viewProjectionMatrix, viewMatrix);
         setVertexAttributes(particuleCount);
@@ -168,6 +160,8 @@ public class ParticleGenerator
         GLES30.glUniformMatrix4fv(
                 mArrayUniformHandles[VIEW_PROJECTION_MATRIX_HANDLE_INDEX], 1, false, viewProjectionMatrix, 0
         );
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE1);
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mArrayUniformHandles[TEXTURE_SAMPLER_HANDLE_INDEX]);
     }
 
     private void setVertexAttributes(int particuleCount)
@@ -246,7 +240,7 @@ public class ParticleGenerator
                                     p.position[1] + (p.speed[1] * (float) deltaTime),
                                     p.position[2] + (p.speed[2] * (float) deltaTime),
                             };
-                    p.distanceCamera = squaredLengthVector3(new float[]
+                    p.distanceCamera = MathUtilities.squaredLengthVector3(new float[]
                             {
                                     p.position[0] - cameraPosition[0],
                                     p.position[1] - cameraPosition[1],
@@ -303,29 +297,6 @@ public class ParticleGenerator
         }
     }
 
-    float[] getInverse(float[] toInverse)
-    {
-        float[] result = new float[toInverse.length];
-        int sqRoot =  (int)Math.sqrt(toInverse.length);
-        double[][] jagged = new double[sqRoot][sqRoot];
-        int k = 0;
-        for(int i = 0; i < sqRoot; i++)
-        {
-            for(int j = 0; j < sqRoot; j++)
-            {
-                jagged[i][j] = toInverse[k++];
-            }
-        }
-        Matrix m = new Matrix(jagged);
-        double[] resultingDoubleArray = m.inverse().getRowPackedCopy();
-
-        for(int i = 0; i < resultingDoubleArray.length; i++)
-        {
-            result[i] = (float)resultingDoubleArray[i];
-        }
-        return result;
-    }
-
     private float[] getRandomSphericalDirection()
     {
         double x = rnd.nextFloat() -0.5, y = rnd.nextFloat() -0.5, z = rnd.nextFloat() -0.5;
@@ -340,19 +311,16 @@ public class ParticleGenerator
         return new float[]{(float)(x/k), (float)(y/k), (float)(z/k)};
     }
 
-    static float squaredLengthVector3(float[] vector)
-    {
-        return (vector[0] * vector[0]) + (vector[1] * vector[1]) + (vector[2] * vector[2]);
-    }
-
-    private void defineUniformHandles()
+    private void defineUniformHandles(int toLoadTextureID)
     {
         GLES30.glUseProgram(programHandle);
 
         mArrayUniformHandles[CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_CameraRightWorldSpace");
         mArrayUniformHandles[CAMERA_UP_WORLDSPACE_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_CameraUpWorldSpace");
         mArrayUniformHandles[VIEW_PROJECTION_MATRIX_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_ViewProjectionMatrix");
-
+        mArrayUniformHandles[VIEW_MATRIX_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_ViewMatrix");
+        mArrayUniformHandles[LIGHT_POSITION_WORLD_SPACE_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_LightPositionWorldSpace");
+        mArrayUniformHandles[TEXTURE_SAMPLER_HANDLE_INDEX] = TextureLoader.loadTexture(mContext, toLoadTextureID);
         textureActiveID = GLES30.glGetUniformLocation(programHandle, "u_TextureSampler");
     }
 
@@ -385,23 +353,5 @@ public class ParticleGenerator
     }
 
 
-}
-class Particle implements Comparable<Particle>
-{
-    float[] position = new float[3];
-    float[] speed = new float[3];
-    byte r;
-    byte g;
-    byte b;
-    byte a;
-    float size;
-    float timeToLive;
-    float distanceCamera;
-
-    @Override
-    public int compareTo(@NonNull Particle other)
-    {
-        return compare(other.distanceCamera, this.distanceCamera);
-    }
 }
 

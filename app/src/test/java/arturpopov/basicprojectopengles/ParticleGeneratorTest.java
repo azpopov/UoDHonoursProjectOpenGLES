@@ -252,7 +252,7 @@ public class ParticleGeneratorTest
                         -9.92f, -3.3f,-2.07f, 1.f
                 };
 
-        float[] result = gen.getInverse(exampleArray);
+        float[] result = MathUtilities.getInverse(exampleArray);
         Assert.assertArrayEquals(expectedArray, result, 0.01f);
     }
 
@@ -267,7 +267,7 @@ public class ParticleGeneratorTest
                 };
         float expected = 173.49f;
 
-        float actual = ParticleGenerator.squaredLengthVector3(exampleVector);
+        float actual = MathUtilities.squaredLengthVector3(exampleVector);
 
         assertEquals(expected, actual, 2.f);
 
