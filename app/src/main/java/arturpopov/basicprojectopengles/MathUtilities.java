@@ -1,5 +1,7 @@
 package arturpopov.basicprojectopengles;
 
+import java.util.Random;
+
 import Jama.Matrix;
 
 /**
@@ -34,5 +36,19 @@ public class MathUtilities
     public static float squaredLengthVector3(float[] vector)
     {
         return (vector[0] * vector[0]) + (vector[1] * vector[1]) + (vector[2] * vector[2]);
+    }
+
+    static float[] GetRandomSphericalDirection(Random rnd)
+    {
+        double x = rnd.nextFloat() -0.5, y = rnd.nextFloat() -0.5, z = rnd.nextFloat() -0.5;
+        double k = Math.sqrt(x*x + y*y + z*z);
+        while(k < 0.2 || k > 0.3)
+        {
+            x = rnd.nextFloat() -0.5;
+            y = rnd.nextFloat() -0.5;
+            z = rnd.nextFloat() -0.5;
+            k = Math.sqrt(x*x + y*y + z*z);
+        }
+        return new float[]{(float)(x/k), (float)(y/k), (float)(z/k)};
     }
 }

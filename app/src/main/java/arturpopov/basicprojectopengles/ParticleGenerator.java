@@ -9,7 +9,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -112,12 +111,6 @@ public class ParticleGenerator
     }
 
 
-    void sortParticles()
-    {
-        Collections.sort(mParticleContainer);
-    }
-
-
     void drawParticles(float[] viewProjectionMatrix, float[] viewMatrix)
     {
         GLES30.glUseProgram(programHandle);
@@ -138,7 +131,7 @@ public class ParticleGenerator
 
         int particuleCount;
         particuleCount = simulateParticles(cameraPosition);
-        sortParticles();
+        mParticleContainer = Particle.sortParticles(mParticleContainer);
 
         updateBuffers(particuleCount);
 
@@ -281,7 +274,7 @@ public class ParticleGenerator
             mParticleContainer.get(particleIndex).position = new float[]{0.f, 1.f, 0.f};
             float spreadF = spread;
             float[] mainDirection = new float[]{0.f, -0.05f, 1.f};
-            float[] rndDirection = getRandomSphericalDirection(); //TODO consider using an algorithm that spreads points uniformly.
+            float[] rndDirection = MathUtilities.GetRandomSphericalDirection(rnd);
             mParticleContainer.get(particleIndex).speed = new float[]{
                     mainDirection[0] + rndDirection[0]*spreadF,
                     mainDirection[1] + rndDirection[1]*spreadF,
@@ -295,20 +288,6 @@ public class ParticleGenerator
             mParticleContainer.get(particleIndex).size = ((rnd.nextInt() % 1000) / 2000.f) + 0.1f;
 
         }
-    }
-
-    private float[] getRandomSphericalDirection()
-    {
-        double x = rnd.nextFloat() -0.5, y = rnd.nextFloat() -0.5, z = rnd.nextFloat() -0.5;
-        double k = Math.sqrt(x*x + y*y + z*z);
-        while(k < 0.2 || k > 0.3)
-        {
-            x = rnd.nextFloat() -0.5;
-            y = rnd.nextFloat() -0.5;
-            z = rnd.nextFloat() -0.5;
-            k = Math.sqrt(x*x + y*y + z*z);
-        }
-        return new float[]{(float)(x/k), (float)(y/k), (float)(z/k)};
     }
 
     private void defineUniformHandles(int toLoadTextureID)

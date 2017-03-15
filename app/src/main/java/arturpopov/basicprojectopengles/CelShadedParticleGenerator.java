@@ -1,16 +1,17 @@
 package arturpopov.basicprojectopengles;
 
 import android.content.Context;
+import android.opengl.GLES20;
 import android.opengl.GLES30;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by arturpopov on 11/03/2017.
@@ -24,6 +25,7 @@ public class CelShadedParticleGenerator
     private static final int CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX = 0, CAMERA_UP_WORLDSPACE_HANDLE_INDEX = 1, VIEW_PROJECTION_MATRIX_HANDLE_INDEX = 2, TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX = 3, TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX = 4;
     private static final int NUMBER_HANDLES = 3, UNIFORM_COUNT = 4;
     private static final int MAX_PARTICLES = 100;
+    private static final int PARTICLE_SPAWN_LIMIT = 5;
 
     private final Context mContext;
     private int programHandle;
@@ -36,6 +38,9 @@ public class CelShadedParticleGenerator
     private float[] particulePositionData;
     private double mLastTime;
     private double deltaTime;
+    private int lastUsedParticleIndex = 0;
+    private float spread = 0.2f;
+    private Random rnd = new Random();
 
     CelShadedParticleGenerator(Context mContext)
     {
@@ -91,14 +96,129 @@ public class CelShadedParticleGenerator
         deltaTime = (currentTime - mLastTime) / 1000000000;
         mLastTime = currentTime;
 
-        float[] inverseView = getInverse(viewMatrix);
+        float[] inverseView = MathUtilities.getInverse(viewMatrix);
         float[] cameraPosition = Arrays.copyOfRange(inverseView, 12, inverseView.length);
+
+        generateNewParticles();
+
+        int particuleCount;
+        particuleCount = simulateParticles(cameraPosition);
+        mParticleContainer = Particle.sortParticles(mParticleContainer);
+
+        updateBuffers(particuleCount);
+
+
+
+
+
+        updateUniforms(viewProjectionMatrix, viewMatrix);
+        setVertexAttributes(particuleCount);
 
     }
 
-    private float[] getInverse(float[] viewMatrix)
+    private void setVertexAttributes(int particuleCount)
     {
-        return new float[]{};
+        GLES30.glEnable(GLES30.GL_BLEND);
+        GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE_MINUS_SRC_ALPHA);
+        GLES30.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES30.glDepthFunc(GLES20.GL_LESS);
+
+        GLES30.glEnableVertexAttribArray(0);
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mArrayVertexHandles[BILLBOARD_BUFFER_HANDLE_INDEX]);
+        GLES30.glVertexAttribPointer(0, 3, GLES30.GL_FLOAT, false, 0, 0);
+
+        GLES30.glEnableVertexAttribArray(1);
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mArrayVertexHandles[PARTICULE_POSITION_HANDLE_INDEX]);
+        GLES30.glVertexAttribPointer(
+                1, 4, GLES30.GL_FLOAT, false, 0, 0
+        );
+
+
+        GLES30.glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
+        GLES30.glVertexAttribDivisor(1, 1); // positions : one per quad (its center)                 -> 1
+
+        GLES30.glDrawArraysInstanced(GLES30.GL_TRIANGLE_STRIP, 0, 4, particuleCount);
+        GLES30.glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
+        GLES30.glVertexAttribDivisor(1, 0); // positions : one per quad (its center)                 -> 1
+
+        GLES30.glDisable(GLES30.GL_BLEND);
+        GLES30.glDisable(GLES20.GL_DEPTH_TEST);
+    }
+
+    private void updateBuffers(int particuleCount)
+    {
+        //POSITIONAL DATA
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mArrayVertexHandles[PARTICULE_POSITION_HANDLE_INDEX]);
+        GLES30.glBufferData(GLES30.GL_ARRAY_BUFFER, MAX_PARTICLES * 4 * BYTES_PER_FLOAT, null, GLES30.GL_STREAM_DRAW);
+        FloatBuffer mParticulePositionBuffer = ByteBuffer.allocateDirect(particulePositionData.length * BYTES_PER_FLOAT)
+                .order(ByteOrder.nativeOrder()).asFloatBuffer();
+        mParticulePositionBuffer.put(particulePositionData).position(0);
+        GLES30.glBufferSubData(GLES30.GL_ARRAY_BUFFER, 0, particuleCount * BYTES_PER_FLOAT * 4, mParticulePositionBuffer);
+    }
+
+    private int simulateParticles(float[] cameraPosition)
+    {
+        int particuleCount = 0;
+        for(int i = 0; i < MAX_PARTICLES; i++)
+        {
+
+            Particle p = mParticleContainer.get(i);
+            if (p.timeToLive > 0.0f)
+            {
+                p.timeToLive -= deltaTime;
+                if (p.timeToLive > 0.f)
+                {
+                    //gravity
+                    float gravity = p.speed[1] + 9.81f * (float) deltaTime; //define gravity here
+                    p.speed[1] = gravity * 0.5f; //Adjust gravity strength
+                    p.position = new float[]
+                            {
+                                    p.position[0] + (p.speed[0] * (float) deltaTime),
+                                    p.position[1] + (p.speed[1] * (float) deltaTime),
+                                    p.position[2] + (p.speed[2] * (float) deltaTime),
+                            };
+                    p.distanceCamera = MathUtilities.squaredLengthVector3(new float[]
+                            {
+                                    p.position[0] - cameraPosition[0],
+                                    p.position[1] - cameraPosition[1],
+                                    p.position[2] - cameraPosition[2]
+                            });
+                    int vertexIndex = 4 * particuleCount;
+                    particulePositionData[vertexIndex + 0] = p.position[0];
+                    particulePositionData[vertexIndex + 1] = p.position[1];
+                    particulePositionData[vertexIndex + 2] = p.position[2];
+                    particulePositionData[vertexIndex + 3] = p.size;
+
+                } else
+                {
+                    p.distanceCamera = -1.f;
+                }
+                particuleCount++;
+            }
+        }
+        return particuleCount;
+    }
+
+    private void generateNewParticles()
+    {
+        int newParticles = (int)(deltaTime * 2000);
+        if(newParticles > PARTICLE_SPAWN_LIMIT)
+            newParticles = PARTICLE_SPAWN_LIMIT;
+        for(int i = 0; i < newParticles; i++)
+        {
+            int particleIndex = findUnusedParticle();
+            mParticleContainer.get(particleIndex).timeToLive = 2.f;
+            mParticleContainer.get(particleIndex).position = new float[]{0.f, 0.f, 0.f};
+            float spreadF = spread;
+            float[] mainDirection = new float[]{0.f, 0.05f, 0.1f};
+            float[] rndDirection = MathUtilities.GetRandomSphericalDirection(rnd);
+            mParticleContainer.get(particleIndex).speed = new float[]{
+                    mainDirection[0] + rndDirection[0]*spreadF,
+                    mainDirection[1] + rndDirection[1]*spreadF,
+                    mainDirection[2] + rndDirection[2]*spreadF,
+            };
+            mParticleContainer.get(particleIndex).size = ((rnd.nextInt() % 1000) / 2000.f) + 0.1f; //TODO desity as size implementation.
+        }
     }
 
 
@@ -155,6 +275,34 @@ public class CelShadedParticleGenerator
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mArrayUniformHandles[TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX]);
     }
 
+
+    int findUnusedParticle()
+    {
+        int result = 0;
+
+        for(int i = lastUsedParticleIndex; i < mParticleContainer.size(); i++)
+        {
+            if(mParticleContainer.get(i).timeToLive < 0)
+            {
+                lastUsedParticleIndex = i;
+                result = i;
+                break;
+            }
+        }
+        if(result == 0)
+        {
+            for (int i = 0; i < lastUsedParticleIndex; i++)
+            {
+                if (mParticleContainer.get(i).timeToLive < 0)
+                {
+                    lastUsedParticleIndex = i;
+                    result = i;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 
 
 }

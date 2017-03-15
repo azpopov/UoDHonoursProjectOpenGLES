@@ -2,6 +2,9 @@ package arturpopov.basicprojectopengles;
 
 import android.support.annotation.NonNull;
 
+import java.util.Collections;
+import java.util.List;
+
 import static java.lang.Float.compare;
 
 /**
@@ -18,6 +21,12 @@ class Particle implements Comparable<Particle>
     float size;
     float timeToLive;
     float distanceCamera;
+
+    static List<Particle> sortParticles(List<Particle> collection)
+    {
+        Collections.sort(collection);
+        return collection;
+    }
 
     @Override
     public int compareTo(@NonNull Particle other)
