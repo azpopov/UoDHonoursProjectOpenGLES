@@ -22,24 +22,24 @@ public class CelShadedParticleGenerator
     private static final int BYTES_PER_FLOAT = 4;
 
     private static final int VERTEX_ARRAY_ID_INDEX = 0, BILLBOARD_BUFFER_HANDLE_INDEX = 1, PARTICULE_POSITION_HANDLE_INDEX = 2;
-    private static final int CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX = 0, CAMERA_UP_WORLDSPACE_HANDLE_INDEX = 1, VIEW_PROJECTION_MATRIX_HANDLE_INDEX = 2, TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX = 3, TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX = 4;
-    private static final int NUMBER_HANDLES = 3, UNIFORM_COUNT = 4;
+    private static final int CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX = 0, CAMERA_UP_WORLDSPACE_HANDLE_INDEX = 1, VIEW_PROJECTION_MATRIX_HANDLE_INDEX = 2, TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX = 3, TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX = 4, VIEW_MATRIX_HANDLE_INDEX = 5;
+    private static final int NUMBER_HANDLES = 3, UNIFORM_COUNT = 6;
     private static final int MAX_PARTICLES = 100;
-    private static final int PARTICLE_SPAWN_LIMIT = 5;
+    private static final int PARTICLE_SPAWN_LIMIT = 1;
 
     private final Context mContext;
     private int programHandle;
 
     private int[] mArrayVertexHandles = new int[NUMBER_HANDLES];
     private int[] mArrayUniformHandles = new int[UNIFORM_COUNT];
-    private int textureColourActiveID, textureNormalDepthActiveID;
+    private int textureColourActiveID, textureNormalAlphaActiveID;
     private List<Particle> mParticleContainer = new ArrayList<>();
 
     private float[] particulePositionData;
     private double mLastTime;
     private double deltaTime;
     private int lastUsedParticleIndex = 0;
-    private float spread = 0.2f;
+    private float spread = 0.1f;
     private Random rnd = new Random();
 
     CelShadedParticleGenerator(Context mContext)
@@ -87,7 +87,7 @@ public class CelShadedParticleGenerator
     {
         GLES30.glUseProgram(programHandle);
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
-        GLES30.glDepthFunc(GLES30.GL_LESS);
+        GLES30.glDepthFunc(GLES30.GL_GREATER);
 
         GLES30.glBindVertexArray(mArrayVertexHandles[VERTEX_ARRAY_ID_INDEX]);
 
@@ -106,10 +106,6 @@ public class CelShadedParticleGenerator
         mParticleContainer = Particle.sortParticles(mParticleContainer);
 
         updateBuffers(particuleCount);
-
-
-
-
 
         updateUniforms(viewProjectionMatrix, viewMatrix);
         setVertexAttributes(particuleCount);
@@ -207,7 +203,7 @@ public class CelShadedParticleGenerator
         for(int i = 0; i < newParticles; i++)
         {
             int particleIndex = findUnusedParticle();
-            mParticleContainer.get(particleIndex).timeToLive = 2.f;
+            mParticleContainer.get(particleIndex).timeToLive = 12.f;
             mParticleContainer.get(particleIndex).position = new float[]{0.f, 0.f, 0.f};
             float spreadF = spread;
             float[] mainDirection = new float[]{0.f, 0.05f, 0.1f};
@@ -249,28 +245,36 @@ public class CelShadedParticleGenerator
         mArrayUniformHandles[CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_CameraRightWorldSpace");
         mArrayUniformHandles[CAMERA_UP_WORLDSPACE_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_CameraUpWorldSpace");
         mArrayUniformHandles[VIEW_PROJECTION_MATRIX_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_ViewProjectionMatrix");
+        mArrayUniformHandles[VIEW_MATRIX_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_ViewMatrix");
 
         mArrayUniformHandles[TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX] = TextureLoader.loadTexture(mContext, toLoadTextureColourID);
         mArrayUniformHandles[TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX] = TextureLoader.loadTexture(mContext, toLoadTextureNormalDepthID);
 
-        textureColourActiveID = GLES30.glGetUniformLocation(programHandle, "textureColourAlpha");
-        textureNormalDepthActiveID = GLES30.glGetUniformLocation(programHandle, "textureNormalDepth");
+        textureColourActiveID = GLES30.glGetUniformLocation(programHandle, "textureColourDepth");
+        textureNormalAlphaActiveID = GLES30.glGetUniformLocation(programHandle, "textureNormalAlpha");
     }
 
 
     private void updateUniforms(float[] viewProjectionMatrix, float[] viewMatrix)
     {
-        GLES30.glUniform1i(textureColourActiveID, 0);
-        GLES30.glUniform1i(textureNormalDepthActiveID, 1);
+
+
 
         GLES30.glUniform3f(mArrayUniformHandles[CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX], viewMatrix[0], viewMatrix[4], viewMatrix[8]);
         GLES30.glUniform3f(mArrayUniformHandles[CAMERA_UP_WORLDSPACE_HANDLE_INDEX], viewMatrix[1], viewMatrix[5], viewMatrix[9]);
         GLES30.glUniformMatrix4fv(
                 mArrayUniformHandles[VIEW_PROJECTION_MATRIX_HANDLE_INDEX], 1, false, viewProjectionMatrix, 0
         );
+        GLES30.glUniformMatrix4fv(
+                mArrayUniformHandles[VIEW_MATRIX_HANDLE_INDEX], 1, false, viewMatrix, 0
+        );
 
+        GLES30.glUniform1i(textureColourActiveID, 0);
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mArrayUniformHandles[TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX]);
+
+
+        GLES30.glUniform1i(textureNormalAlphaActiveID, 1);
         GLES30.glActiveTexture(GLES30.GL_TEXTURE1);
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mArrayUniformHandles[TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX]);
     }

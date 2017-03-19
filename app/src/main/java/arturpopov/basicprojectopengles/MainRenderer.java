@@ -42,7 +42,8 @@ class MainRenderer implements GLSurfaceView.Renderer
         this.mContext = mContext;
     }
 
-    ParticleGenerator particleGenerator;
+    //ParticleGenerator particleGenerator;
+    CelShadedParticleGenerator celShadedParticleGenerator;
 
     @Override
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config)
@@ -64,8 +65,11 @@ class MainRenderer implements GLSurfaceView.Renderer
         bambooObj.initialize("testBamboo.obj", mContext, R.drawable.bamboo, R.drawable.bamboo_normal_map);
 
         defineUniformHandles();
-        particleGenerator = new ParticleGenerator(mContext);
-        particleGenerator.create(R.drawable.droplet);
+        //particleGenerator = new ParticleGenerator(mContext);
+        //particleGenerator.create(R.drawable.droplet);
+        celShadedParticleGenerator = new CelShadedParticleGenerator(mContext);
+        celShadedParticleGenerator.create(R.drawable.particule_normal4, R.drawable.particule_colour_depth3);
+
 
     }
 
@@ -122,8 +126,8 @@ class MainRenderer implements GLSurfaceView.Renderer
 
         Matrix.setIdentityM(mVPMatrix, 0);
         Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
-        particleGenerator.drawParticles(mVPMatrix, mViewMatrix);
-
+        //particleGenerator.drawParticles(mVPMatrix, mViewMatrix);
+        celShadedParticleGenerator.drawParticles(mVPMatrix, mViewMatrix);
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.translateM(mModelMatrix, 0, 0.0f, -1.0f, 0.0f);
         Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 1.0f, 0.0f, 0.0f);
