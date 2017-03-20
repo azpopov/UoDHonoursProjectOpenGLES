@@ -8,7 +8,6 @@ import android.util.Log;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 import java.util.ArrayList;
 
 /**
@@ -25,7 +24,7 @@ public class ObjectContainer implements IPrimitive
 
     public void initialize(String fileName, Context context, int textureDefault, int textureNormalMap)
     {
-        ArrayList<ArrayList<Float>> objData = ObjectLoader.loadObjFile(fileName, context);
+        ArrayList<ArrayList<Float>> objData = ObjectLoader.loadNormalMappedObj(fileName, context);
 
         GLES20.glGenBuffers(6, buffers, 0);
 
