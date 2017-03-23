@@ -33,7 +33,6 @@ void main(){
 	vec3 MaterialAmbientColor = vec3(0.1,0.1,0.1) * MaterialDiffuseColor;
 	vec3 MaterialSpecularColor = LightColor.rgb * vec3(0.3, 0.3, 0.3);
 
-	// Local normal, in tangent space. V tex coordinate is inverted because normal map is in TGA (not in DDS) for better quality
 	vec3 tex2Dresult = (texture2D( u_NormalTextureSampler, vec2(UV.x, UV.y)).rgb);
 
 	float maxVec;

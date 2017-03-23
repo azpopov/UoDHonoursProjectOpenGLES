@@ -24,7 +24,7 @@ public class ObjectContainer implements IPrimitive
 
     public void initialize(String fileName, Context context, int textureDefault, int textureNormalMap)
     {
-        ArrayList<ArrayList<Float>> objData = ObjectLoader.loadNormalMappedObj(fileName, context);
+        ArrayList<ArrayList<Float>> objData = ObjectLoader.loadObjFile(fileName, context);
 
         GLES20.glGenBuffers(6, buffers, 0);
 
