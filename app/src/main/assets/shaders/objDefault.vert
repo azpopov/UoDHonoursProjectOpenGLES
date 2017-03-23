@@ -30,7 +30,7 @@ void main(){
 	// Vector that goes from the vertex to the camera, in camera space.
 	// In camera space, the camera is at the origin (0,0,0).
 	vec3 vertexPosition_cameraspace = ( u_ViewMatrix * (u_ModelMatrix * a_Position)).xyz;
-	fragEyeDirectionCameraspace = vec3(0,0,0) - vertexPosition_cameraspace;
+	fragEyeDirectionCameraspace = vec3(0.f, 0.f, 3.f) - vertexPosition_cameraspace;
 
 	// Vector that goes from the vertex to the light, in camera space. ModelMatrix is ommited because it's identity.
 	vec3 LightPosition_cameraspace = ( u_ViewMatrix * vec4(u_LightPositionWorldSpace,1)).xyz;

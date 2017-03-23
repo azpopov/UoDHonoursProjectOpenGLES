@@ -1,6 +1,6 @@
 #version 300 es
 
-precision mediump float;
+precision highp float;
 // This is the output vertex colour sent to the rasterizer
 in vec3 LightDirectionCameraspace;
 in vec3 fragNormal;

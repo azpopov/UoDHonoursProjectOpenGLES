@@ -27,7 +27,7 @@ class MainRenderer implements GLSurfaceView.Renderer
     private Context mContext;
 
     ObjectContainer bambooObj;
-    ObjectContainerDefault floorObj, backWallObj, leftWallObj, lightSourceObj;
+    ObjectContainerDefault floorObj, backWallObj, leftWallObj, lightSourceObj, shadowingObject;
     //Shader Handles
     @SuppressWarnings("FieldCanBeLocal")
     private int programDefaultHandle, programNormalMapHandle, programParticlesHandle, programObjDefaultHandle;
@@ -73,6 +73,9 @@ class MainRenderer implements GLSurfaceView.Renderer
         leftWallObj.initialize("cube.obj", mContext, R.drawable.cube);
         lightSourceObj = new ObjectContainerDefault();
         lightSourceObj.initialize("cube.obj", mContext, R.drawable.cube);
+        shadowingObject = new ObjectContainerDefault();
+        shadowingObject.initialize("cube.obj", mContext, R.drawable.cube);
+
 
         defineUniformHandles();
         //particleGenerator = new ParticleGenerator(mContext);
@@ -136,11 +139,11 @@ class MainRenderer implements GLSurfaceView.Renderer
                 0.0f, 0.0f, 0.0f, //LOOKING DIRECTION x,y,z
                 0.0f, 1.0f, 0.0f); //Define 'UP' direction)
 
-        Matrix.translateM(mViewMatrix, 0, eyeX, eyeY, 0.f);
+        Matrix.translateM(mViewMatrix, 0, 0.0f, 0.0f, 0.f);
         //Demonstration of model.
         long time = SystemClock.uptimeMillis() % 10000L;
         float angleInDegrees = (360.0f / 10000.0f) * ((int) time);
-        float[] lightPosition = {2.0f, 1.0f, 1.0f};
+        float[] lightPosition = {2.0f, eyeX, eyeY};
 
         Matrix.setIdentityM(mVPMatrix, 0);
         Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
@@ -175,7 +178,7 @@ class MainRenderer implements GLSurfaceView.Renderer
 
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.translateM(mModelMatrix, 0, 0.0f, 0.0f, -1.0f);
-
+        Matrix.rotateM(mModelMatrix, 0, 180, 0.0f, 1.0f, 0.0f);
         Matrix.scaleM(mModelMatrix, 0 , 1.0f, 1.0f, 0.1f);
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
         normalMatrix = new Matrix4f(mMVPMatrix);
@@ -199,6 +202,19 @@ class MainRenderer implements GLSurfaceView.Renderer
         updateObjDefaultUniforms(lightPosition, normalMatrix);
 
         leftWallObj.draw(programObjDefaultHandle);
+
+        Matrix.setIdentityM(mModelMatrix, 0);
+        Matrix.translateM(mModelMatrix, 0, 0.0f, 0.5f, 0.0f);
+        Matrix.rotateM(mModelMatrix, 0, 180, 0.0f, 1.0f, 0.0f);
+        Matrix.scaleM(mModelMatrix, 0 , 0.3f, 0.3f, 0.3f);
+        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+        normalMatrix = new Matrix4f(mMVPMatrix);
+        normalMatrix.inverseTranspose();
+
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+        updateObjDefaultUniforms(lightPosition, normalMatrix);
+
+        shadowingObject.draw(programObjDefaultHandle);
 
 
         Matrix.setIdentityM(mModelMatrix, 0);
