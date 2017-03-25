@@ -12,6 +12,7 @@ out vec4 fragPositionWorldSpace;
 out vec3 fragEyeDirectionCameraspace;
 out vec3 LightDirectionCameraspace;
 out vec3 fragNormal;
+out vec4 ShadowCoord;
 
 // Values that stay constant for the whole mesh.
 uniform mat4 u_MVPMatrix;
@@ -20,10 +21,13 @@ uniform mat4 u_ModelMatrix;
 uniform vec3 u_LightPositionWorldSpace;
 uniform mat3 u_NormalMatrix;
 
+uniform mat4 uShadowProjMatrix;
+
+
 void main(){
 	// Output position of the vertex, in clip space : MVP * position
 	gl_Position =  u_MVPMatrix * a_Position;
-
+    ShadowCoord = uShadowProjMatrix * a_Position;
 	// Position of the vertex, in worldspace : ModelMatrix * position
 	fragPositionWorldSpace = u_ModelMatrix * a_Position;
 

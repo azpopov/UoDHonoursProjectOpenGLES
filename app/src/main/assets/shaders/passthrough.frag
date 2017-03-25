@@ -1,14 +1,10 @@
 #version 300 es
-
+// Pixel shader to generate the Depth Map
+// Used for shadow mapping - generates depth map from the light's viewpoint
 precision highp float;
 
-in vec2 UV;
+layout(location = 0) out float fragmentdepth;
 
-out vec3 color;
-
-uniform sampler2D renderedTexture;
-uniform float time;
-
-void main(){
-	color = texture( renderedTexture, UV + 0.005*vec2( sin(time+1024.0*UV.x),cos(time+768.0*UV.y)) ).xyz ;
+void main() {
+    fragmentdepth = gl_FragCoord.z;
 }
