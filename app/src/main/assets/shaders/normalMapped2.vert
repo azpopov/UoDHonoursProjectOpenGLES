@@ -34,12 +34,8 @@ void main(){
 
     UV = a_UV;
 
-	// Position of the vertex, in worldspace : ModelMatrix * position
-
-
-	// Vector that goes from the vertex to the camera, in camera space.
-	// In camera space, the camera is at the origin (0,0,0).
 	vec3 vertexPosition_cameraspace = vec3(vertPos);
+
     vec3 PositionWorldspace = (u_ModelMatrix * vec4(a_Position, 1.0)).xyz;
 
    vec3 T = normalize(vec3(u_NormalMatrix * vec4(a_Tangent,   0.0)));
