@@ -18,7 +18,7 @@ public class ObjectContainerDefault implements IPrimitive
 {
     private FloatBuffer mVerticeBuffer, mTexCoordBuffer, mNormalBuffer;
     private Integer verticeHandle, texCoordHandle, normalHandle;
-    public Integer mDiffuseTextureDataHandle, mDiffuseTextureUniform;
+    public Integer mDiffuseTextureDataHandle, mDiffuseTextureUniform, mShadowSampleTextureHandle, mShadowSampleUniform;
 
     private int[] buffers = new int[4];
 
@@ -88,12 +88,17 @@ public class ObjectContainerDefault implements IPrimitive
 
         GLES20.glUseProgram(pProgramHandle);
 
-        if (verticeHandle == null || texCoordHandle == null || normalHandle == null || mDiffuseTextureUniform == null)
+        if (verticeHandle == null || texCoordHandle == null || normalHandle == null || mDiffuseTextureUniform == null || mShadowSampleUniform == null)
         {
             verticeHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_Position");
             texCoordHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_UV");
             normalHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_Normal");
             mDiffuseTextureUniform = GLES20.glGetUniformLocation(pProgramHandle, "u_DiffuseTextureSampler");
+            mShadowSampleUniform = GLES20.glGetUniformLocation(pProgramHandle, "u_ShadowTexture");
+            if (verticeHandle == null || texCoordHandle == null || normalHandle == null || mDiffuseTextureUniform == null || mShadowSampleUniform == null)
+            {
+                Log.d(LogTag.SHADERS, "One of the Handles is NULL in class: " + this.getClass());
+            }
         }
 
         if (mDiffuseTextureDataHandle != 0)
@@ -101,6 +106,15 @@ public class ObjectContainerDefault implements IPrimitive
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mDiffuseTextureDataHandle);
             GLES20.glUniform1i(mDiffuseTextureUniform, 0);
+
+
+        }
+        if(mShadowSampleTextureHandle != 0)
+        {
+            //SHADOW
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mShadowSampleTextureHandle);
+            GLES20.glUniform1i(mShadowSampleUniform, 1);
         }
         mVerticeBuffer.position(0);
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[0]);
