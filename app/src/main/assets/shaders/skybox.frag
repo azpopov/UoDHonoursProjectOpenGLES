@@ -1,5 +1,13 @@
-#version 120
+#version 300 es
 
-void main() {
-	gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+precision mediump float;
+
+in vec3 TexCoords;
+out vec4 color;
+
+uniform samplerCube skyboxSampler;
+
+void main()
+{
+    color = texture(skyboxSampler, TexCoords);
 }
