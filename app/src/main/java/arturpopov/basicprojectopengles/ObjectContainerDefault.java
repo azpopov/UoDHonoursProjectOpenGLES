@@ -95,7 +95,7 @@ public class ObjectContainerDefault implements IPrimitive
             normalHandle = GLES20.glGetAttribLocation(pProgramHandle, "a_Normal");
             mDiffuseTextureUniform = GLES20.glGetUniformLocation(pProgramHandle, "u_DiffuseTextureSampler");
             mShadowSampleUniform = GLES20.glGetUniformLocation(pProgramHandle, "u_ShadowTexture");
-            if (verticeHandle == null || texCoordHandle == null || normalHandle == null || mDiffuseTextureUniform == null || mShadowSampleUniform == null)
+            if (verticeHandle == null || texCoordHandle == null || normalHandle == null || mDiffuseTextureUniform == null )
             {
                 Log.d(LogTag.SHADERS, "One of the Handles is NULL in class: " + this.getClass());
             }
@@ -109,13 +109,13 @@ public class ObjectContainerDefault implements IPrimitive
 
 
         }
-        if(mShadowSampleTextureHandle != 0)
-        {
-            //SHADOW
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mShadowSampleTextureHandle);
-            GLES20.glUniform1i(mShadowSampleUniform, 1);
-        }
+//        if(mShadowSampleTextureHandle != 0)
+//        {
+//            //SHADOW
+//            GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+//            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mShadowSampleTextureHandle);
+//            GLES20.glUniform1i(mShadowSampleUniform, 1);
+//        }
         mVerticeBuffer.position(0);
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[0]);
         GLES20.glVertexAttribPointer(verticeHandle, POSITION_SIZE, GLES20.GL_FLOAT, false, 0, 0);

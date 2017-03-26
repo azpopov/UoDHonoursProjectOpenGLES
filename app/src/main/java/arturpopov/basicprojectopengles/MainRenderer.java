@@ -2,6 +2,7 @@ package arturpopov.basicprojectopengles;
 
 import android.content.Context;
 import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
@@ -28,6 +29,7 @@ class MainRenderer implements GLSurfaceView.Renderer
 
     ObjectContainer bambooObj;
     ObjectContainerDefault floorObj, backWallObj, leftWallObj, lightSourceObj, shadowingObject;
+    Skybox skybox;
     //Shader Handles
     @SuppressWarnings("FieldCanBeLocal")
     private int programDefaultHandle, programNormalMapHandle, programParticlesHandle, programObjDefaultHandle, programPassThrough;
@@ -63,9 +65,9 @@ class MainRenderer implements GLSurfaceView.Renderer
 
         BuildShaders();
 
-        shadowMapper = new ShadowMapping();
+        //shadowMapper = new ShadowMapping();
 
-        shadowMapper.createRenderDepthFrameBuffer();
+        //shadowMapper.createRenderDepthFrameBuffer();
         //shadowMapper.prepareFullScreenQuad(ShaderBuilder.LoadProgram("passthrough", mContext));
 
        bambooObj = new ObjectContainer();
@@ -80,7 +82,7 @@ class MainRenderer implements GLSurfaceView.Renderer
         lightSourceObj = new ObjectContainerDefault();
         lightSourceObj.initialize("cube.obj", mContext, R.drawable.cube);
         shadowingObject = new ObjectContainerDefault();
-        shadowingObject.initialize("sphere.obj", mContext, R.drawable.red);
+        shadowingObject.initialize("pine_stump.obj", mContext, R.drawable.tree_stomp_colmap);
 
 
         defineUniformHandles();
@@ -89,7 +91,9 @@ class MainRenderer implements GLSurfaceView.Renderer
         celShadedParticleGenerator = new CelShadedParticleGenerator(mContext);
         celShadedParticleGenerator.create(R.drawable.particule_normal4, R.drawable.particule_colour_depth3);
 
-
+        skybox = new Skybox();
+        skybox.setFaceTextures(R.drawable.day_right, R.drawable.day_left, R.drawable.day_top, R.drawable.day_bottom, R.drawable.day_back, R.drawable.day_front);
+        skybox.initialize(mContext);
     }
 
     private void defineUniformHandles()
@@ -127,9 +131,9 @@ class MainRenderer implements GLSurfaceView.Renderer
     public void onSurfaceChanged(GL10 glUnused, int width, int height)
     {
         GLES20.glViewport(0,0, width, height);
-        shadowMapper.width = width;
-        shadowMapper.height = height;
-        shadowMapper.createRenderDepthFrameBuffer();
+        //shadowMapper.width = width;
+       //shadowMapper.height = height;
+        //shadowMapper.createRenderDepthFrameBuffer();
         final float ratio = (float) width / height;
         final float left = -ratio;
         final float right = ratio;
@@ -151,7 +155,8 @@ class MainRenderer implements GLSurfaceView.Renderer
                 0.0f, 0.0f, 0.0f, //LOOKING DIRECTION x,y,z
                 0.0f, 1.0f, 0.0f); //Define 'UP' direction)
         Matrix.translateM(mViewMatrix, 0, 0.0f, 0.0f, 0.f);
-
+        Matrix.rotateM(mViewMatrix, 0, eyeX, 0.0f, 1.f, 0.f);
+        Matrix.rotateM(mViewMatrix, 0, eyeY, 1.0f, 0.f, 0.f);
         float[] lightPosition = new float[]{eyeX,eyeY,2.0f, 1.0f};
 
         Matrix.setLookAtM(lightView, 0,
@@ -165,18 +170,22 @@ class MainRenderer implements GLSurfaceView.Renderer
         float angleInDegrees = (360.0f / 10000.0f) * ((int) time);
 
 
+
+
         Matrix.setIdentityM(mVPMatrix, 0);
         Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
         float[] MVPLightMatrix = new float[16];
         Matrix.multiplyMM(MVPLightMatrix, 0, mLightProjectionMatrix, 0, lightView, 0);
 
-        shadowMapper.renderShadowMap(programPassThrough, MVPLightMatrix, new ObjectContainerDefault[]{floorObj , backWallObj, leftWallObj, shadowingObject, lightSourceObj});
+        //shadowMapper.renderShadowMap(programPassThrough, MVPLightMatrix, new ObjectContainerDefault[]{floorObj , backWallObj, leftWallObj, shadowingObject, lightSourceObj});
 
 
         //celShadedParticleGenerator.drawParticles(mVPMatrix, mViewMatrix);
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
 
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
+
+        skybox.renderSkybox(mViewMatrix, mProjectionMatrix);
 
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.translateM(mModelMatrix, 0, 0.0f, -1.0f, 0.0f);
@@ -195,7 +204,7 @@ class MainRenderer implements GLSurfaceView.Renderer
 
 
         updateNormalMappingUniforms(lightPosition, viewPosition, normalMatrix);
-        bambooObj.draw(programNormalMapHandle); //debug ONLY
+        //bambooObj.draw(programNormalMapHandle); //debug ONLY
 
 
         Matrix.setIdentityM(mModelMatrix, 0);
@@ -212,7 +221,7 @@ class MainRenderer implements GLSurfaceView.Renderer
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
         updateObjDefaultUniforms(lightPosition, normalMatrix,MVPLightMatrix, viewPosition);
 
-        floorObj.draw(programObjDefaultHandle);
+        //floorObj.draw(programObjDefaultHandle);
 
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.translateM(mModelMatrix, 0, 0.0f, 0.0f, -1.0f);
@@ -229,7 +238,7 @@ class MainRenderer implements GLSurfaceView.Renderer
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
         updateObjDefaultUniforms(lightPosition, normalMatrix,MVPLightMatrix, viewPosition);
 
-        backWallObj.draw(programObjDefaultHandle);
+        //backWallObj.draw(programObjDefaultHandle);
 
 
         Matrix.setIdentityM(mModelMatrix, 0);
@@ -290,6 +299,8 @@ class MainRenderer implements GLSurfaceView.Renderer
 
         lightSourceObj.draw(programObjDefaultHandle);
         GLES20.glUniform1i(u_EmitMode_ObjDefaultHandle, 0);
+
+
 
     }
 

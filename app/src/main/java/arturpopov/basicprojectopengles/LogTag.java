@@ -10,4 +10,5 @@ final class LogTag
     public static final String TOUCH_EVENT = "LogTouchEvent";
     public static final String PARTICLE_EFFECT = "LogParticleEffect";
     public static final String FRAMEBUFFER = "LogFrameBuffer";
+    public static final String SKYBOX = "LogSkyBox";
 }

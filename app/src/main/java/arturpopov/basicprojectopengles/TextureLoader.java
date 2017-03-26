@@ -67,8 +67,9 @@ public class TextureLoader
         final int[] textureHandle = new int[1];
 
         GLES20.glGenTextures(1, textureHandle, 0);
-        GLES30.glActiveTexture(textureHandle[0]);
+        GLES30.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES30.glBindTexture(GLES20.GL_TEXTURE_CUBE_MAP, textureHandle[0]);
+
         if (textureHandle[0] != 0)
         {
             final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -79,9 +80,14 @@ public class TextureLoader
                 Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), textureIDs[i], options);
 
                 Matrix mirrorMatrix = new Matrix();
-                mirrorMatrix.preScale(1.0f, -1.0f);
+                //mirrorMatrix.preScale(-1.0f, 1.0f);
 
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mirrorMatrix, false);
+                GLES30.glTexParameteri(GLES20.GL_TEXTURE_CUBE_MAP, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+                GLES30.glTexParameteri(GLES20.GL_TEXTURE_CUBE_MAP, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+                GLES30.glTexParameteri(GLES20.GL_TEXTURE_CUBE_MAP, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+                GLES30.glTexParameteri(GLES20.GL_TEXTURE_CUBE_MAP, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+                GLES30.glTexParameteri(GLES20.GL_TEXTURE_CUBE_MAP, GLES30.GL_TEXTURE_WRAP_R, GLES20.GL_CLAMP_TO_EDGE);
 
                 // Load the bitmap into the bound texture.
                 GLUtils.texImage2D(GLES20.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, bitmap, 0);
@@ -89,11 +95,7 @@ public class TextureLoader
                 // Recycle the bitmap, since its data has been loaded into OpenGL.
                 bitmap.recycle();
             }
-            GLES30.glTexParameteri(GLES20.GL_TEXTURE_CUBE_MAP, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-            GLES30.glTexParameteri(GLES20.GL_TEXTURE_CUBE_MAP, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-            GLES30.glTexParameteri(GLES20.GL_TEXTURE_CUBE_MAP, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-            GLES30.glTexParameteri(GLES20.GL_TEXTURE_CUBE_MAP, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-            GLES30.glTexParameteri(GLES20.GL_TEXTURE_CUBE_MAP, GLES30.GL_TEXTURE_WRAP_R, GLES20.GL_CLAMP_TO_EDGE);
+
 
         }
 
@@ -102,6 +104,7 @@ public class TextureLoader
             throw new RuntimeException("Error loading texture.");
         }
         GLES30.glBindTexture(GLES20.GL_TEXTURE_CUBE_MAP, 0);
+
         return textureHandle[0];
     }
 

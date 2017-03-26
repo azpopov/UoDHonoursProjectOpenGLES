@@ -107,7 +107,9 @@ public class ObjectLoader
                 normalDataFinal.add(normalDataTemp.get((faceValues[2] * 3) + 0));
                 normalDataFinal.add(normalDataTemp.get((faceValues[2] * 3) + 1));
                 normalDataFinal.add(normalDataTemp.get((faceValues[2] * 3) + 2));
-
+                Log.d(LogTag.PRIMITIVE, "Vector Data Temp size: "+ vectorDataTemp.size());
+                Log.d(LogTag.PRIMITIVE, "Vector Data Final size: "+ vectorDataFinal.size());
+                Log.d(LogTag.PRIMITIVE, "Face VAlue requested: "+ (faceValues[3] * 3) + 0);
                 vectorDataFinal.add(vectorDataTemp.get((faceValues[3] * 3) + 0));
                 vectorDataFinal.add(vectorDataTemp.get((faceValues[3] * 3) + 1));
                 vectorDataFinal.add(vectorDataTemp.get((faceValues[3] * 3) + 2));
