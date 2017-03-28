@@ -2,7 +2,6 @@ package arturpopov.basicprojectopengles;
 
 import android.content.Context;
 import android.opengl.GLES20;
-import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
@@ -28,15 +27,15 @@ class MainRenderer implements GLSurfaceView.Renderer
     private Context mContext;
 
     ObjectContainer bambooObj;
-    ObjectContainerDefault floorObj, backWallObj, leftWallObj, lightSourceObj, shadowingObject;
+    ObjectContainerDefault floorObj, backWallObj, leftWallObj, lightSourceObj, shadowingObject, terrain;
     Skybox skybox;
     //Shader Handles
     @SuppressWarnings("FieldCanBeLocal")
-    private int programDefaultHandle, programNormalMapHandle, programParticlesHandle, programObjDefaultHandle, programPassThrough;
+    private int programDefaultHandle, programNormalMapHandle,  programObjDefaultHandle;
 
     //Uniform Handles
     private int mMVPMatrixHandle, u_ViewMatrix_NormalMapHandle, u_ModelMatrix_NormalMapHandle, u_NormalMatrix_NormalMapHandle, u_LightPositionWorldSpace_NormalMapHandle, u_MVPMatrix_NormalMapHandle, u_ViewPositionWorldSpace_NormalMapHandle;
-    private int u_MVPMatrix_ObjDefaultHandle, u_ViewMatrix_ObjDefaultHandle, u_ModelMatrix_ObjDefaultHandle, u_LightPositionWorldSpace_ObjDefaultHandle, u_ViewPositionWorldSpace_ObjDefaultHandle, u_NormalMatrix_ObjDefaultHandle,u_ShadowProjMatrix_ObjDefaultHandle, u_EmitMode_ObjDefaultHandle;
+    private int u_MVPMatrix_ObjDefaultHandle, u_ViewMatrix_ObjDefaultHandle, u_ModelMatrix_ObjDefaultHandle, u_Option_ObjDefaultHandle, u_LightPositionWorldSpace_ObjDefaultHandle, u_ViewPositionWorldSpace_ObjDefaultHandle, u_NormalMatrix_ObjDefaultHandle,u_ShadowProjMatrix_ObjDefaultHandle, u_EmitMode_ObjDefaultHandle;
     public float eyeX, eyeY, eyeZ;
     private float[] mLightProjectionMatrix = new float[16];
 
@@ -82,8 +81,9 @@ class MainRenderer implements GLSurfaceView.Renderer
         lightSourceObj = new ObjectContainerDefault();
         lightSourceObj.initialize("cube.obj", mContext, R.drawable.cube);
         shadowingObject = new ObjectContainerDefault();
-        shadowingObject.initialize("pine_stump.obj", mContext, R.drawable.tree_stomp_colmap);
-
+        shadowingObject.initialize("skinny_bush.obj", mContext, R.drawable.skinny_bush);
+        terrain = new ObjectContainerDefault();
+        terrain.initializeTerrain("terrain2.obj", mContext, R.drawable.terrain_texture);
 
         defineUniformHandles();
         //particleGenerator = new ParticleGenerator(mContext);
@@ -116,31 +116,28 @@ class MainRenderer implements GLSurfaceView.Renderer
         u_EmitMode_ObjDefaultHandle = GLES20.glGetUniformLocation(programObjDefaultHandle, "u_EmitMode");
         u_ShadowProjMatrix_ObjDefaultHandle = GLES20.glGetUniformLocation(programObjDefaultHandle, "uShadowProjMatrix");
         u_ViewPositionWorldSpace_ObjDefaultHandle = GLES20.glGetUniformLocation(programObjDefaultHandle, "u_ViewPositionWorldSpace");
+        u_Option_ObjDefaultHandle = GLES20.glGetUniformLocation(programObjDefaultHandle, "u_Option");
     }
 
     private void BuildShaders()
     {
-        programParticlesHandle = ShaderBuilder.LoadProgram("particleGenerator", mContext);
         programDefaultHandle = ShaderBuilder.LoadProgram("default", mContext, new String[]{"a_Position", "a_Colour"});
         programNormalMapHandle = ShaderBuilder.LoadProgram("normalMapped2", mContext);
         programObjDefaultHandle = ShaderBuilder.LoadProgram("objDefault2", mContext);
-        programPassThrough = ShaderBuilder.LoadProgram("passthrough", mContext);
     }
 
     @Override
     public void onSurfaceChanged(GL10 glUnused, int width, int height)
     {
         GLES20.glViewport(0,0, width, height);
-        //shadowMapper.width = width;
-       //shadowMapper.height = height;
-        //shadowMapper.createRenderDepthFrameBuffer();
+
         final float ratio = (float) width / height;
         final float left = -ratio;
         final float right = ratio;
         final float bottom = -1.0f;
         final float top = 1.0f;
         final float near = 1.0f;
-        final float far = 10.0f;
+        final float far = 20.0f;
 
         Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
         Matrix.frustumM(mLightProjectionMatrix, 0, 1.1f*left, 1.1f*right, 1.1f*bottom, 1.1f*top, near, far);
@@ -149,14 +146,14 @@ class MainRenderer implements GLSurfaceView.Renderer
     @Override
     public void onDrawFrame(GL10 glUnused)
     {
-        float[] viewPosition = {0.f, 0.f, 3.f};
+        float[] viewPosition = {0.f, 0.5f, 3.f};
         Matrix.setLookAtM(mViewMatrix, 0,
                 viewPosition[0], viewPosition[1], viewPosition[2], //EYE x,y,z
                 0.0f, 0.0f, 0.0f, //LOOKING DIRECTION x,y,z
                 0.0f, 1.0f, 0.0f); //Define 'UP' direction)
         Matrix.translateM(mViewMatrix, 0, 0.0f, 0.0f, 0.f);
         Matrix.rotateM(mViewMatrix, 0, eyeX, 0.0f, 1.f, 0.f);
-        Matrix.rotateM(mViewMatrix, 0, eyeY, 1.0f, 0.f, 0.f);
+
         float[] lightPosition = new float[]{eyeX,eyeY,2.0f, 1.0f};
 
         Matrix.setLookAtM(lightView, 0,
@@ -177,16 +174,13 @@ class MainRenderer implements GLSurfaceView.Renderer
         float[] MVPLightMatrix = new float[16];
         Matrix.multiplyMM(MVPLightMatrix, 0, mLightProjectionMatrix, 0, lightView, 0);
 
-        //shadowMapper.renderShadowMap(programPassThrough, MVPLightMatrix, new ObjectContainerDefault[]{floorObj , backWallObj, leftWallObj, shadowingObject, lightSourceObj});
 
-
-        //celShadedParticleGenerator.drawParticles(mVPMatrix, mViewMatrix);
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
 
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
         skybox.renderSkybox(mViewMatrix, mProjectionMatrix);
-
+        celShadedParticleGenerator.drawParticles(mVPMatrix, mViewMatrix);
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.translateM(mModelMatrix, 0, 0.0f, -1.0f, 0.0f);
         Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 1.0f, 0.0f, 0.0f);
@@ -201,101 +195,13 @@ class MainRenderer implements GLSurfaceView.Renderer
 
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
 
-
-
-        updateNormalMappingUniforms(lightPosition, viewPosition, normalMatrix);
-        //bambooObj.draw(programNormalMapHandle); //debug ONLY
-
-
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 0.0f, -1.f, 0.0f);
-        Matrix.scaleM(mModelMatrix, 0 , 1.0f, 0.1f, 1.0f);
-        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-
-        normalMatrix = new float[16];
-        Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-        normalMatrixInverted = new float[16];
-        Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
-        Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
-
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-        updateObjDefaultUniforms(lightPosition, normalMatrix,MVPLightMatrix, viewPosition);
-
-        //floorObj.draw(programObjDefaultHandle);
-
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 0.0f, 0.0f, -1.0f);
-        //Matrix.rotateM(mModelMatrix, 0, 180, 0.0f, 1.0f, 0.0f);
-        Matrix.scaleM(mModelMatrix, 0 , 1.0f, 1.0f, 0.1f);
-        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-
-        normalMatrix = new float[16];
-        Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-        normalMatrixInverted = new float[16];
-        Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
-        Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
-
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-        updateObjDefaultUniforms(lightPosition, normalMatrix,MVPLightMatrix, viewPosition);
-
-        //backWallObj.draw(programObjDefaultHandle);
-
-
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, -1.0f, 0.0f, 0.0f);
-
-        Matrix.scaleM(mModelMatrix, 0 , 0.10f, 1.0f, 1.f);
-        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-
-        normalMatrix = new float[16];
-        Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-        normalMatrixInverted = new float[16];
-        Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
-        Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
-
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-        updateObjDefaultUniforms(lightPosition, normalMatrix,MVPLightMatrix, viewPosition);
-
-        leftWallObj.draw(programObjDefaultHandle);
-
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 0.0f, 0.5f, 0.0f);
-        //Matrix.rotateM(mModelMatrix, 0, 180, 0.0f, 1.0f, 0.0f);
-        Matrix.scaleM(mModelMatrix, 0 , 0.3f, 0.3f, 0.3f);
-        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-
-        normalMatrix = new float[16];
-        Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-        normalMatrixInverted = new float[16];
-        Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
-        Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
-
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-        updateObjDefaultUniforms(lightPosition, normalMatrix,MVPLightMatrix, viewPosition);
-
-        shadowingObject.draw(programObjDefaultHandle);
-
-
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, lightPosition[0], lightPosition[1], lightPosition[2]);
-        Matrix.scaleM(mModelMatrix, 0 , 0.05f, 0.05f, 0.05f);
-        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-
-        normalMatrix = new float[16];
-        Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-        normalMatrixInverted = new float[16];
-        Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
-        Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
-
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-
         int err = GLES20.GL_INVALID_OPERATION  ;
         while((err = GLES20.glGetError()) != GLES20.GL_NO_ERROR)
         {
             Log.d(LogTag.FRAMEBUFFER, "Error is "+err);
         }
         GLES20.glUniform1i(u_EmitMode_ObjDefaultHandle, 1);
-        updateObjDefaultUniforms(lightPosition, normalMatrix,MVPLightMatrix, viewPosition);
+        updateObjDefaultUniforms(lightPosition, normalMatrix,MVPLightMatrix, viewPosition, 0);
 
         lightSourceObj.draw(programObjDefaultHandle);
         GLES20.glUniform1i(u_EmitMode_ObjDefaultHandle, 0);
@@ -321,7 +227,7 @@ class MainRenderer implements GLSurfaceView.Renderer
         GLES20.glUniform3fv(u_ViewPositionWorldSpace_NormalMapHandle, 1, viewPosition, 0);
     }
 
-    private void updateObjDefaultUniforms(float[] lightPosition, float[] normalMatrix, float[] MVPLightMatrix, float[] viewPosition)
+    private void updateObjDefaultUniforms(float[] lightPosition, float[] normalMatrix, float[] MVPLightMatrix, float[] viewPosition, int u_Option)
     {
         GLES20.glUseProgram(programObjDefaultHandle);
         GLES20.glUniformMatrix4fv(u_MVPMatrix_ObjDefaultHandle, 1, false, mMVPMatrix, 0);
@@ -331,6 +237,7 @@ class MainRenderer implements GLSurfaceView.Renderer
         GLES20.glUniform3fv(u_ViewPositionWorldSpace_ObjDefaultHandle, 1, viewPosition, 0);
         GLES20.glUniformMatrix4fv(u_NormalMatrix_ObjDefaultHandle, 1, false, normalMatrix, 0);
         GLES20.glUniformMatrix4fv(u_ShadowProjMatrix_ObjDefaultHandle, 1, false, MVPLightMatrix, 0);
+        GLES20.glUniform1i(u_Option_ObjDefaultHandle, u_Option);
     }
 
 }

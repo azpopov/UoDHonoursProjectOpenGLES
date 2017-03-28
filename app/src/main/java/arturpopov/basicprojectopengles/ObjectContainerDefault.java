@@ -24,7 +24,72 @@ public class ObjectContainerDefault implements IPrimitive
 
     public void initialize(String fileName, Context context, int textureDefault)
     {
+        initializeVertexData(fileName, context);
+
+        mDiffuseTextureDataHandle = TextureLoader.loadTexture(context, textureDefault);
+    }
+    public void initializeTerrain(String fileName, Context context, int textureDefault)
+    {
+        initializeVertexData(fileName, context);
+
+        mDiffuseTextureDataHandle = TextureLoader.loadTerrainTexture(context, textureDefault);
+    }
+
+    private void initializeVertexData(String fileName, Context context)
+    {
         ArrayList<ArrayList<Float>> objData = ObjectLoader.loadObjFile(fileName, context);
+
+        GLES20.glGenBuffers(4, buffers, 0);
+
+        mVerticeBuffer = ByteBuffer.allocateDirect(objData.get(ObjectLoader.VERTEX_ARRAY_INDEX).size() * BYTES_PER_FLOAT)
+                .order(ByteOrder.nativeOrder()).asFloatBuffer();
+        float[] floatValues = new float[objData.get(ObjectLoader.VERTEX_ARRAY_INDEX).size()];
+        //BalusC - Java convert Arraylist<Float> to float[]
+        int i = 0;
+        for (Float f : objData.get(ObjectLoader.VERTEX_ARRAY_INDEX))
+        {
+            floatValues[i++] = (f != null ? f : Float.NaN);
+        }
+        mVerticeBuffer.put(floatValues).position(0);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[0]);
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mVerticeBuffer.capacity() * BYTES_PER_FLOAT,
+                mVerticeBuffer, GLES20.GL_STATIC_DRAW);
+
+
+        mTexCoordBuffer = ByteBuffer.allocateDirect(objData.get(ObjectLoader.TEXTURE_COORDINATE_ARRAY_INDEX).size() * BYTES_PER_FLOAT)
+                .order(ByteOrder.nativeOrder()).asFloatBuffer();
+        i = 0;
+        floatValues = new float[objData.get(ObjectLoader.TEXTURE_COORDINATE_ARRAY_INDEX).size()];
+        for (Float f : objData.get(ObjectLoader.TEXTURE_COORDINATE_ARRAY_INDEX))
+        {
+            floatValues[i++] = (f != null ? f : Float.NaN);
+        }
+        mTexCoordBuffer.put(floatValues).position(0);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[1]);
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mTexCoordBuffer.capacity() * BYTES_PER_FLOAT,
+                mTexCoordBuffer, GLES20.GL_STATIC_DRAW);
+
+
+        mNormalBuffer = ByteBuffer.allocateDirect(objData.get(ObjectLoader.NORMAL_ARRAY_INDEX).size() * BYTES_PER_FLOAT)
+                .order(ByteOrder.nativeOrder()).asFloatBuffer();
+        i = 0;
+        floatValues = new float[objData.get(ObjectLoader.NORMAL_ARRAY_INDEX).size()];
+        for (Float f : objData.get(ObjectLoader.NORMAL_ARRAY_INDEX))
+        {
+            floatValues[i++] = (f != null ? f : Float.NaN);
+        }
+        mNormalBuffer.put(floatValues).position(0);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[2]);
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mNormalBuffer.capacity() * BYTES_PER_FLOAT,
+                mNormalBuffer, GLES20.GL_STATIC_DRAW);
+
+
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+    }
+
+    public void initializeUnityTerrain(String fileName, Context context, int textureDefault)
+    {
+        ArrayList<ArrayList<Float>> objData = ObjectLoader.loadUnityTerrain(fileName, context);
 
         GLES20.glGenBuffers(4, buffers, 0);
 

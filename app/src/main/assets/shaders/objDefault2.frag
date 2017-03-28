@@ -12,7 +12,7 @@ uniform int mode;
 uniform vec3 u_LightPositionWorldSpace;
 uniform vec3 u_ViewPositionWorldSpace;
 uniform int u_EmitMode;
-
+uniform int u_Option;
 
 uniform sampler2D u_DiffuseTextureSampler;
 
@@ -26,6 +26,11 @@ const float attenuationConst1 = 0.f;
 const float attenuationConst2 = 0.1f;
 void main() {
     vec4 colourTex = texture(u_DiffuseTextureSampler, UV);
+
+    if(u_Option == 1 && colourTex.a < 0.1)
+    {
+        discard;
+    }
 
     vec3 lightPos = u_LightPositionWorldSpace;
     vec3 normal = normalize(normalInterp);

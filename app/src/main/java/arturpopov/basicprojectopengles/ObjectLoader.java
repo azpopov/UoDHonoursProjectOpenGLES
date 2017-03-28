@@ -107,9 +107,7 @@ public class ObjectLoader
                 normalDataFinal.add(normalDataTemp.get((faceValues[2] * 3) + 0));
                 normalDataFinal.add(normalDataTemp.get((faceValues[2] * 3) + 1));
                 normalDataFinal.add(normalDataTemp.get((faceValues[2] * 3) + 2));
-                Log.d(LogTag.PRIMITIVE, "Vector Data Temp size: "+ vectorDataTemp.size());
-                Log.d(LogTag.PRIMITIVE, "Vector Data Final size: "+ vectorDataFinal.size());
-                Log.d(LogTag.PRIMITIVE, "Face VAlue requested: "+ (faceValues[3] * 3) + 0);
+
                 vectorDataFinal.add(vectorDataTemp.get((faceValues[3] * 3) + 0));
                 vectorDataFinal.add(vectorDataTemp.get((faceValues[3] * 3) + 1));
                 vectorDataFinal.add(vectorDataTemp.get((faceValues[3] * 3) + 2));
@@ -321,6 +319,248 @@ public class ObjectLoader
    private static boolean isNear(float lhs, float rhs)
    {
        return Math.abs( lhs-rhs ) < 0.01f;
+   }
+
+   static ArrayList<ArrayList<Float>> loadObjDefault(String fileName, Context context)
+   {
+       if (context == null)
+       {
+           Log.d(LogTag.CONTEXT, "Context null");
+           throw new RuntimeException("Context Null");
+       }
+
+       int tangentIndex = 0;
+       int objectIndex = 0;
+
+       ArrayList<ArrayList<Float>> resultList = new ArrayList<>();
+       ArrayList<Float> vectorDataTemp = new ArrayList<>();
+       ArrayList<Float> textureCoordTemp = new ArrayList<>();
+       ArrayList<Float> normalDataTemp = new ArrayList<>();
+
+       ArrayList<Float> vectorDataFinal = new ArrayList<>();
+       ArrayList<Float> textureCoordFinal = new ArrayList<>();
+       ArrayList<Float> normalDataFinal = new ArrayList<>();
+
+       String everything = FileReader.readFile("objFiles/" + fileName, context);
+       String[] splitEverything = everything.split("\n");
+
+       for (int lineNum = 0; lineNum < splitEverything.length; lineNum++)
+       {
+           if (Objects.equals(splitEverything[lineNum].substring(0, 2), "v "))
+           {
+               String stringBuffer = splitEverything[lineNum].substring(2);
+               String[] split = stringBuffer.split("\\s+");
+               Float[] v = new Float[3];
+               v[0] = Float.parseFloat(split[0]);
+               v[1] = Float.parseFloat(split[1]);
+               v[2] = Float.parseFloat(split[2]);
+               Collections.addAll(vectorDataTemp, v);
+           }
+           else if (Objects.equals(splitEverything[lineNum].substring(0, 2), "vt"))
+           {
+               String stringBuffer = splitEverything[lineNum].substring(3);
+               String[] split = stringBuffer.split("\\s+");
+               Float[] textureCoordsArray = new Float[2];
+               textureCoordsArray[0] = Float.parseFloat(split[0]);
+               textureCoordsArray[1] = Float.parseFloat(split[1]);
+               Collections.addAll(textureCoordTemp, textureCoordsArray);
+           }
+           else if (Objects.equals(splitEverything[lineNum].substring(0, 2), "vn"))
+           {
+               String stringBuffer = splitEverything[lineNum].substring(3);
+               String[] split = stringBuffer.split("\\s+");
+               Float[] normalArray = new Float[3];
+               normalArray[0] = Float.parseFloat(split[0]);
+               normalArray[1] = Float.parseFloat(split[1]);
+               normalArray[2] = Float.parseFloat(split[2]);
+               Collections.addAll(normalDataTemp, normalArray);
+           }
+           else if (Objects.equals(splitEverything[lineNum].substring(0, 2), "f "))
+           {
+               String stringBuffer = splitEverything[lineNum].substring(2);
+               stringBuffer.replaceAll("\\//", " ");
+
+               String[] firstSplit = stringBuffer.split("\\s+");
+               String[] finalSplit = new String[9];
+               int index = 0;
+               for (String s : firstSplit)
+               {
+                   String[] split = s.split("/");
+                   finalSplit[index++] = split[0];
+                   finalSplit[index++] = split[1];
+                   finalSplit[index++] = split[2];
+               }
+               Integer[] faceValues = new Integer[9];
+               for (int i = 0; i < faceValues.length; i++)
+               {
+                   faceValues[i] = Integer.parseInt(finalSplit[i]) - 1;
+               }
+               vectorDataFinal.add(vectorDataTemp.get(faceValues[0] * 3));
+               vectorDataFinal.add(vectorDataTemp.get((faceValues[0] * 3) + 1));
+               vectorDataFinal.add(vectorDataTemp.get((faceValues[0] * 3) + 2));
+
+               textureCoordFinal.add(textureCoordTemp.get(faceValues[1] * 2));
+               textureCoordFinal.add(textureCoordTemp.get((faceValues[1] * 2) + 1));
+
+               normalDataFinal.add(normalDataTemp.get((faceValues[2] * 3) + 0));
+               normalDataFinal.add(normalDataTemp.get((faceValues[2] * 3) + 1));
+               normalDataFinal.add(normalDataTemp.get((faceValues[2] * 3) + 2));
+
+               vectorDataFinal.add(vectorDataTemp.get((faceValues[3] * 3) + 0));
+               vectorDataFinal.add(vectorDataTemp.get((faceValues[3] * 3) + 1));
+               vectorDataFinal.add(vectorDataTemp.get((faceValues[3] * 3) + 2));
+
+               textureCoordFinal.add(textureCoordTemp.get((faceValues[4] * 2) + 0));
+               textureCoordFinal.add(textureCoordTemp.get((faceValues[4] * 2) + 1));
+
+               normalDataFinal.add(normalDataTemp.get((faceValues[5] * 3) + 0));
+               normalDataFinal.add(normalDataTemp.get((faceValues[5] * 3) + 1));
+               normalDataFinal.add(normalDataTemp.get((faceValues[5] * 3) + 2));
+
+               vectorDataFinal.add(vectorDataTemp.get((faceValues[6] * 3) + 0));
+               vectorDataFinal.add(vectorDataTemp.get((faceValues[6] * 3) + 1));
+               vectorDataFinal.add(vectorDataTemp.get((faceValues[6] * 3) + 2));
+
+               textureCoordFinal.add(textureCoordTemp.get((faceValues[7] * 2) + 0));
+               textureCoordFinal.add(textureCoordTemp.get((faceValues[7] * 2) + 1));
+               ;
+
+               normalDataFinal.add(normalDataTemp.get((faceValues[8] * 3) + 0));
+               normalDataFinal.add(normalDataTemp.get((faceValues[8] * 3) + 1));
+               normalDataFinal.add(normalDataTemp.get((faceValues[8] * 3) + 2));
+           }
+       }
+
+       resultList.add(vectorDataFinal);
+       resultList.add(textureCoordFinal);
+       resultList.add(normalDataFinal);
+       return resultList;
+   }
+
+    static ArrayList<ArrayList<Float>> loadUnityTerrain(String fileName, Context context)
+    {
+        if (context == null)
+        {
+            Log.d(LogTag.CONTEXT, "Context null");
+            throw new RuntimeException("Context Null");
+        }
+
+        ArrayList<ArrayList<Float>> resultList = new ArrayList<>();
+        ArrayList<Float> vectorDataTemp = new ArrayList<>();
+        ArrayList<Float> textureCoordTemp = new ArrayList<>();
+
+        ArrayList<Float> vectorDataFinal = new ArrayList<>();
+        ArrayList<Float> textureCoordFinal = new ArrayList<>();
+        ArrayList<Float> normalDataFinal = new ArrayList<>();
+
+        String everything = FileReader.readFile("objFiles/" + fileName, context);
+        String[] splitEverything = everything.split("\n");
+
+        for (int lineNum = 0; lineNum < splitEverything.length; lineNum++)
+        {
+            if (Objects.equals(splitEverything[lineNum].substring(0, 2), "v "))
+            {
+                String stringBuffer = splitEverything[lineNum].substring(2);
+                String[] split = stringBuffer.split("\\s+");
+                Float[] v = new Float[3];
+                v[0] = Float.parseFloat(split[0]);
+                v[1] = Float.parseFloat(split[1]);
+                v[2] = Float.parseFloat(split[2]);
+                Collections.addAll(vectorDataTemp, v);
+            }
+            else if (Objects.equals(splitEverything[lineNum].substring(0, 2), "vt"))
+            {
+                String stringBuffer = splitEverything[lineNum].substring(3);
+                String[] split = stringBuffer.split("\\s+");
+                Float[] textureCoordsArray = new Float[2];
+                textureCoordsArray[0] = Float.parseFloat(split[0]);
+                textureCoordsArray[1] = Float.parseFloat(split[1]);
+                Collections.addAll(textureCoordTemp, textureCoordsArray);
+            }
+            else if (Objects.equals(splitEverything[lineNum].substring(0, 2), "f "))
+            {
+                String stringBuffer = splitEverything[lineNum].substring(2);
+                stringBuffer.replaceAll("\\//", " ");
+
+                String[] firstSplit = stringBuffer.split("\\s+");
+                String[] finalSplit = new String[6];
+                int index = 0;
+                for (String s : firstSplit)
+                {
+                    String[] split = s.split("/");
+                    finalSplit[index++] = split[0];
+                    finalSplit[index++] = split[1];
+                }
+                Integer[] faceValues = new Integer[6];
+                for (int i = 0; i < faceValues.length; i++)
+                {
+                    faceValues[i] = Integer.parseInt(finalSplit[i]) - 1;
+                }
+                vectorDataFinal.add(vectorDataTemp.get(faceValues[0] * 3));
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[0] * 3) + 1));
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[0] * 3) + 2));
+
+                textureCoordFinal.add(textureCoordTemp.get(faceValues[1] * 2));
+                textureCoordFinal.add(textureCoordTemp.get((faceValues[1] * 2) + 1));
+
+
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[2] * 3) + 0));
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[2] * 3) + 1));
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[2] * 3) + 2));
+
+                textureCoordFinal.add(textureCoordTemp.get((faceValues[3] * 2) + 0));
+                textureCoordFinal.add(textureCoordTemp.get((faceValues[3] * 2) + 1));
+
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[4] * 3) + 0));
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[4] * 3) + 1));
+                vectorDataFinal.add(vectorDataTemp.get((faceValues[4] * 3) + 2));
+
+                textureCoordFinal.add(textureCoordTemp.get((faceValues[5] * 2) + 0));
+                textureCoordFinal.add(textureCoordTemp.get((faceValues[5] * 2) + 1));
+
+
+            }
+        }
+
+        for(int i = 0; i < vectorDataFinal.size() - 6; i += 3)
+        {
+            float[] normal = calculateSurfaceNormal(new float[]
+                    {
+                            vectorDataFinal.get(i), vectorDataFinal.get(i+1), vectorDataFinal.get(i+2),
+                            vectorDataFinal.get(i+3), vectorDataFinal.get(i+4), vectorDataFinal.get(i+5),
+                            vectorDataFinal.get(i+6), vectorDataFinal.get(i+7), vectorDataFinal.get(i+8)
+                    });
+            normalDataFinal.add(normal[0]);
+            normalDataFinal.add(normal[1]);
+            normalDataFinal.add(normal[2]);
+        }
+        normalDataFinal.add(normalDataFinal.get(0));
+        normalDataFinal.add(normalDataFinal.get(1));
+        normalDataFinal.add(normalDataFinal.get(2));
+        normalDataFinal.add(normalDataFinal.get(3));
+        normalDataFinal.add(normalDataFinal.get(4));
+        normalDataFinal.add(normalDataFinal.get(5));
+
+        resultList.add(vectorDataFinal);
+        resultList.add(textureCoordFinal);
+        resultList.add(normalDataFinal);
+        return resultList;
+    }
+
+
+
+   private static float[] calculateSurfaceNormal(float[] triangle)
+   {
+        float[] normal = new float[]{0.f, 0.f, 0.f};
+
+       float[] vectorU = {triangle[3] - triangle[0], triangle[4] - triangle[1],triangle[5] - triangle[2]};
+       float[] vectorV = {triangle[6] - triangle[0], triangle[7] - triangle[1],triangle[8] - triangle[2]};
+
+       normal[0] = (vectorU[1] * vectorV[2]) - (vectorU[2] * vectorV[1]);
+       normal[1] = (vectorU[2] * vectorV[0]) - (vectorU[0] * vectorV[2]);
+       normal[2] = (vectorU[0] * vectorV[1]) - (vectorU[1] * vectorV[0]);
+
+       return normal;
    }
 }
 
