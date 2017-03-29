@@ -32,7 +32,7 @@ public class ParticleGeneratorTest
 
         gen.mParticleContainer = exampleList;
 
-        Particle.sortParticles();
+        Particle.sortParticles(gen.mParticleContainer);
 
         List<Particle> actual = gen.mParticleContainer;
         assertArrayEquals(expected.toArray(), actual.toArray());
@@ -49,7 +49,7 @@ public class ParticleGeneratorTest
 
         gen.mParticleContainer = exampleList;
 
-        Particle.sortParticles();
+        Particle.sortParticles(gen.mParticleContainer);
 
         List<Particle> actual = gen.mParticleContainer;
         assertArrayEquals(expected.toArray(), actual.toArray());
@@ -81,7 +81,7 @@ public class ParticleGeneratorTest
         }
         gen.mParticleContainer = exampleList;
 
-        Particle.sortParticles();
+        Particle.sortParticles(gen.mParticleContainer);
 
         List<Particle> actual = gen.mParticleContainer;
         assertArrayEquals(expected.toArray(), actual.toArray());
@@ -114,7 +114,7 @@ public class ParticleGeneratorTest
         }
         gen.mParticleContainer = exampleList;
 
-        Particle.sortParticles();
+        Particle.sortParticles(gen.mParticleContainer);
 
         List<Particle> actual = gen.mParticleContainer;
         assertArrayEquals(expected.toArray(), actual.toArray());

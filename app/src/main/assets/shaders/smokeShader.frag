@@ -10,7 +10,8 @@ out vec4 fragColor;
 
 uniform sampler2D textureNormalAlpha;
 uniform sampler2D textureColourDepth;
-
+uniform sampler2D textureCelShading;
+flat in float distnaceToL;
 
 vec3 Ka = vec3(0.1);
 vec3 GenLight = vec3(1.0);
@@ -44,29 +45,23 @@ void main() {
     {
         discard;
     }
+    alpha = alpha;
     gl_FragDepth -= depth ;
-
-	fragColor = vec4(vec3(Ka + C * GenLight * qLamb( getMax(0.0,dot(N, L)))), alpha);
+    vec3 oppositeL = -L; // flip light vector as values in  L are inverted
+	fragColor = vec4(vec3(Ka + C * GenLight * qLamb( getMax(0.0,dot(N, oppositeL)))), alpha);
 //	fragColor = vec4(vec3(Ka + C * L * qLamb( dot(N, L))), alpha);
-	//fragColor = vec4(N, alpha);
+	//fragColor = vec4(dot(N, oppositeL), 0.0, 0.0, 1.0);
 }
-
+//TODO fix rotations on particles
 
 
 vec3 qLamb(float x)
 {
-    vec3 q;
+    vec4 q;
+    vec2 calShadeUV = vec2(x, clamp(abs(distnaceToL), 0.0, 1.0));
+    q = texture(textureCelShading, calShadeUV);
 
-    if(x < 0.5)
-    {
-        q = vec3(1.0);
-    }
-    else
-    {
-        q = vec3(0.0);
-    }
-
-    return q;
+    return vec3(q);
 }
 
 float getMax(float a, float b)

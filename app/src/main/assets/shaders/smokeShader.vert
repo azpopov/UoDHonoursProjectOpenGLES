@@ -6,12 +6,14 @@ layout(location = 1) in vec4 xyzs; // Position of the center of the particule an
 out vec2 UV;
 out vec3 LightDirectionCameraSpace;
 out vec3 L;
+out float LightDistance;
 
 uniform mat4 u_ViewMatrix;
 uniform vec3 u_LightPositionWorldSpace;
 uniform vec3 u_CameraRightWorldSpace;
 uniform vec3 u_CameraUpWorldSpace;
 uniform mat4 u_ViewProjectionMatrix;
+flat out float distnaceToL;
 
 vec3 getL();
 
@@ -25,9 +27,10 @@ void main() {
     		+ u_CameraRightWorldSpace * squareVertices.x * particleSize
     		+ u_CameraUpWorldSpace * squareVertices.y * particleSize;
 
-	gl_Position = u_ViewProjectionMatrix * vec4(vertexPosition_worldspace, 1.0);
 
+	gl_Position = u_ViewProjectionMatrix * vec4(vertexPosition_worldspace, 1.0);
     L = getL();
+    distnaceToL = length(L);
 	UV = squareVertices.xy + vec2(0.5, 0.5);
 }
 

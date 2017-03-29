@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.StringTokenizer;
 
 /**
  * Created by arturpopov on 11/03/2017.
@@ -22,8 +23,8 @@ public class CelShadedParticleGenerator
     private static final int BYTES_PER_FLOAT = 4;
 
     private static final int VERTEX_ARRAY_ID_INDEX = 0, BILLBOARD_BUFFER_HANDLE_INDEX = 1, PARTICULE_POSITION_HANDLE_INDEX = 2;
-    private static final int CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX = 0, CAMERA_UP_WORLDSPACE_HANDLE_INDEX = 1, VIEW_PROJECTION_MATRIX_HANDLE_INDEX = 2, TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX = 3, TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX = 4, VIEW_MATRIX_HANDLE_INDEX = 5;
-    private static final int NUMBER_HANDLES = 3, UNIFORM_COUNT = 6;
+    private static final int CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX = 0, CAMERA_UP_WORLDSPACE_HANDLE_INDEX = 1, VIEW_PROJECTION_MATRIX_HANDLE_INDEX = 2, TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX = 3, TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX = 4, VIEW_MATRIX_HANDLE_INDEX = 5, TEXTURE_CEL_SHADING_SAMPLER_HANDLE_INDEX = 6;
+    private static final int NUMBER_HANDLES = 3, UNIFORM_COUNT = 7;
     private static final int MAX_PARTICLES = 100;
     private static final int PARTICLE_SPAWN_LIMIT = 1;
 
@@ -32,7 +33,7 @@ public class CelShadedParticleGenerator
 
     private int[] mArrayVertexHandles = new int[NUMBER_HANDLES];
     private int[] mArrayUniformHandles = new int[UNIFORM_COUNT];
-    private int textureColourActiveID, textureNormalAlphaActiveID;
+    private int textureColourActiveID, textureNormalAlphaActiveID, textureCelShadingActiveID;
     private List<Particle> mParticleContainer = new ArrayList<>();
 
     private float[] particulePositionData;
@@ -47,7 +48,7 @@ public class CelShadedParticleGenerator
         this.mContext = mContext;
     }
 
-    void create(int toLoadTextureNormalDepthID, int toLoadTextureColourID)
+    void create(int toLoadTextureNormalDepthID, int toLoadTextureColourID, int celShadingTextureID)
     {
         programHandle = ShaderBuilder.LoadProgram("smokeShader", mContext);
         GLES30.glUseProgram(programHandle);
@@ -73,7 +74,7 @@ public class CelShadedParticleGenerator
 
         setupBuffers(squareVertexData);
 
-        defineUniformHandles(toLoadTextureNormalDepthID, toLoadTextureColourID);
+        defineUniformHandles(toLoadTextureNormalDepthID, toLoadTextureColourID, celShadingTextureID);
 
         if(mArrayUniformHandles[TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX] == 0
                 || mArrayUniformHandles[TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX] == 0)
@@ -98,11 +99,13 @@ public class CelShadedParticleGenerator
 
         float[] inverseView = MathUtilities.getInverse(viewMatrix);
         float[] cameraPosition = Arrays.copyOfRange(inverseView, 12, inverseView.length);
-
-        generateNewParticles();
-
         int particuleCount;
         particuleCount = simulateParticles(cameraPosition);
+        generateNewParticles(particuleCount);
+
+
+
+        Log.d(LogTag.PARTICLE_EFFECT, String.valueOf(particuleCount));
         mParticleContainer = Particle.sortParticles(mParticleContainer);
 
         updateBuffers(particuleCount);
@@ -183,21 +186,25 @@ public class CelShadedParticleGenerator
                     particulePositionData[vertexIndex + 0] = p.position[0];
                     particulePositionData[vertexIndex + 1] = p.position[1];
                     particulePositionData[vertexIndex + 2] = p.position[2];
+                    p.size += p.size*0.1f * deltaTime;
                     particulePositionData[vertexIndex + 3] = p.size;
-
+                    particuleCount++;
                 } else
                 {
                     p.distanceCamera = -1.f;
                 }
-                particuleCount++;
+
+
             }
         }
         return particuleCount;
     }
 
-    private void generateNewParticles()
+    private void generateNewParticles(int particuleCount)
     {
-        int newParticles = (int)(deltaTime * 2000);
+        if(particuleCount == MAX_PARTICLES) //TODO
+            return;
+        int newParticles = (int)(deltaTime * 50);
         if(newParticles > PARTICLE_SPAWN_LIMIT)
             newParticles = PARTICLE_SPAWN_LIMIT;
         for(int i = 0; i < newParticles; i++)
@@ -213,7 +220,7 @@ public class CelShadedParticleGenerator
                     mainDirection[1] + rndDirection[1]*spreadF,
                     mainDirection[2] + rndDirection[2]*spreadF,
             };
-            mParticleContainer.get(particleIndex).size = ((rnd.nextInt() % 1000) / 2000.f) + 0.1f; //TODO desity as size implementation.
+            mParticleContainer.get(particleIndex).size = 0.3f;
         }
     }
 
@@ -238,7 +245,7 @@ public class CelShadedParticleGenerator
     }
 
 
-    private void defineUniformHandles(int toLoadTextureNormalDepthID, int toLoadTextureColourID)
+    private void defineUniformHandles(int toLoadTextureNormalDepthID, int toLoadTextureColourID, int toLoadTextureCelShading)
     {
         GLES30.glUseProgram(programHandle);
 
@@ -249,9 +256,11 @@ public class CelShadedParticleGenerator
 
         mArrayUniformHandles[TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX] = TextureLoader.loadTexture(mContext, toLoadTextureColourID);
         mArrayUniformHandles[TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX] = TextureLoader.loadTexture(mContext, toLoadTextureNormalDepthID);
+        mArrayUniformHandles[TEXTURE_CEL_SHADING_SAMPLER_HANDLE_INDEX] = TextureLoader.loadTexture(mContext, toLoadTextureCelShading);
 
         textureColourActiveID = GLES30.glGetUniformLocation(programHandle, "textureColourDepth");
         textureNormalAlphaActiveID = GLES30.glGetUniformLocation(programHandle, "textureNormalAlpha");
+        textureCelShadingActiveID = GLES30.glGetUniformLocation(programHandle, "textureCelShading");
     }
 
 
@@ -277,6 +286,10 @@ public class CelShadedParticleGenerator
         GLES30.glUniform1i(textureNormalAlphaActiveID, 1);
         GLES30.glActiveTexture(GLES30.GL_TEXTURE1);
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mArrayUniformHandles[TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX]);
+
+        GLES30.glUniform1i(textureCelShadingActiveID, 2);
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE2);
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mArrayUniformHandles[TEXTURE_CEL_SHADING_SAMPLER_HANDLE_INDEX]);
     }
 
 

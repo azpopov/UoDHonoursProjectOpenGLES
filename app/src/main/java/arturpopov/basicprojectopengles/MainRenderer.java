@@ -27,7 +27,12 @@ class MainRenderer implements GLSurfaceView.Renderer
     private Context mContext;
 
     ObjectContainer bambooObj;
-    ObjectContainerDefault floorObj, backWallObj, leftWallObj, lightSourceObj, shadowingObject, terrain;
+    ObjectContainerDefault floorObj;
+    ObjectContainerDefault backWallObj;
+    ObjectContainerDefault leftWallObj;
+    ObjectContainer lightSourceObj;
+    ObjectContainerDefault shadowingObject;
+    ObjectContainerDefault terrain;
     Skybox skybox;
     //Shader Handles
     @SuppressWarnings("FieldCanBeLocal")
@@ -69,30 +74,18 @@ class MainRenderer implements GLSurfaceView.Renderer
         //shadowMapper.createRenderDepthFrameBuffer();
         //shadowMapper.prepareFullScreenQuad(ShaderBuilder.LoadProgram("passthrough", mContext));
 
-       bambooObj = new ObjectContainer();
-        bambooObj.initialize("testBamboo.obj", mContext, R.drawable.bamboo, R.drawable.bamboo_normal_map);
-
-        floorObj = new ObjectContainerDefault();
-        floorObj.initialize("cube.obj", mContext, R.drawable.cube);
-        backWallObj = new ObjectContainerDefault();
-        backWallObj.initialize("cube.obj", mContext, R.drawable.cube);
-        leftWallObj = new ObjectContainerDefault();
-        leftWallObj.initialize("cube.obj", mContext, R.drawable.cube);
-        lightSourceObj = new ObjectContainerDefault();
-        lightSourceObj.initialize("cube.obj", mContext, R.drawable.cube);
-        shadowingObject = new ObjectContainerDefault();
-        shadowingObject.initialize("skinny_bush.obj", mContext, R.drawable.skinny_bush);
         terrain = new ObjectContainerDefault();
-        terrain.initializeTerrain("terrain2.obj", mContext, R.drawable.terrain_texture);
+        //terrain.initializeTerrain("terrain2.obj", mContext, R.drawable.terrain_texture);
 
         defineUniformHandles();
         //particleGenerator = new ParticleGenerator(mContext);
         //particleGenerator.create(R.drawable.droplet);
         celShadedParticleGenerator = new CelShadedParticleGenerator(mContext);
-        celShadedParticleGenerator.create(R.drawable.particule_normal4, R.drawable.particule_colour_depth3);
+        celShadedParticleGenerator.create(R.drawable.particule_normal5, R.drawable.particule_colour_depth3, R.drawable.whiteyellow);
 
         skybox = new Skybox();
-        skybox.setFaceTextures(R.drawable.day_right, R.drawable.day_left, R.drawable.day_top, R.drawable.day_bottom, R.drawable.day_back, R.drawable.day_front);
+        //skybox.setFaceTextures(R.drawable.day_right, R.drawable.day_left, R.drawable.day_top, R.drawable.day_bottom, R.drawable.day_back, R.drawable.day_front);
+        skybox.setFaceTextures(R.drawable.green_nebula_right1, R.drawable.green_nebula_left2, R.drawable.green_nebula_top3, R.drawable.green_nebula_bottom4, R.drawable.green_nebula_back6,R.drawable.green_nebula_front5);
         skybox.initialize(mContext);
     }
 
@@ -137,7 +130,7 @@ class MainRenderer implements GLSurfaceView.Renderer
         final float bottom = -1.0f;
         final float top = 1.0f;
         final float near = 1.0f;
-        final float far = 20.0f;
+        final float far = 25.0f;
 
         Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
         Matrix.frustumM(mLightProjectionMatrix, 0, 1.1f*left, 1.1f*right, 1.1f*bottom, 1.1f*top, near, far);
@@ -183,8 +176,8 @@ class MainRenderer implements GLSurfaceView.Renderer
         celShadedParticleGenerator.drawParticles(mVPMatrix, mViewMatrix);
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.translateM(mModelMatrix, 0, 0.0f, -1.0f, 0.0f);
-        Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 1.0f, 0.0f, 0.0f);
-        Matrix.scaleM(mModelMatrix, 0 , 0.1f, 0.1f, 0.1f);
+        //Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 1.0f, 0.0f, 0.0f);
+        //Matrix.scaleM(mModelMatrix, 0 , 0.1f, 0.1f, 0.1f);
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
 
         float[] normalMatrix = new float[16];
@@ -194,7 +187,7 @@ class MainRenderer implements GLSurfaceView.Renderer
         Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
 
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-
+        //terrain.draw(programObjDefaultHandle);
         int err = GLES20.GL_INVALID_OPERATION  ;
         while((err = GLES20.glGetError()) != GLES20.GL_NO_ERROR)
         {
@@ -203,7 +196,7 @@ class MainRenderer implements GLSurfaceView.Renderer
         GLES20.glUniform1i(u_EmitMode_ObjDefaultHandle, 1);
         updateObjDefaultUniforms(lightPosition, normalMatrix,MVPLightMatrix, viewPosition, 0);
 
-        lightSourceObj.draw(programObjDefaultHandle);
+        //lightSourceObj.draw(programObjDefaultHandle);
         GLES20.glUniform1i(u_EmitMode_ObjDefaultHandle, 0);
 
 

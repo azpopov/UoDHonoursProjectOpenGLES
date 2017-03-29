@@ -49,6 +49,7 @@ public class MathUtilities
             z = rnd.nextFloat() -0.5;
             k = Math.sqrt(x*x + y*y + z*z);
         }
-        return new float[]{(float)(x/k), (float)(y/k), (float)(z/k)};
+        float ydirection = Math.abs((float)(y/k));
+        return new float[]{(float)(x/k), ydirection, (float)(z/k)};
     }
 }
