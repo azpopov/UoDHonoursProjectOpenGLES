@@ -47,6 +47,8 @@ public class MainSurfaceView extends GLSurfaceView {
                     mVelocityTracker.addMovement(event);
                    break;
                 case MotionEvent.ACTION_UP:
+                    mRenderer.celShadedParticleGenerator.queueSmokePuff(10);
+                    Log.d(LogTag.TOUCH_EVENT, "CLICK");
                     break;
                 case MotionEvent.ACTION_MOVE:
                     mVelocityTracker.addMovement(event);

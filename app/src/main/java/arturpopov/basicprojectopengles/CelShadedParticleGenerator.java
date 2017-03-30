@@ -25,8 +25,8 @@ public class CelShadedParticleGenerator
     private static final int VERTEX_ARRAY_ID_INDEX = 0, BILLBOARD_BUFFER_HANDLE_INDEX = 1, PARTICULE_POSITION_HANDLE_INDEX = 2;
     private static final int CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX = 0, CAMERA_UP_WORLDSPACE_HANDLE_INDEX = 1, VIEW_PROJECTION_MATRIX_HANDLE_INDEX = 2, TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX = 3, TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX = 4, VIEW_MATRIX_HANDLE_INDEX = 5, TEXTURE_CEL_SHADING_SAMPLER_HANDLE_INDEX = 6;
     private static final int NUMBER_HANDLES = 3, UNIFORM_COUNT = 7;
-    private static final int MAX_PARTICLES = 100;
-    private static final int PARTICLE_SPAWN_LIMIT = 1;
+    private static final int MAX_PARTICLES = 1000;
+    private static final int PARTICLE_SPAWN_LIMIT = 10;
 
     private final Context mContext;
     private int programHandle;
@@ -42,6 +42,7 @@ public class CelShadedParticleGenerator
     private int lastUsedParticleIndex = 0;
     private float spread = 0.1f;
     private Random rnd = new Random();
+    private int queuedParticleGeneration;
 
     CelShadedParticleGenerator(Context mContext)
     {
@@ -105,7 +106,6 @@ public class CelShadedParticleGenerator
 
 
 
-        Log.d(LogTag.PARTICLE_EFFECT, String.valueOf(particuleCount));
         mParticleContainer = Particle.sortParticles(mParticleContainer);
 
         updateBuffers(particuleCount);
@@ -188,12 +188,12 @@ public class CelShadedParticleGenerator
                     particulePositionData[vertexIndex + 2] = p.position[2];
                     p.size += p.size*0.1f * deltaTime;
                     particulePositionData[vertexIndex + 3] = p.size;
-                    particuleCount++;
+
                 } else
                 {
                     p.distanceCamera = -1.f;
                 }
-
+                particuleCount++;
 
             }
         }
@@ -202,9 +202,8 @@ public class CelShadedParticleGenerator
 
     private void generateNewParticles(int particuleCount)
     {
-        if(particuleCount == MAX_PARTICLES) //TODO
-            return;
-        int newParticles = (int)(deltaTime * 50);
+        //int newParticles = (int)(deltaTime * 50);
+        double newParticles = (MAX_PARTICLES - particuleCount) * deltaTime;
         if(newParticles > PARTICLE_SPAWN_LIMIT)
             newParticles = PARTICLE_SPAWN_LIMIT;
         for(int i = 0; i < newParticles; i++)
@@ -223,6 +222,71 @@ public class CelShadedParticleGenerator
             mParticleContainer.get(particleIndex).size = 0.3f;
         }
     }
+
+    public void queueSmokePuff(int puffParticleSize)
+    {
+        this.queuedParticleGeneration += puffParticleSize;
+    }
+
+    void drawQueuedParticles(float[] viewProjectionMatrix, float[] viewMatrix)
+    {
+        GLES30.glUseProgram(programHandle);
+        GLES30.glEnable(GLES30.GL_DEPTH_TEST);
+        GLES30.glDepthFunc(GLES30.GL_GREATER);
+
+        GLES30.glBindVertexArray(mArrayVertexHandles[VERTEX_ARRAY_ID_INDEX]);
+
+        double currentTime = System.nanoTime();
+
+        deltaTime = (currentTime - mLastTime) / 1000000000;
+        mLastTime = currentTime;
+
+        float[] inverseView = MathUtilities.getInverse(viewMatrix);
+        float[] cameraPosition = Arrays.copyOfRange(inverseView, 12, inverseView.length);
+        int particuleCount;
+        particuleCount = simulateParticles(cameraPosition);
+        generateQueuedParticles(particuleCount);
+
+
+
+        mParticleContainer = Particle.sortParticles(mParticleContainer);
+
+        updateBuffers(particuleCount);
+
+        updateUniforms(viewProjectionMatrix, viewMatrix);
+        setVertexAttributes(particuleCount);
+
+    }
+
+    private void generateQueuedParticles(int particuleCount)
+    {
+        Log.d(LogTag.PARTICLE_EFFECT, String.valueOf(queuedParticleGeneration));
+        //int newParticles = (int)(deltaTime * 50);
+        if(queuedParticleGeneration <= 0)
+        {
+            return;
+        }
+        double newParticles =  deltaTime * 50;
+        if(newParticles > PARTICLE_SPAWN_LIMIT)
+            newParticles = PARTICLE_SPAWN_LIMIT;
+        queuedParticleGeneration -= newParticles;
+        for(int i = 0; i < newParticles; i++)
+        {
+            int particleIndex = findUnusedParticle();
+            mParticleContainer.get(particleIndex).timeToLive = 12.f;
+            mParticleContainer.get(particleIndex).position = new float[]{0.f, 0.f, 0.f};
+            float spreadF = spread;
+            float[] mainDirection = new float[]{0.f, 0.05f, 0.1f};
+            float[] rndDirection = MathUtilities.GetRandomSphericalDirection(rnd);
+            mParticleContainer.get(particleIndex).speed = new float[]{
+                    mainDirection[0] + rndDirection[0]*spreadF,
+                    mainDirection[1] + rndDirection[1]*spreadF,
+                    mainDirection[2] + rndDirection[2]*spreadF,
+            };
+            mParticleContainer.get(particleIndex).size = 0.3f;
+        }
+    }
+
 
 
     private void setupBuffers(float[] squareVertexData)

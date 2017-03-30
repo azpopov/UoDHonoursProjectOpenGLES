@@ -75,7 +75,7 @@ class MainRenderer implements GLSurfaceView.Renderer
         //shadowMapper.prepareFullScreenQuad(ShaderBuilder.LoadProgram("passthrough", mContext));
 
         terrain = new ObjectContainerDefault();
-        //terrain.initializeTerrain("terrain2.obj", mContext, R.drawable.terrain_texture);
+        terrain.initializeTerrain("terrain2.obj", mContext, R.drawable.terrain_texture);
 
         defineUniformHandles();
         //particleGenerator = new ParticleGenerator(mContext);
@@ -173,7 +173,7 @@ class MainRenderer implements GLSurfaceView.Renderer
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
         skybox.renderSkybox(mViewMatrix, mProjectionMatrix);
-        celShadedParticleGenerator.drawParticles(mVPMatrix, mViewMatrix);
+        celShadedParticleGenerator.drawQueuedParticles(mVPMatrix, mViewMatrix);
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.translateM(mModelMatrix, 0, 0.0f, -1.0f, 0.0f);
         //Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 1.0f, 0.0f, 0.0f);
@@ -187,7 +187,7 @@ class MainRenderer implements GLSurfaceView.Renderer
         Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
 
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-        //terrain.draw(programObjDefaultHandle);
+        terrain.draw(programObjDefaultHandle);
         int err = GLES20.GL_INVALID_OPERATION  ;
         while((err = GLES20.glGetError()) != GLES20.GL_NO_ERROR)
         {
