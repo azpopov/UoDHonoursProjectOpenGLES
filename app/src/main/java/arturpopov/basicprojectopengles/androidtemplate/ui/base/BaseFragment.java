@@ -1,10 +1,16 @@
 package arturpopov.basicprojectopengles.androidtemplate.ui.base;
 
 import android.app.Fragment;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
+import arturpopov.basicprojectopengles.MainActivity;
+import arturpopov.basicprojectopengles.R;
 import butterknife.ButterKnife;
 import arturpopov.basicprojectopengles.androidtemplate.util.LogUtil;
 
@@ -30,7 +36,23 @@ public class BaseFragment extends Fragment {
         View view = inflater.inflate(layout, container, false);
         ButterKnife.bind(this, view);
 
+
+
+        FloatingActionButton myFab = (FloatingActionButton) view.findViewById(R.id.fab);
+        myFab.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                sendMessage(v);
+            }
+        });
+
         LogUtil.logD(TAG, ">>> view inflated");
         return view;
     }
+    /** Called when the user taps the Send button */
+    public void sendMessage(View view) {
+        Intent intent = new Intent(getActivity(), MainActivity.class);
+        startActivity(intent);
+    }
+
+
 }

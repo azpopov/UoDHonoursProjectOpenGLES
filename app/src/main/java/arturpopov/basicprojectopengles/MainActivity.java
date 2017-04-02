@@ -22,11 +22,13 @@ public class MainActivity extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        startGame();
 
     }
 
     private void startGame()
     {
+
         mglSurfaceView = new MainSurfaceView(this);
         mContext = this;
         //Version Check
