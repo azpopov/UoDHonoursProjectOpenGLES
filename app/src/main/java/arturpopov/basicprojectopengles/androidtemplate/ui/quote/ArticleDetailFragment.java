@@ -66,7 +66,7 @@ public class ArticleDetailFragment extends BaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflateAndBind(inflater, container, R.layout.fragment_article_detail);
+        View rootView = inflateAndBind(inflater, container, R.layout.fragment_article_detail, dummyItem);
 
         if (!((BaseActivity) getActivity()).providesActivityToolbar()) {
             // No Toolbar present. Set include_toolbar:
@@ -80,6 +80,7 @@ public class ArticleDetailFragment extends BaseFragment {
             collapsingToolbar.setTitle(dummyItem.title);
             author.setText(dummyItem.author);
             quote.setText(dummyItem.content);
+
         }
 
         return rootView;

@@ -11,6 +11,7 @@ import android.widget.ImageView;
 
 import arturpopov.basicprojectopengles.MainActivity;
 import arturpopov.basicprojectopengles.R;
+import arturpopov.basicprojectopengles.androidtemplate.dummy.DummyContent;
 import butterknife.ButterKnife;
 import arturpopov.basicprojectopengles.androidtemplate.util.LogUtil;
 
@@ -30,27 +31,31 @@ public class BaseFragment extends Fragment {
      * @param inflater the inflater
      * @param container the layout container
      * @param layout the layout resource
+     * @param dummyItem
      * @return the inflated view
      */
-    public View inflateAndBind(LayoutInflater inflater, ViewGroup container, int layout) {
+    public View inflateAndBind(LayoutInflater inflater, ViewGroup container, int layout, final DummyContent.DummyItem dummyItem) {
         View view = inflater.inflate(layout, container, false);
         ButterKnife.bind(this, view);
 
 
 
         FloatingActionButton myFab = (FloatingActionButton) view.findViewById(R.id.fab);
+
         myFab.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                sendMessage(v);
+                sendMessage(v, dummyItem);
             }
         });
+
 
         LogUtil.logD(TAG, ">>> view inflated");
         return view;
     }
     /** Called when the user taps the Send button */
-    public void sendMessage(View view) {
+    public void sendMessage(View view, DummyContent.DummyItem dummyItem) {
         Intent intent = new Intent(getActivity(), MainActivity.class);
+        intent.putExtra("LEVEL", dummyItem.title);
         startActivity(intent);
     }
 

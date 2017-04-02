@@ -22,7 +22,25 @@ public class MainActivity extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        // Get the Intent that started this activity and extract the string
+        Bundle bundle = getIntent().getExtras();
+        String message = bundle.getString("LEVEL");
+
+        getOptions(message);
+
         startGame();
+
+    }
+
+    private void getOptions(String message)
+    {
+        switch(message) {
+            case "Five Solid Colours & Noise Texture":
+                System.out.printf("GOO");
+                break;
+            default:
+                break;
+        }
 
     }
 
