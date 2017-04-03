@@ -23,8 +23,8 @@ public class CelShadedParticleGenerator
     private static final int BYTES_PER_FLOAT = 4;
 
     private static final int VERTEX_ARRAY_ID_INDEX = 0, BILLBOARD_BUFFER_HANDLE_INDEX = 1, PARTICULE_POSITION_HANDLE_INDEX = 2;
-    private static final int CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX = 0, CAMERA_UP_WORLDSPACE_HANDLE_INDEX = 1, VIEW_PROJECTION_MATRIX_HANDLE_INDEX = 2, TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX = 3, TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX = 4, VIEW_MATRIX_HANDLE_INDEX = 5, TEXTURE_CEL_SHADING_SAMPLER_HANDLE_INDEX = 6;
-    private static final int NUMBER_HANDLES = 3, UNIFORM_COUNT = 7;
+    private static final int CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX = 0, CAMERA_UP_WORLDSPACE_HANDLE_INDEX = 1, VIEW_PROJECTION_MATRIX_HANDLE_INDEX = 2, TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX = 3, TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX = 4, VIEW_MATRIX_HANDLE_INDEX = 5, TEXTURE_CEL_SHADING_SAMPLER_HANDLE_INDEX = 6, VARIABLE_L_OPTION_HANDLE_INDEX = 7;
+    private static final int NUMBER_HANDLES = 3, UNIFORM_COUNT = 8;
     private static final int MAX_PARTICLES = 1000;
     private static final int PARTICLE_SPAWN_LIMIT = 10;
 
@@ -44,14 +44,18 @@ public class CelShadedParticleGenerator
     private Random rnd = new Random();
     private int queuedParticleGeneration;
 
+
+    int optionVariation = 0;
     CelShadedParticleGenerator(Context mContext)
     {
         this.mContext = mContext;
     }
 
-    void create(int toLoadTextureNormalDepthID, int toLoadTextureColourID, int celShadingTextureID)
+    void create(int toLoadTextureNormalDepthID, int toLoadTextureColourID, int celShadingTextureID, int optionVariation)
     {
         programHandle = ShaderBuilder.LoadProgram("smokeShader", mContext);
+
+        this.optionVariation = optionVariation;
         GLES30.glUseProgram(programHandle);
 
         for (int i = 0; i < MAX_PARTICLES; i++)
@@ -110,6 +114,10 @@ public class CelShadedParticleGenerator
 
         updateBuffers(particuleCount);
 
+        if(optionVariation != 0)
+        {
+            GLES30.glUniform1i(mArrayUniformHandles[VARIABLE_L_OPTION_HANDLE_INDEX], optionVariation);
+        }
         updateUniforms(viewProjectionMatrix, viewMatrix);
         setVertexAttributes(particuleCount);
 
@@ -247,7 +255,10 @@ public class CelShadedParticleGenerator
         particuleCount = simulateParticles(cameraPosition);
         generateQueuedParticles(particuleCount);
 
-
+        if(optionVariation != 0)
+        {
+            GLES30.glUniform1i(mArrayUniformHandles[VARIABLE_L_OPTION_HANDLE_INDEX], optionVariation);
+        }
 
         mParticleContainer = Particle.sortParticles(mParticleContainer);
 
@@ -317,14 +328,17 @@ public class CelShadedParticleGenerator
         mArrayUniformHandles[CAMERA_UP_WORLDSPACE_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_CameraUpWorldSpace");
         mArrayUniformHandles[VIEW_PROJECTION_MATRIX_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_ViewProjectionMatrix");
         mArrayUniformHandles[VIEW_MATRIX_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_ViewMatrix");
+        mArrayUniformHandles[VARIABLE_L_OPTION_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_LVariation");
 
         mArrayUniformHandles[TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX] = TextureLoader.loadTexture(mContext, toLoadTextureColourID);
         mArrayUniformHandles[TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX] = TextureLoader.loadTexture(mContext, toLoadTextureNormalDepthID);
         mArrayUniformHandles[TEXTURE_CEL_SHADING_SAMPLER_HANDLE_INDEX] = TextureLoader.loadTexture(mContext, toLoadTextureCelShading);
 
+
         textureColourActiveID = GLES30.glGetUniformLocation(programHandle, "textureColourDepth");
         textureNormalAlphaActiveID = GLES30.glGetUniformLocation(programHandle, "textureNormalAlpha");
         textureCelShadingActiveID = GLES30.glGetUniformLocation(programHandle, "textureCelShading");
+
     }
 
 

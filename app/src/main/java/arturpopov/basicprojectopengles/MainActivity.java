@@ -18,6 +18,9 @@ public class MainActivity extends Activity
 {
     private GLSurfaceView mglSurfaceView;
     private Context mContext;
+    private MainRenderer mainRenderer;
+    private int options = 0;
+
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -36,9 +39,10 @@ public class MainActivity extends Activity
     {
         switch(message) {
             case "Five Solid Colours & Noise Texture":
-                System.out.printf("GOO");
+                options = 1;
                 break;
             default:
+                options = 0;
                 break;
         }
 
@@ -64,7 +68,10 @@ public class MainActivity extends Activity
         else
         {
             mglSurfaceView.setEGLContextClientVersion(2);
-            mglSurfaceView.setRenderer(new MainRenderer(mContext));
+            mainRenderer = new MainRenderer(mContext);
+            mainRenderer.setOptions(options);
+            mglSurfaceView.setRenderer(mainRenderer);
+
             setContentView(mglSurfaceView);
         }
     }

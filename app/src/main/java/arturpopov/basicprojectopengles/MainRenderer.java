@@ -43,6 +43,9 @@ class MainRenderer implements GLSurfaceView.Renderer
     private int u_MVPMatrix_ObjDefaultHandle, u_ViewMatrix_ObjDefaultHandle, u_ModelMatrix_ObjDefaultHandle, u_Option_ObjDefaultHandle, u_LightPositionWorldSpace_ObjDefaultHandle, u_ViewPositionWorldSpace_ObjDefaultHandle, u_NormalMatrix_ObjDefaultHandle,u_ShadowProjMatrix_ObjDefaultHandle, u_EmitMode_ObjDefaultHandle;
     public float eyeX, eyeY, eyeZ;
     private float[] mLightProjectionMatrix = new float[16];
+    private int normalAlphaID = R.drawable.particule_normaleastwind;
+    private int colourDepthID = R.drawable.particule_colour_depth3;
+    private int quantizedID = R.drawable.whiteyellow;
 
 
     MainRenderer(Context mContext)
@@ -53,6 +56,9 @@ class MainRenderer implements GLSurfaceView.Renderer
     //ParticleGenerator particleGenerator;
     CelShadedParticleGenerator celShadedParticleGenerator;
     ShadowMapping shadowMapper;
+
+    //OPTIONS
+    int optionVariationOnL = 0;
     @Override
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config)
     {
@@ -81,7 +87,8 @@ class MainRenderer implements GLSurfaceView.Renderer
         //particleGenerator = new ParticleGenerator(mContext);
         //particleGenerator.create(R.drawable.droplet);
         celShadedParticleGenerator = new CelShadedParticleGenerator(mContext);
-        celShadedParticleGenerator.create(R.drawable.particule_normal5, R.drawable.particule_colour_depth3, R.drawable.whiteyellow);
+
+        celShadedParticleGenerator.create(normalAlphaID, colourDepthID, quantizedID, optionVariationOnL );
 
         skybox = new Skybox();
         //skybox.setFaceTextures(R.drawable.day_right, R.drawable.day_left, R.drawable.day_top, R.drawable.day_bottom, R.drawable.day_back, R.drawable.day_front);
@@ -233,4 +240,21 @@ class MainRenderer implements GLSurfaceView.Renderer
         GLES20.glUniform1i(u_Option_ObjDefaultHandle, u_Option);
     }
 
+    public void setOptions(int options) {
+        switch (options)
+        {
+            case 1:
+                optionVariationOnL = 1;
+                normalAlphaID = R.drawable.particule_normal5;
+                colourDepthID = R.drawable.particule_colour_depth3;
+                quantizedID = R.drawable.whiteyellow;
+                break;
+            default:
+                optionVariationOnL = 0;
+                normalAlphaID = R.drawable.particule_normaleastwind;
+                colourDepthID = R.drawable.particule_colour_depth3;
+                quantizedID = R.drawable.greytintwhitecenter;
+                break;
+        }
+    }
 }
