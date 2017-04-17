@@ -4,8 +4,9 @@ import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import android.os.SystemClock;
 import android.util.Log;
+
+import java.util.Random;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -16,23 +17,24 @@ import javax.microedition.khronos.opengles.GL10;
 
 class MainRenderer implements GLSurfaceView.Renderer
 {
-
+    Random r = new Random();
     //Matrices
     private float[] mViewMatrix = new float[16];
     private float[] mProjectionMatrix = new float[16];
     private float[] mModelMatrix = new float[16];
     private float[] mMVPMatrix = new float[16];
     private float[] mVPMatrix = new float[16];
-    float[] lightView = new float[16];
+
     private Context mContext;
 
-    ObjectContainer bambooObj;
-    ObjectContainerDefault floorObj;
-    ObjectContainerDefault backWallObj;
-    ObjectContainerDefault leftWallObj;
-    ObjectContainer lightSourceObj;
-    ObjectContainerDefault shadowingObject;
     ObjectContainerDefault terrain;
+
+
+
+    ObjectContainerDefault fireplaceObj;
+
+    ObjectContainerDefault[] trees = new ObjectContainerDefault[3];
+    private float[][] treePositions = new float[trees.length][3];
     Skybox skybox;
     //Shader Handles
     @SuppressWarnings("FieldCanBeLocal")
@@ -48,6 +50,7 @@ class MainRenderer implements GLSurfaceView.Renderer
     private int quantizedID = R.drawable.whiteyellow;
 
 
+
     MainRenderer(Context mContext)
     {
         this.mContext = mContext;
@@ -55,7 +58,6 @@ class MainRenderer implements GLSurfaceView.Renderer
 
     //ParticleGenerator particleGenerator;
     CelShadedParticleGenerator celShadedParticleGenerator;
-    ShadowMapping shadowMapper;
 
     //OPTIONS
     int optionVariationOnL = 0;
@@ -75,23 +77,32 @@ class MainRenderer implements GLSurfaceView.Renderer
 
         BuildShaders();
 
-        //shadowMapper = new ShadowMapping();
-
-        //shadowMapper.createRenderDepthFrameBuffer();
-        //shadowMapper.prepareFullScreenQuad(ShaderBuilder.LoadProgram("passthrough", mContext));
+        fireplaceObj =  new ObjectContainerDefault();
+        fireplaceObj.initialize("fireplace.obj", mContext, R.drawable.fireplace);
 
         terrain = new ObjectContainerDefault();
         terrain.initializeTerrain("terrain2.obj", mContext, R.drawable.terrain_texture);
 
+        trees[0] = new ObjectContainerDefault();
+        trees[0].initialize("tree.obj", mContext, R.drawable.pine);
+        treePositions[0] = MathUtilities.GetRandomSphericalDirection(r);
+        treePositions[0][1] = -1.f;
+        for(int i = 1; i < trees.length; i++)
+        {
+           trees[i] = trees[0];
+            treePositions[i] = MathUtilities.GetRandomSphericalDirection(r);
+            treePositions[i][1] = -1.f;
+            treePositions[i][0] *= 10.f;
+            treePositions[i][2] *= 10.f;
+
+        }
         defineUniformHandles();
-        //particleGenerator = new ParticleGenerator(mContext);
-        //particleGenerator.create(R.drawable.droplet);
         celShadedParticleGenerator = new CelShadedParticleGenerator(mContext);
 
         celShadedParticleGenerator.create(normalAlphaID, colourDepthID, quantizedID, optionVariationOnL );
 
         skybox = new Skybox();
-        //skybox.setFaceTextures(R.drawable.day_right, R.drawable.day_left, R.drawable.day_top, R.drawable.day_bottom, R.drawable.day_back, R.drawable.day_front);
+
         skybox.setFaceTextures(R.drawable.green_nebula_right1, R.drawable.green_nebula_left2, R.drawable.green_nebula_top3, R.drawable.green_nebula_bottom4, R.drawable.green_nebula_back6,R.drawable.green_nebula_front5);
         skybox.initialize(mContext);
     }
@@ -147,44 +158,34 @@ class MainRenderer implements GLSurfaceView.Renderer
     public void onDrawFrame(GL10 glUnused)
     {
         float[] viewPosition = {0.f, 0.5f, 3.f};
+        eyeX = Math.min(eyeX, 10.f);
+        eyeX = Math.max(eyeX, -10.f);
+        eyeY = Math.min(eyeY, 10.f);
+        eyeY = Math.max(eyeY, -10.f);
         Matrix.setLookAtM(mViewMatrix, 0,
                 viewPosition[0], viewPosition[1], viewPosition[2], //EYE x,y,z
-                0.0f, 0.0f, 0.0f, //LOOKING DIRECTION x,y,z
+                eyeX / 10, eyeY / 10, 0.0f, //LOOKING DIRECTION x,y,z
                 0.0f, 1.0f, 0.0f); //Define 'UP' direction)
         Matrix.translateM(mViewMatrix, 0, 0.0f, 0.0f, 0.f);
-        Matrix.rotateM(mViewMatrix, 0, eyeX, 0.0f, 1.f, 0.f);
 
-        float[] lightPosition = new float[]{eyeX,eyeY,2.0f, 1.0f};
 
-        Matrix.setLookAtM(lightView, 0,
-                lightPosition[0],lightPosition[1], lightPosition[2],
-                lightPosition[0], -lightPosition[1], lightPosition[2],
-                -lightPosition[0], 0, -lightPosition[2]
-                );
-        Matrix.translateM(lightView, 0, 0.0f, 0.0f, 0.f);
-        //Demonstration of model.
-        float time = SystemClock.uptimeMillis() % 10000L;
-        float angleInDegrees = (360.0f / 10000.0f) * ((int) time);
-
+        float[] lightPosition = new float[]{ 0.2f, 0.8f, -1.0f, 1.0f};
 
 
 
         Matrix.setIdentityM(mVPMatrix, 0);
         Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
-        float[] MVPLightMatrix = new float[16];
-        Matrix.multiplyMM(MVPLightMatrix, 0, mLightProjectionMatrix, 0, lightView, 0);
-
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
 
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
-
         skybox.renderSkybox(mViewMatrix, mProjectionMatrix);
         celShadedParticleGenerator.drawQueuedParticles(mVPMatrix, mViewMatrix);
+
+
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.translateM(mModelMatrix, 0, 0.0f, -1.0f, 0.0f);
-        //Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 1.0f, 0.0f, 0.0f);
-        //Matrix.scaleM(mModelMatrix, 0 , 0.1f, 0.1f, 0.1f);
+
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
 
         float[] normalMatrix = new float[16];
@@ -194,18 +195,51 @@ class MainRenderer implements GLSurfaceView.Renderer
         Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
 
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+        updateObjDefaultUniforms(lightPosition, normalMatrix, viewPosition, 0);
         terrain.draw(programObjDefaultHandle);
+
+        Matrix.setIdentityM(mModelMatrix, 0);
+        Matrix.translateM(mModelMatrix, 0, 0.f, -1.0f, 0.f);
+        Matrix.scaleM(mModelMatrix, 0 , 0.1f, 0.1f, 0.1f);
+        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+
+        normalMatrix = new float[16];
+        Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+        normalMatrixInverted = new float[16];
+        Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
+        Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
+
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+        updateObjDefaultUniforms(lightPosition, normalMatrix,viewPosition, 0);
+        fireplaceObj.draw(programObjDefaultHandle);
         int err = GLES20.GL_INVALID_OPERATION  ;
         while((err = GLES20.glGetError()) != GLES20.GL_NO_ERROR)
         {
             Log.d(LogTag.FRAMEBUFFER, "Error is "+err);
         }
         GLES20.glUniform1i(u_EmitMode_ObjDefaultHandle, 1);
-        updateObjDefaultUniforms(lightPosition, normalMatrix,MVPLightMatrix, viewPosition, 0);
+        updateObjDefaultUniforms(lightPosition, normalMatrix, viewPosition, 0);
 
         //lightSourceObj.draw(programObjDefaultHandle);
         GLES20.glUniform1i(u_EmitMode_ObjDefaultHandle, 0);
 
+
+        for(int i = 0; i < trees.length; i++) {
+            Matrix.setIdentityM(mModelMatrix, 0);
+            Matrix.translateM(mModelMatrix, 0, treePositions[i][0], treePositions[i][1], treePositions[i][2]);
+            //Matrix.scaleM(mModelMatrix, 0, 0.1f, 0.1f, 0.1f);
+            Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+
+            normalMatrix = new float[16];
+            Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+            normalMatrixInverted = new float[16];
+            Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
+            Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
+
+            Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+            updateObjDefaultUniforms(lightPosition, normalMatrix, viewPosition, 1);
+            trees[i].draw(programObjDefaultHandle);
+        }
 
 
     }
@@ -227,7 +261,7 @@ class MainRenderer implements GLSurfaceView.Renderer
         GLES20.glUniform3fv(u_ViewPositionWorldSpace_NormalMapHandle, 1, viewPosition, 0);
     }
 
-    private void updateObjDefaultUniforms(float[] lightPosition, float[] normalMatrix, float[] MVPLightMatrix, float[] viewPosition, int u_Option)
+    private void updateObjDefaultUniforms(float[] lightPosition, float[] normalMatrix, float[] viewPosition, int u_Option)
     {
         GLES20.glUseProgram(programObjDefaultHandle);
         GLES20.glUniformMatrix4fv(u_MVPMatrix_ObjDefaultHandle, 1, false, mMVPMatrix, 0);
@@ -236,7 +270,6 @@ class MainRenderer implements GLSurfaceView.Renderer
         GLES20.glUniform3fv(u_LightPositionWorldSpace_ObjDefaultHandle, 1, lightPosition, 0);
         GLES20.glUniform3fv(u_ViewPositionWorldSpace_ObjDefaultHandle, 1, viewPosition, 0);
         GLES20.glUniformMatrix4fv(u_NormalMatrix_ObjDefaultHandle, 1, false, normalMatrix, 0);
-        GLES20.glUniformMatrix4fv(u_ShadowProjMatrix_ObjDefaultHandle, 1, false, MVPLightMatrix, 0);
         GLES20.glUniform1i(u_Option_ObjDefaultHandle, u_Option);
     }
 

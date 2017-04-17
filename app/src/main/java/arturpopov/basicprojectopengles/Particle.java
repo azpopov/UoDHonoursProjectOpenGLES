@@ -20,7 +20,14 @@ class Particle implements Comparable<Particle>
     byte a;
     float size;
     float timeToLive;
+    float halfLife;
     float distanceCamera;
+
+    public void setLifeSpan(float lifeSpan)
+    {
+        this.halfLife = lifeSpan / 2;
+        timeToLive = lifeSpan;
+    }
 
     static List<Particle> sortParticles(List<Particle> collection)
     {

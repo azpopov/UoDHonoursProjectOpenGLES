@@ -13,6 +13,10 @@ uniform sampler2D textureColourDepth;
 uniform sampler2D textureCelShading;
 flat in float distnaceToL;
 
+const float attenuationConst0 = 1.0f;
+const float attenuationConst1 = 0.f;
+const float attenuationConst2 = 0.1f;
+
 vec3 Ka = vec3(0.1);
 vec3 GenLight = vec3(1.0);
 
@@ -31,6 +35,7 @@ float getMax(float a, float b);
 
 void main() {
     float originalZ = gl_FragCoord.z / gl_FragCoord.w;
+    float att = (1.0f / (attenuationConst0 + attenuationConst1 * distnaceToL + attenuationConst2 * distnaceToL * distnaceToL));
 
 
     vec4 textureColourDepthAtUV = vec4(getColourDepthVector());
@@ -48,7 +53,7 @@ void main() {
     alpha = alpha;
     gl_FragDepth -= depth ;
     vec3 oppositeL = -L; // flip light vector as values in  L are inverted
-	fragColor = vec4(vec3(Ka + C * GenLight * qLamb( getMax(0.0,dot(N, oppositeL)))), alpha);
+	fragColor = vec4(vec3(Ka + C * GenLight * qLamb( getMax(0.0,dot(N, oppositeL)))) * att, alpha);
 //	fragColor = vec4(vec3(Ka + C * L * qLamb( dot(N, L))), alpha);
 	//fragColor = vec4(dot(N, oppositeL), 0.0, 0.0, 1.0);
 }

@@ -177,12 +177,15 @@ public class CelShadedParticleGenerator
                 {
                     //gravity
                     float gravity = p.speed[1] + 9.81f * (float) deltaTime; //define gravity here
-                    p.speed[1] = gravity * 0.5f; //Adjust gravity strength
+                    p.speed[1] = gravity * 0.8f; //Adjust gravity strength
+                    float rebinder = 1.0f;
+                    if(p.halfLife > p.timeToLive)
+                        rebinder = -0.2f;
                     p.position = new float[]
                             {
-                                    p.position[0] + (p.speed[0] * (float) deltaTime),
+                                    p.position[0] + (p.speed[0] * (float) deltaTime) * rebinder,
                                     p.position[1] + (p.speed[1] * (float) deltaTime),
-                                    p.position[2] + (p.speed[2] * (float) deltaTime),
+                                    p.position[2] + (p.speed[2] * (float) deltaTime) * rebinder,
                             };
                     p.distanceCamera = MathUtilities.squaredLengthVector3(new float[]
                             {
@@ -217,10 +220,10 @@ public class CelShadedParticleGenerator
         for(int i = 0; i < newParticles; i++)
         {
             int particleIndex = findUnusedParticle();
-            mParticleContainer.get(particleIndex).timeToLive = 12.f;
+            mParticleContainer.get(particleIndex).setLifeSpan(3.f);
             mParticleContainer.get(particleIndex).position = new float[]{0.f, 0.f, 0.f};
             float spreadF = spread;
-            float[] mainDirection = new float[]{0.f, 0.05f, 0.1f};
+            float[] mainDirection = new float[]{0.f, 0.05f, -0.1f};
             float[] rndDirection = MathUtilities.GetRandomSphericalDirection(rnd);
             mParticleContainer.get(particleIndex).speed = new float[]{
                     mainDirection[0] + rndDirection[0]*spreadF,
@@ -271,7 +274,7 @@ public class CelShadedParticleGenerator
 
     private void generateQueuedParticles(int particuleCount)
     {
-        Log.d(LogTag.PARTICLE_EFFECT, String.valueOf(queuedParticleGeneration));
+
         //int newParticles = (int)(deltaTime * 50);
         if(queuedParticleGeneration <= 0)
         {
@@ -284,8 +287,8 @@ public class CelShadedParticleGenerator
         for(int i = 0; i < newParticles; i++)
         {
             int particleIndex = findUnusedParticle();
-            mParticleContainer.get(particleIndex).timeToLive = 12.f;
-            mParticleContainer.get(particleIndex).position = new float[]{0.f, 0.f, 0.f};
+            mParticleContainer.get(particleIndex).setLifeSpan(5.f);
+            mParticleContainer.get(particleIndex).position = new float[]{0.f, -0.7f, 0.f};
             float spreadF = spread;
             float[] mainDirection = new float[]{0.f, 0.05f, 0.1f};
             float[] rndDirection = MathUtilities.GetRandomSphericalDirection(rnd);

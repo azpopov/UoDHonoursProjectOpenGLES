@@ -6,7 +6,6 @@ layout(location = 1) in vec4 xyzs; // Position of the center of the particule an
 out vec2 UV;
 out vec3 LightDirectionCameraSpace;
 out vec3 L;
-out float LightDistance;
 
 uniform mat4 u_ViewMatrix;
 uniform vec3 u_LightPositionWorldSpace;
