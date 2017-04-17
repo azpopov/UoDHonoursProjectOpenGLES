@@ -58,6 +58,4 @@ public class BaseFragment extends Fragment {
         intent.putExtra("LEVEL", dummyItem.title);
         startActivity(intent);
     }
-
-
 }

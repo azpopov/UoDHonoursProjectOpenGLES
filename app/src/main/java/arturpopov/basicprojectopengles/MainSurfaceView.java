@@ -22,6 +22,9 @@ public class MainSurfaceView extends GLSurfaceView {
 
 
     private VelocityTracker mVelocityTracker = null;
+    private float timeSinceDown = 0;
+    private long timePressed;
+
     public MainSurfaceView(Context context) {
         super(context);
 
@@ -44,10 +47,13 @@ public class MainSurfaceView extends GLSurfaceView {
                         mVelocityTracker = VelocityTracker.obtain();
                     else
                         mVelocityTracker.clear();
+                    timePressed = System.currentTimeMillis();
                     mVelocityTracker.addMovement(event);
                    break;
                 case MotionEvent.ACTION_UP:
                     mRenderer.celShadedParticleGenerator.queueSmokePuff(10);
+                    if(System.currentTimeMillis() - timePressed > 5000)
+                        MainActivity.doRestart(getContext());
                     Log.d(LogTag.TOUCH_EVENT, "CLICK");
                     break;
                 case MotionEvent.ACTION_MOVE:

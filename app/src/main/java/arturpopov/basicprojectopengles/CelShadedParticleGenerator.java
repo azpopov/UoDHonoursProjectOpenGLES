@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.StringTokenizer;
 
 /**
  * Created by arturpopov on 11/03/2017.
@@ -23,8 +22,8 @@ public class CelShadedParticleGenerator
     private static final int BYTES_PER_FLOAT = 4;
 
     private static final int VERTEX_ARRAY_ID_INDEX = 0, BILLBOARD_BUFFER_HANDLE_INDEX = 1, PARTICULE_POSITION_HANDLE_INDEX = 2;
-    private static final int CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX = 0, CAMERA_UP_WORLDSPACE_HANDLE_INDEX = 1, VIEW_PROJECTION_MATRIX_HANDLE_INDEX = 2, TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX = 3, TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX = 4, VIEW_MATRIX_HANDLE_INDEX = 5, TEXTURE_CEL_SHADING_SAMPLER_HANDLE_INDEX = 6, VARIABLE_L_OPTION_HANDLE_INDEX = 7;
-    private static final int NUMBER_HANDLES = 3, UNIFORM_COUNT = 8;
+    private static final int CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX = 0, CAMERA_UP_WORLDSPACE_HANDLE_INDEX = 1, VIEW_PROJECTION_MATRIX_HANDLE_INDEX = 2, TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX = 3, TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX = 4, VIEW_MATRIX_HANDLE_INDEX = 5, TEXTURE_CEL_SHADING_SAMPLER_HANDLE_INDEX = 6, VARIABLE_L_OPTION_HANDLE_INDEX = 7, LIGHT_POSITION_WORLD_SPACE_HANDLE_INDEX = 8;
+    private static final int NUMBER_HANDLES = 3, UNIFORM_COUNT = 9;
     private static final int MAX_PARTICLES = 1000;
     private static final int PARTICLE_SPAWN_LIMIT = 10;
 
@@ -89,7 +88,7 @@ public class CelShadedParticleGenerator
         mLastTime = System.nanoTime();
     }
 
-    void drawParticles(float[] viewProjectionMatrix, float[] viewMatrix)
+    void drawParticles(float[] viewProjectionMatrix, float[] viewMatrix, float[] lightPositionWorldSpace)
     {
         GLES30.glUseProgram(programHandle);
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
@@ -118,7 +117,7 @@ public class CelShadedParticleGenerator
         {
             GLES30.glUniform1i(mArrayUniformHandles[VARIABLE_L_OPTION_HANDLE_INDEX], optionVariation);
         }
-        updateUniforms(viewProjectionMatrix, viewMatrix);
+        updateUniforms(viewProjectionMatrix, viewMatrix, lightPositionWorldSpace);
         setVertexAttributes(particuleCount);
 
     }
@@ -220,7 +219,7 @@ public class CelShadedParticleGenerator
         for(int i = 0; i < newParticles; i++)
         {
             int particleIndex = findUnusedParticle();
-            mParticleContainer.get(particleIndex).setLifeSpan(3.f);
+            mParticleContainer.get(particleIndex).setLifeSpan(10.f);
             mParticleContainer.get(particleIndex).position = new float[]{0.f, 0.f, 0.f};
             float spreadF = spread;
             float[] mainDirection = new float[]{0.f, 0.05f, -0.1f};
@@ -239,7 +238,7 @@ public class CelShadedParticleGenerator
         this.queuedParticleGeneration += puffParticleSize;
     }
 
-    void drawQueuedParticles(float[] viewProjectionMatrix, float[] viewMatrix)
+    void drawQueuedParticles(float[] viewProjectionMatrix, float[] viewMatrix, float[] lightPositionWorldSpace)
     {
         GLES30.glUseProgram(programHandle);
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
@@ -267,7 +266,7 @@ public class CelShadedParticleGenerator
 
         updateBuffers(particuleCount);
 
-        updateUniforms(viewProjectionMatrix, viewMatrix);
+        updateUniforms(viewProjectionMatrix, viewMatrix, lightPositionWorldSpace);
         setVertexAttributes(particuleCount);
 
     }
@@ -287,7 +286,7 @@ public class CelShadedParticleGenerator
         for(int i = 0; i < newParticles; i++)
         {
             int particleIndex = findUnusedParticle();
-            mParticleContainer.get(particleIndex).setLifeSpan(5.f);
+            mParticleContainer.get(particleIndex).setLifeSpan(10.f);
             mParticleContainer.get(particleIndex).position = new float[]{0.f, -0.7f, 0.f};
             float spreadF = spread;
             float[] mainDirection = new float[]{0.f, 0.05f, 0.1f};
@@ -332,6 +331,8 @@ public class CelShadedParticleGenerator
         mArrayUniformHandles[VIEW_PROJECTION_MATRIX_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_ViewProjectionMatrix");
         mArrayUniformHandles[VIEW_MATRIX_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_ViewMatrix");
         mArrayUniformHandles[VARIABLE_L_OPTION_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_LVariation");
+        mArrayUniformHandles[LIGHT_POSITION_WORLD_SPACE_HANDLE_INDEX] = GLES30.glGetUniformLocation(programHandle, "u_LightPositionWorldSpace");
+
 
         mArrayUniformHandles[TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX] = TextureLoader.loadTexture(mContext, toLoadTextureColourID);
         mArrayUniformHandles[TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX] = TextureLoader.loadTexture(mContext, toLoadTextureNormalDepthID);
@@ -345,13 +346,15 @@ public class CelShadedParticleGenerator
     }
 
 
-    private void updateUniforms(float[] viewProjectionMatrix, float[] viewMatrix)
+    private void updateUniforms(float[] viewProjectionMatrix, float[] viewMatrix, float[] lightPositionWorldSpace)
     {
 
 
 
         GLES30.glUniform3f(mArrayUniformHandles[CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX], viewMatrix[0], viewMatrix[4], viewMatrix[8]);
         GLES30.glUniform3f(mArrayUniformHandles[CAMERA_UP_WORLDSPACE_HANDLE_INDEX], viewMatrix[1], viewMatrix[5], viewMatrix[9]);
+        GLES30.glUniform3fv(mArrayUniformHandles[LIGHT_POSITION_WORLD_SPACE_HANDLE_INDEX], 1, lightPositionWorldSpace, 0);
+
         GLES30.glUniformMatrix4fv(
                 mArrayUniformHandles[VIEW_PROJECTION_MATRIX_HANDLE_INDEX], 1, false, viewProjectionMatrix, 0
         );

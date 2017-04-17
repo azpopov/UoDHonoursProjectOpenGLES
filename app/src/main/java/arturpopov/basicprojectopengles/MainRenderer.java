@@ -33,8 +33,9 @@ class MainRenderer implements GLSurfaceView.Renderer
 
     ObjectContainerDefault fireplaceObj;
 
-    ObjectContainerDefault[] trees = new ObjectContainerDefault[3];
-    private float[][] treePositions = new float[trees.length][3];
+    ObjectContainerDefault trees;
+    ObjectContainerDefault grass;
+    ObjectContainer stump;
     Skybox skybox;
     //Shader Handles
     @SuppressWarnings("FieldCanBeLocal")
@@ -74,28 +75,23 @@ class MainRenderer implements GLSurfaceView.Renderer
         eyeZ = 3.f;
 
 
-
         BuildShaders();
 
         fireplaceObj =  new ObjectContainerDefault();
         fireplaceObj.initialize("fireplace.obj", mContext, R.drawable.fireplace);
 
         terrain = new ObjectContainerDefault();
-        terrain.initializeTerrain("terrain2.obj", mContext, R.drawable.terrain_texture);
+        terrain.initializeTerrain("terrain.obj", mContext, R.drawable.terrain_texture);
 
-        trees[0] = new ObjectContainerDefault();
-        trees[0].initialize("tree.obj", mContext, R.drawable.pine);
-        treePositions[0] = MathUtilities.GetRandomSphericalDirection(r);
-        treePositions[0][1] = -1.f;
-        for(int i = 1; i < trees.length; i++)
-        {
-           trees[i] = trees[0];
-            treePositions[i] = MathUtilities.GetRandomSphericalDirection(r);
-            treePositions[i][1] = -1.f;
-            treePositions[i][0] *= 10.f;
-            treePositions[i][2] *= 10.f;
+        trees = new ObjectContainerDefault();
+        trees.initialize("scenetrees.obj", mContext, R.drawable.pine);
 
-        }
+        grass = new ObjectContainerDefault();
+        grass.initialize("grass.obj", mContext, R.drawable.grass_texture);
+
+        stump = new ObjectContainer();
+        stump.initialize("pine_stump.obj", mContext, R.drawable.tree_stomp_colmap, R.drawable.tree_stomp_normap);
+
         defineUniformHandles();
         celShadedParticleGenerator = new CelShadedParticleGenerator(mContext);
 
@@ -160,7 +156,7 @@ class MainRenderer implements GLSurfaceView.Renderer
         float[] viewPosition = {0.f, 0.5f, 3.f};
         eyeX = Math.min(eyeX, 10.f);
         eyeX = Math.max(eyeX, -10.f);
-        eyeY = Math.min(eyeY, 10.f);
+        eyeY = Math.min(eyeY, 20.f);
         eyeY = Math.max(eyeY, -10.f);
         Matrix.setLookAtM(mViewMatrix, 0,
                 viewPosition[0], viewPosition[1], viewPosition[2], //EYE x,y,z
@@ -169,8 +165,7 @@ class MainRenderer implements GLSurfaceView.Renderer
         Matrix.translateM(mViewMatrix, 0, 0.0f, 0.0f, 0.f);
 
 
-        float[] lightPosition = new float[]{ 0.2f, 0.8f, -1.0f, 1.0f};
-
+        float[] lightPosition = new float[]{ 0.f, 1.f, -1.f, 1.0f};
 
 
         Matrix.setIdentityM(mVPMatrix, 0);
@@ -180,11 +175,11 @@ class MainRenderer implements GLSurfaceView.Renderer
 
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         skybox.renderSkybox(mViewMatrix, mProjectionMatrix);
-        celShadedParticleGenerator.drawQueuedParticles(mVPMatrix, mViewMatrix);
+        celShadedParticleGenerator.drawQueuedParticles(mVPMatrix, mViewMatrix, lightPosition);
 
 
         Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 0.0f, -1.0f, 0.0f);
+        Matrix.translateM(mModelMatrix, 0, 0.0f, -1.2f, 0.0f);
 
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
 
@@ -192,14 +187,19 @@ class MainRenderer implements GLSurfaceView.Renderer
         Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
         float[] normalMatrixInverted = new float[16];
         Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
+        Matrix.setIdentityM(normalMatrix, 0);
         Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
 
+        float[] lightPositionWorldSpace = new float[4];
+        Matrix.multiplyMV(lightPositionWorldSpace, 0, mModelMatrix, 0, lightPosition, 0);
+        Matrix.multiplyMV(lightPositionWorldSpace, 0, mViewMatrix, 0, lightPositionWorldSpace, 0);
+
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-        updateObjDefaultUniforms(lightPosition, normalMatrix, viewPosition, 0);
+        updateObjDefaultUniforms(lightPositionWorldSpace, normalMatrix, viewPosition, 0);
         terrain.draw(programObjDefaultHandle);
 
         Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 0.f, -1.0f, 0.f);
+        Matrix.translateM(mModelMatrix, 0, 0.f, -1.2f, 0.f);
         Matrix.scaleM(mModelMatrix, 0 , 0.1f, 0.1f, 0.1f);
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
 
@@ -209,8 +209,11 @@ class MainRenderer implements GLSurfaceView.Renderer
         Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
         Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
 
+        lightPositionWorldSpace = new float[4];
+        Matrix.multiplyMV(lightPositionWorldSpace, 0, mModelMatrix, 0, lightPosition, 0);
+        Matrix.multiplyMV(lightPositionWorldSpace, 0, mViewMatrix, 0, lightPositionWorldSpace, 0);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-        updateObjDefaultUniforms(lightPosition, normalMatrix,viewPosition, 0);
+        updateObjDefaultUniforms(lightPositionWorldSpace, normalMatrix,viewPosition, 0);
         fireplaceObj.draw(programObjDefaultHandle);
         int err = GLES20.GL_INVALID_OPERATION  ;
         while((err = GLES20.glGetError()) != GLES20.GL_NO_ERROR)
@@ -224,24 +227,46 @@ class MainRenderer implements GLSurfaceView.Renderer
         GLES20.glUniform1i(u_EmitMode_ObjDefaultHandle, 0);
 
 
-        for(int i = 0; i < trees.length; i++) {
-            Matrix.setIdentityM(mModelMatrix, 0);
-            Matrix.translateM(mModelMatrix, 0, treePositions[i][0], treePositions[i][1], treePositions[i][2]);
-            //Matrix.scaleM(mModelMatrix, 0, 0.1f, 0.1f, 0.1f);
-            Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+        Matrix.setIdentityM(mModelMatrix, 0);
+        Matrix.translateM(mModelMatrix, 0, 0.0f, -1.0f, 0.0f);
+        //Matrix.scaleM(mModelMatrix, 0, 0.1f, 0.1f, 0.1f);
+        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
 
-            normalMatrix = new float[16];
-            Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-            normalMatrixInverted = new float[16];
-            Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
-            Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
-
-            Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-            updateObjDefaultUniforms(lightPosition, normalMatrix, viewPosition, 1);
-            trees[i].draw(programObjDefaultHandle);
-        }
+        normalMatrix = new float[16];
+        Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+        normalMatrixInverted = new float[16];
+        Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
+        Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
 
 
+        lightPositionWorldSpace = new float[4];
+        Matrix.multiplyMV(lightPositionWorldSpace, 0, mModelMatrix, 0, lightPosition, 0);
+        Matrix.multiplyMV(lightPositionWorldSpace, 0, mViewMatrix, 0, lightPositionWorldSpace, 0);
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+        updateObjDefaultUniforms(lightPosition, normalMatrix, viewPosition, 1);
+        trees.draw(programObjDefaultHandle);
+
+        grass.draw(programObjDefaultHandle);
+
+        Matrix.setIdentityM(mModelMatrix, 0);
+        Matrix.translateM(mModelMatrix, 0, -3.0f, -1.0f, 0.5f);
+        Matrix.rotateM(mModelMatrix, 0, -90, 0, 1.f, 0);
+        Matrix.scaleM(mModelMatrix, 0, 0.5f, 0.5f, 0.5f);
+        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+
+        normalMatrix = new float[16];
+        Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+        normalMatrixInverted = new float[16];
+        Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
+        Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
+
+
+        lightPositionWorldSpace = new float[4];
+        Matrix.multiplyMV(lightPositionWorldSpace, 0, mModelMatrix, 0, lightPosition, 0);
+        Matrix.multiplyMV(lightPositionWorldSpace, 0, mViewMatrix, 0, lightPositionWorldSpace, 0);
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+        updateNormalMappingUniforms(lightPosition, viewPosition, normalMatrix);
+        stump.draw(programNormalMapHandle);
     }
 
     private void updateDefaultUniforms()
@@ -282,10 +307,21 @@ class MainRenderer implements GLSurfaceView.Renderer
                 colourDepthID = R.drawable.particule_colour_depth3;
                 quantizedID = R.drawable.whiteyellow;
                 break;
+            case 2:
+                optionVariationOnL = 0;
+                normalAlphaID = R.drawable.particule_normal4;
+                colourDepthID = R.drawable.particule_colour_depth2;
+                quantizedID = R.drawable.whiteyellow;
+            case 3:
+                optionVariationOnL = 0;
+                normalAlphaID = R.drawable.particule_normal4;
+                colourDepthID = R.drawable.particule_colour_depth2;
+                quantizedID = R.drawable.gredgreenblacktellow;
+                break;
             default:
                 optionVariationOnL = 0;
-                normalAlphaID = R.drawable.particule_normaleastwind;
-                colourDepthID = R.drawable.particule_colour_depth3;
+                normalAlphaID = R.drawable.particule_normal5;
+                colourDepthID = R.drawable.particule_colour_depth2;
                 quantizedID = R.drawable.greytintwhitecenter;
                 break;
         }

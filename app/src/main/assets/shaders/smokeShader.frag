@@ -11,10 +11,11 @@ out vec4 fragColor;
 uniform sampler2D textureNormalAlpha;
 uniform sampler2D textureColourDepth;
 uniform sampler2D textureCelShading;
+uniform mat4 u_ViewProjectionMatrix;
 flat in float distnaceToL;
 
 const float attenuationConst0 = 1.0f;
-const float attenuationConst1 = 0.f;
+const float attenuationConst1 = 0.5f;
 const float attenuationConst2 = 0.1f;
 
 vec3 Ka = vec3(0.1);
@@ -44,6 +45,7 @@ void main() {
 
     vec4 textureNormalAlphaAtUV = texture(textureNormalAlpha, UV);
     vec3 N = textureNormalAlphaAtUV.xyz; //foin
+    N = normalize(N * 2.0 - 1.0);
     float alpha = textureNormalAlphaAtUV.a;
 
      if(alpha == 0.0)
@@ -54,8 +56,7 @@ void main() {
     gl_FragDepth -= depth ;
     vec3 oppositeL = -L; // flip light vector as values in  L are inverted
 	fragColor = vec4(vec3(Ka + C * GenLight * qLamb( getMax(0.0,dot(N, oppositeL)))) * att, alpha);
-//	fragColor = vec4(vec3(Ka + C * L * qLamb( dot(N, L))), alpha);
-	//fragColor = vec4(dot(N, oppositeL), 0.0, 0.0, 1.0);
+    //fragColor = vec4(vec3(att,0,0), alpha);
 }
 //TODO fix rotations on particles
 

@@ -1,5 +1,7 @@
 #version 300 es
 
+precision mediump float;
+
 layout(location = 0) in vec3 squareVertices;
 layout(location = 1) in vec4 xyzs; // Position of the center of the particule and size of the square
 
@@ -38,7 +40,7 @@ void main() {
     {
         L=getLNonVarying();
     }
-    distnaceToL = length(L);
+    distnaceToL = length(( u_ViewMatrix * vec4(u_LightPositionWorldSpace,1)).xyz - ( u_ViewMatrix * vec4(particleCenter_wordspace,1)).xyz);
 	UV = squareVertices.xy + vec2(0.5, 0.5);
 }
 

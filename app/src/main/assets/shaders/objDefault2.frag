@@ -17,9 +17,9 @@ uniform int u_Option;
 uniform sampler2D u_DiffuseTextureSampler;
 
 
-const vec3 ambientColor = vec3(0.3, 0.3, 0.3);
+const vec3 ambientColor = vec3(0.2, 0.2, 0.2);
 const vec3 diffuseColor = vec3(0.2, 0.2, 0.2);
-const vec3 specColor = vec3(1.0, 1.0, 1.0);
+const vec3 specColor = vec3(1.0, 0.7, 0.5);
 
 const float attenuationConst0 = 1.0f;
 const float attenuationConst1 = 0.f;
@@ -48,7 +48,7 @@ void main() {
 
        vec3 halfDir = normalize(lightDir + viewDir);
        float specAngle = max(dot(halfDir, normal), 0.0);
-       specular = pow(specAngle, 6.0);
+       specular = pow(specAngle, 3.0);
   }
 
   colour = vec4( ambientColor + att *
