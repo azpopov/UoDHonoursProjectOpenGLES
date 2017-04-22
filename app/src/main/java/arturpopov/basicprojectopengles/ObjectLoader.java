@@ -79,6 +79,7 @@ public class ObjectLoader
             }
             else if (Objects.equals(splitEverything[lineNum].substring(0, 2), "f "))
             {
+                MainRenderer.polygonCounter += 3;
                 String stringBuffer = splitEverything[lineNum].substring(2);
                 stringBuffer.replaceAll("\\//", " ");
 

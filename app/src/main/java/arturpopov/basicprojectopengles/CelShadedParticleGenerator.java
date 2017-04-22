@@ -45,15 +45,17 @@ public class CelShadedParticleGenerator
 
 
     int optionVariation = 0;
+    private float[] bias = new float[]{0.f, 0.f, 0.f};
+
     CelShadedParticleGenerator(Context mContext)
     {
         this.mContext = mContext;
     }
 
-    void create(int toLoadTextureNormalDepthID, int toLoadTextureColourID, int celShadingTextureID, int optionVariation)
+    void create(int toLoadTextureNormalDepthID, int toLoadTextureColourID, int celShadingTextureID, int optionVariation, float[] bias)
     {
         programHandle = ShaderBuilder.LoadProgram("smokeShader", mContext);
-
+        this.bias = bias;
         this.optionVariation = optionVariation;
         GLES30.glUseProgram(programHandle);
 
@@ -177,14 +179,15 @@ public class CelShadedParticleGenerator
                     //gravity
                     float gravity = p.speed[1] + 9.81f * (float) deltaTime; //define gravity here
                     p.speed[1] = gravity * 0.8f; //Adjust gravity strength
+                    //p.speed = new float[]{p.speed[0] + bias[0],p.speed[1] + bias[1],p.speed[2] + bias[2] };
                     float rebinder = 1.0f;
                     if(p.halfLife > p.timeToLive)
                         rebinder = -0.2f;
                     p.position = new float[]
                             {
-                                    p.position[0] + (p.speed[0] * (float) deltaTime) * rebinder,
-                                    p.position[1] + (p.speed[1] * (float) deltaTime),
-                                    p.position[2] + (p.speed[2] * (float) deltaTime) * rebinder,
+                                    p.position[0] + ((p.speed[0] + bias[0])* (float) deltaTime) * rebinder,
+                                    p.position[1] + ((p.speed[1] + bias[0]) * (float) deltaTime) ,
+                                    p.position[2] + ((p.speed[2] + bias[0])* (float) deltaTime) * rebinder,
                             };
                     p.distanceCamera = MathUtilities.squaredLengthVector3(new float[]
                             {
@@ -202,6 +205,7 @@ public class CelShadedParticleGenerator
                 } else
                 {
                     p.distanceCamera = -1.f;
+                    MainRenderer.polygonCounter--;
                 }
                 particuleCount++;
 
@@ -216,6 +220,7 @@ public class CelShadedParticleGenerator
         double newParticles = (MAX_PARTICLES - particuleCount) * deltaTime;
         if(newParticles > PARTICLE_SPAWN_LIMIT)
             newParticles = PARTICLE_SPAWN_LIMIT;
+        MainRenderer.polygonCounter += newParticles;
         for(int i = 0; i < newParticles; i++)
         {
             int particleIndex = findUnusedParticle();
@@ -283,6 +288,8 @@ public class CelShadedParticleGenerator
         if(newParticles > PARTICLE_SPAWN_LIMIT)
             newParticles = PARTICLE_SPAWN_LIMIT;
         queuedParticleGeneration -= newParticles;
+
+        MainRenderer.polygonCounter += newParticles;
         for(int i = 0; i < newParticles; i++)
         {
             int particleIndex = findUnusedParticle();

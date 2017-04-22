@@ -17,7 +17,8 @@ import javax.microedition.khronos.opengles.GL10;
 
 class MainRenderer implements GLSurfaceView.Renderer
 {
-    Random r = new Random();
+    public static long polygonCounter = 0;
+    double frameRate, startTime, endTime, elapsedTime;
     //Matrices
     private float[] mViewMatrix = new float[16];
     private float[] mProjectionMatrix = new float[16];
@@ -49,7 +50,8 @@ class MainRenderer implements GLSurfaceView.Renderer
     private int normalAlphaID = R.drawable.particule_normaleastwind;
     private int colourDepthID = R.drawable.particule_colour_depth3;
     private int quantizedID = R.drawable.whiteyellow;
-
+    private int[] skyboxIDs;
+    private float[] bias = new float[]{0.f, 0.f, 0.f};
 
 
     MainRenderer(Context mContext)
@@ -66,6 +68,7 @@ class MainRenderer implements GLSurfaceView.Renderer
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config)
     {
 
+        startTime = System.currentTimeMillis();
 
         GLES20.glClearColor(0.5f, 0.5f, 0.5f, 0.5f);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
@@ -95,11 +98,11 @@ class MainRenderer implements GLSurfaceView.Renderer
         defineUniformHandles();
         celShadedParticleGenerator = new CelShadedParticleGenerator(mContext);
 
-        celShadedParticleGenerator.create(normalAlphaID, colourDepthID, quantizedID, optionVariationOnL );
+        celShadedParticleGenerator.create(normalAlphaID, colourDepthID, quantizedID, optionVariationOnL, bias );
 
         skybox = new Skybox();
 
-        skybox.setFaceTextures(R.drawable.green_nebula_right1, R.drawable.green_nebula_left2, R.drawable.green_nebula_top3, R.drawable.green_nebula_bottom4, R.drawable.green_nebula_back6,R.drawable.green_nebula_front5);
+        skybox.setFaceTextures(skyboxIDs[0],skyboxIDs[1],skyboxIDs[2],skyboxIDs[3],skyboxIDs[4],skyboxIDs[5]);
         skybox.initialize(mContext);
     }
 
@@ -153,6 +156,7 @@ class MainRenderer implements GLSurfaceView.Renderer
     @Override
     public void onDrawFrame(GL10 glUnused)
     {
+        Log.d(LogTag.COUNTER, "triangles in scene in scene: " + polygonCounter);
         float[] viewPosition = {0.f, 0.5f, 3.f};
         eyeX = Math.min(eyeX, 10.f);
         eyeX = Math.max(eyeX, -10.f);
@@ -267,6 +271,12 @@ class MainRenderer implements GLSurfaceView.Renderer
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
         updateNormalMappingUniforms(lightPosition, viewPosition, normalMatrix);
         stump.draw(programNormalMapHandle);
+
+
+        elapsedTime = System.currentTimeMillis() - startTime;
+        double fps = 1000 / elapsedTime;
+        Log.d(LogTag.FRAMERATE, "FrameRate is " + fps + " fps");
+        startTime = System.currentTimeMillis();
     }
 
     private void updateDefaultUniforms()
@@ -302,27 +312,94 @@ class MainRenderer implements GLSurfaceView.Renderer
         switch (options)
         {
             case 1:
-                optionVariationOnL = 1;
-                normalAlphaID = R.drawable.particule_normal5;
-                colourDepthID = R.drawable.particule_colour_depth3;
-                quantizedID = R.drawable.whiteyellow;
+                optionVariationOnL = 0;
+                normalAlphaID = R.drawable.particule_normal4;
+                colourDepthID = R.drawable.particule_colour_depth2;
+                quantizedID = R.drawable.greytintwhitecenter;
+                skyboxIDs = new int[]{
+                                R.drawable.green_nebula_right1,
+                                R.drawable.green_nebula_left2,
+                                R.drawable.green_nebula_top3,
+                                R.drawable.green_nebula_bottom4,
+                                R.drawable.green_nebula_back6,
+                                R.drawable.green_nebula_front5
+                                };
                 break;
             case 2:
                 optionVariationOnL = 0;
-                normalAlphaID = R.drawable.particule_normal4;
+                normalAlphaID = R.drawable.particule_normaleastwind;
                 colourDepthID = R.drawable.particule_colour_depth2;
-                quantizedID = R.drawable.whiteyellow;
+                quantizedID = R.drawable.greytintwhitecenterwithgradient;
+                bias = new float[]{ 0.2f, -.2f, 0.f};
+                skyboxIDs = new int[]{
+                        R.drawable.standart_sky_right1,
+                        R.drawable.standart_sky_left2,
+                        R.drawable.standart_sky_top3,
+                        R.drawable.standart_sky_bottom4,
+                        R.drawable.standart_sky_back6,
+                        R.drawable.standart_sky_front5
+                };
+                break;
+
             case 3:
                 optionVariationOnL = 0;
                 normalAlphaID = R.drawable.particule_normal4;
+                colourDepthID = R.drawable.particule_colour_depth3;
+                quantizedID = R.drawable.greytintwhitecenterwithgradient;
+                skyboxIDs = new int[]{
+                        R.drawable.green_nebula_right1,
+                        R.drawable.green_nebula_left2,
+                        R.drawable.green_nebula_top3,
+                        R.drawable.green_nebula_bottom4,
+                        R.drawable.green_nebula_back6,
+                        R.drawable.green_nebula_front5
+                };
+                break;
+            case 4:
+                optionVariationOnL = 0;
+                normalAlphaID = R.drawable.particule_normal;
+                colourDepthID = R.drawable.particule_colour_depth3;
+                quantizedID = R.drawable.gredgreenblacktellow;
+                bias = new float[]{ 0.2f, -.2f, 0.f};
+                skyboxIDs = new int[]{
+                        R.drawable.green_nebula_right1,
+                        R.drawable.green_nebula_left2,
+                        R.drawable.green_nebula_top3,
+                        R.drawable.green_nebula_bottom4,
+                        R.drawable.green_nebula_back6,
+                        R.drawable.green_nebula_front5
+                };
+                break;
+            case 5:
+                optionVariationOnL = 0;
+                normalAlphaID = R.drawable.particule_normal6;
+                colourDepthID = R.drawable.particule_colour_depth2;
+                quantizedID = R.drawable.red;
+                skyboxIDs = new int[]{
+                        R.drawable.green_nebula_right1,
+                        R.drawable.green_nebula_left2,
+                        R.drawable.green_nebula_top3,
+                        R.drawable.green_nebula_bottom4,
+                        R.drawable.green_nebula_back6,
+                        R.drawable.green_nebula_front5
+                };
+                break;
+            case 6:
+                optionVariationOnL = 0;
+                normalAlphaID = R.drawable.particule_normal6;
                 colourDepthID = R.drawable.particule_colour_depth2;
                 quantizedID = R.drawable.gredgreenblacktellow;
+                skyboxIDs = new int[]{
+                        R.drawable.green_nebula_right1,
+                        R.drawable.green_nebula_left2,
+                        R.drawable.green_nebula_top3,
+                        R.drawable.green_nebula_bottom4,
+                        R.drawable.green_nebula_back6,
+                        R.drawable.green_nebula_front5
+                };
                 break;
             default:
-                optionVariationOnL = 0;
-                normalAlphaID = R.drawable.particule_normal5;
-                colourDepthID = R.drawable.particule_colour_depth2;
-                quantizedID = R.drawable.greytintwhitecenter;
+                System.exit(0);
                 break;
         }
     }

@@ -11,4 +11,6 @@ final class LogTag
     public static final String PARTICLE_EFFECT = "LogParticleEffect";
     public static final String FRAMEBUFFER = "LogFrameBuffer";
     public static final String SKYBOX = "LogSkyBox";
+    public static final String FRAMERATE = "LogFramerate";
+    public static final String COUNTER = "LogCounter";
 }

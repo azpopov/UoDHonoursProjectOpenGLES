@@ -55,7 +55,7 @@ public class BaseFragment extends Fragment {
     /** Called when the user taps the Send button */
     public void sendMessage(View view, DummyContent.DummyItem dummyItem) {
         Intent intent = new Intent(getActivity(), MainActivity.class);
-        intent.putExtra("LEVEL", dummyItem.title);
+        intent.putExtra("LEVEL", dummyItem.id);
         startActivity(intent);
     }
 }

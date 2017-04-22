@@ -41,24 +41,7 @@ public class MainActivity extends Activity
 
     private void getOptions(String message)
     {
-        switch(message) {
-            case "Five Solid Colours & Noise Texture":
-                options = 1;
-                break;
-            case "Quote #1":
-                options = 2;
-                break;
-            case "Quote #3":
-                options = 3;
-                break;
-            case "Quote #4":
-                options = 4;
-                break;
-            default:
-                options = 0;
-                break;
-        }
-
+        options = Integer.parseInt(message);
     }
 
     private void startGame()
