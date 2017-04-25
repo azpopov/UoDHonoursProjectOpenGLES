@@ -10,7 +10,6 @@ import android.support.v7.widget.Toolbar;
 
 import arturpopov.basicprojectopengles.R;
 
-import static arturpopov.basicprojectopengles.androidtemplate.util.LogUtil.logD;
 import static arturpopov.basicprojectopengles.androidtemplate.util.LogUtil.makeLogTag;
 
 /**
@@ -23,7 +22,7 @@ import static arturpopov.basicprojectopengles.androidtemplate.util.LogUtil.makeL
 public abstract class BaseActivity extends AppCompatActivity {
     private static final String TAG = makeLogTag(BaseActivity.class);
 
-    protected static final int NAV_DRAWER_ITEM_INVALID = -1;
+    private static final int NAV_DRAWER_ITEM_INVALID = -1;
 
     private DrawerLayout drawerLayout;
     private Toolbar actionBarToolbar;

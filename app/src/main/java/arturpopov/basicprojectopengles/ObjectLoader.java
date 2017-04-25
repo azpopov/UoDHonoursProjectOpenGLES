@@ -11,14 +11,15 @@ import java.util.Objects;
  * Created by arturpopov on 09/02/2017.
  */
 
-public class ObjectLoader
+@SuppressWarnings("PointlessArithmeticExpression")
+class ObjectLoader
 {
     public static final int VERTEX_ARRAY_INDEX = 0;
     public static final int TEXTURE_COORDINATE_ARRAY_INDEX = 1;
     public static final int NORMAL_ARRAY_INDEX = 2;
     public static final int TANGENT_ARRAY_INDEX = 3;
     public static final int BITANGENT_ARRAY_INDEX = 4;
-    public static final int INDICE_ARRAY_INDEX = 5;
+    private static final int INDICE_ARRAY_INDEX = 5;
 
 
     static ArrayList<ArrayList<Float>> loadObjFile(String fileName, Context context)
@@ -28,9 +29,6 @@ public class ObjectLoader
             Log.d(LogTag.CONTEXT, "Context null");
             throw new RuntimeException("Context Null");
         }
-
-        int tangentIndex = 0;
-        int objectIndex = 0;
 
         ArrayList<ArrayList<Float>> resultList = new ArrayList<>();
         ArrayList<Float> vectorDataTemp = new ArrayList<>();
@@ -46,56 +44,46 @@ public class ObjectLoader
         String everything = FileReader.readFile("objFiles/" + fileName, context);
         String[] splitEverything = everything.split("\n");
 
-        for (int lineNum = 0; lineNum < splitEverything.length; lineNum++)
-        {
-            if (Objects.equals(splitEverything[lineNum].substring(0, 2), "v "))
-            {
-                String stringBuffer = splitEverything[lineNum].substring(2);
+        for (String aSplitEverything : splitEverything) {
+            if (Objects.equals(aSplitEverything.substring(0, 2), "v ")) {
+                String stringBuffer = aSplitEverything.substring(2);
                 String[] split = stringBuffer.split("\\s+");
                 Float[] v = new Float[3];
                 v[0] = Float.parseFloat(split[0]);
                 v[1] = Float.parseFloat(split[1]);
                 v[2] = Float.parseFloat(split[2]);
                 Collections.addAll(vectorDataTemp, v);
-            }
-            else if (Objects.equals(splitEverything[lineNum].substring(0, 2), "vt"))
-            {
-                String stringBuffer = splitEverything[lineNum].substring(3);
+            } else if (Objects.equals(aSplitEverything.substring(0, 2), "vt")) {
+                String stringBuffer = aSplitEverything.substring(3);
                 String[] split = stringBuffer.split("\\s+");
                 Float[] textureCoordsArray = new Float[2];
                 textureCoordsArray[0] = Float.parseFloat(split[0]);
                 textureCoordsArray[1] = Float.parseFloat(split[1]);
                 Collections.addAll(textureCoordTemp, textureCoordsArray);
-            }
-            else if (Objects.equals(splitEverything[lineNum].substring(0, 2), "vn"))
-            {
-                String stringBuffer = splitEverything[lineNum].substring(3);
+            } else if (Objects.equals(aSplitEverything.substring(0, 2), "vn")) {
+                String stringBuffer = aSplitEverything.substring(3);
                 String[] split = stringBuffer.split("\\s+");
                 Float[] normalArray = new Float[3];
                 normalArray[0] = Float.parseFloat(split[0]);
                 normalArray[1] = Float.parseFloat(split[1]);
                 normalArray[2] = Float.parseFloat(split[2]);
                 Collections.addAll(normalDataTemp, normalArray);
-            }
-            else if (Objects.equals(splitEverything[lineNum].substring(0, 2), "f "))
-            {
+            } else if (Objects.equals(aSplitEverything.substring(0, 2), "f ")) {
                 MainRenderer.polygonCounter += 3;
-                String stringBuffer = splitEverything[lineNum].substring(2);
+                String stringBuffer = aSplitEverything.substring(2);
                 stringBuffer.replaceAll("\\//", " ");
 
                 String[] firstSplit = stringBuffer.split("\\s+");
                 String[] finalSplit = new String[9];
                 int index = 0;
-                for (String s : firstSplit)
-                {
+                for (String s : firstSplit) {
                     String[] split = s.split("/");
                     finalSplit[index++] = split[0];
                     finalSplit[index++] = split[1];
                     finalSplit[index++] = split[2];
                 }
                 Integer[] faceValues = new Integer[9];
-                for (int i = 0; i < faceValues.length; i++)
-                {
+                for (int i = 0; i < faceValues.length; i++) {
                     faceValues[i] = Integer.parseInt(finalSplit[i]) - 1;
                 }
                 vectorDataFinal.add(vectorDataTemp.get(faceValues[0] * 3));
@@ -126,13 +114,11 @@ public class ObjectLoader
 
                 textureCoordFinal.add(textureCoordTemp.get((faceValues[7] * 2) + 0));
                 textureCoordFinal.add(textureCoordTemp.get((faceValues[7] * 2) + 1));
-                ;
 
                 normalDataFinal.add(normalDataTemp.get((faceValues[8] * 3) + 0));
                 normalDataFinal.add(normalDataTemp.get((faceValues[8] * 3) + 1));
                 normalDataFinal.add(normalDataTemp.get((faceValues[8] * 3) + 2));
 
-                tangentIndex += 3;
             }
         }
 
@@ -276,41 +262,23 @@ public class ObjectLoader
             }
             else
             {
-                Collections.addAll(result.get(VERTEX_ARRAY_INDEX), new Float[]
-                        {
-                                in.get(VERTEX_ARRAY_INDEX).get((i * 3) + 0),
-                                in.get(VERTEX_ARRAY_INDEX).get((i * 3) + 1),
-                                in.get(VERTEX_ARRAY_INDEX).get((i * 3) + 2)
-                        });
-                Collections.addAll(result.get(TEXTURE_COORDINATE_ARRAY_INDEX), new Float[]
-                        {
-                                in.get(TEXTURE_COORDINATE_ARRAY_INDEX).get((i * 2) + 0),
-                                in.get(TEXTURE_COORDINATE_ARRAY_INDEX).get((i * 2) + 1)
-                        });
-                Collections.addAll(result.get(NORMAL_ARRAY_INDEX), new Float[]
-                        {
-                                in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 0),
-                                in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 1),
-                                in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 2)
-                        });
-                Collections.addAll(result.get(NORMAL_ARRAY_INDEX), new Float[]
-                        {
-                                in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 0),
-                                in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 1),
-                                in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 2)
-                        });
-                Collections.addAll(result.get(TANGENT_ARRAY_INDEX), new Float[]
-                        {
-                                in.get(TANGENT_ARRAY_INDEX).get((i * 3) + 0),
-                                in.get(TANGENT_ARRAY_INDEX).get((i * 3) + 1),
-                                in.get(TANGENT_ARRAY_INDEX).get((i * 3) + 2)
-                        });
-                Collections.addAll(result.get(BITANGENT_ARRAY_INDEX), new Float[]
-                        {
-                                in.get(BITANGENT_ARRAY_INDEX).get((i * 3) + 0),
-                                in.get(BITANGENT_ARRAY_INDEX).get((i * 3) + 1),
-                                in.get(BITANGENT_ARRAY_INDEX).get((i * 3) + 2)
-                        });
+                Collections.addAll(result.get(VERTEX_ARRAY_INDEX), in.get(VERTEX_ARRAY_INDEX).get((i * 3) + 0),
+                        in.get(VERTEX_ARRAY_INDEX).get((i * 3) + 1),
+                        in.get(VERTEX_ARRAY_INDEX).get((i * 3) + 2));
+                Collections.addAll(result.get(TEXTURE_COORDINATE_ARRAY_INDEX), in.get(TEXTURE_COORDINATE_ARRAY_INDEX).get((i * 2) + 0),
+                        in.get(TEXTURE_COORDINATE_ARRAY_INDEX).get((i * 2) + 1));
+                Collections.addAll(result.get(NORMAL_ARRAY_INDEX), in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 0),
+                        in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 1),
+                        in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 2));
+                Collections.addAll(result.get(NORMAL_ARRAY_INDEX), in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 0),
+                        in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 1),
+                        in.get(NORMAL_ARRAY_INDEX).get((i * 3) + 2));
+                Collections.addAll(result.get(TANGENT_ARRAY_INDEX), in.get(TANGENT_ARRAY_INDEX).get((i * 3) + 0),
+                        in.get(TANGENT_ARRAY_INDEX).get((i * 3) + 1),
+                        in.get(TANGENT_ARRAY_INDEX).get((i * 3) + 2));
+                Collections.addAll(result.get(BITANGENT_ARRAY_INDEX), in.get(BITANGENT_ARRAY_INDEX).get((i * 3) + 0),
+                        in.get(BITANGENT_ARRAY_INDEX).get((i * 3) + 1),
+                        in.get(BITANGENT_ARRAY_INDEX).get((i * 3) + 2));
                 Collections.addAll(result.get(INDICE_ARRAY_INDEX), (float)result.get(INDICE_ARRAY_INDEX).size());
             }
         }
@@ -330,9 +298,6 @@ public class ObjectLoader
            throw new RuntimeException("Context Null");
        }
 
-       int tangentIndex = 0;
-       int objectIndex = 0;
-
        ArrayList<ArrayList<Float>> resultList = new ArrayList<>();
        ArrayList<Float> vectorDataTemp = new ArrayList<>();
        ArrayList<Float> textureCoordTemp = new ArrayList<>();
@@ -345,55 +310,45 @@ public class ObjectLoader
        String everything = FileReader.readFile("objFiles/" + fileName, context);
        String[] splitEverything = everything.split("\n");
 
-       for (int lineNum = 0; lineNum < splitEverything.length; lineNum++)
-       {
-           if (Objects.equals(splitEverything[lineNum].substring(0, 2), "v "))
-           {
-               String stringBuffer = splitEverything[lineNum].substring(2);
+       for (String aSplitEverything : splitEverything) {
+           if (Objects.equals(aSplitEverything.substring(0, 2), "v ")) {
+               String stringBuffer = aSplitEverything.substring(2);
                String[] split = stringBuffer.split("\\s+");
                Float[] v = new Float[3];
                v[0] = Float.parseFloat(split[0]);
                v[1] = Float.parseFloat(split[1]);
                v[2] = Float.parseFloat(split[2]);
                Collections.addAll(vectorDataTemp, v);
-           }
-           else if (Objects.equals(splitEverything[lineNum].substring(0, 2), "vt"))
-           {
-               String stringBuffer = splitEverything[lineNum].substring(3);
+           } else if (Objects.equals(aSplitEverything.substring(0, 2), "vt")) {
+               String stringBuffer = aSplitEverything.substring(3);
                String[] split = stringBuffer.split("\\s+");
                Float[] textureCoordsArray = new Float[2];
                textureCoordsArray[0] = Float.parseFloat(split[0]);
                textureCoordsArray[1] = Float.parseFloat(split[1]);
                Collections.addAll(textureCoordTemp, textureCoordsArray);
-           }
-           else if (Objects.equals(splitEverything[lineNum].substring(0, 2), "vn"))
-           {
-               String stringBuffer = splitEverything[lineNum].substring(3);
+           } else if (Objects.equals(aSplitEverything.substring(0, 2), "vn")) {
+               String stringBuffer = aSplitEverything.substring(3);
                String[] split = stringBuffer.split("\\s+");
                Float[] normalArray = new Float[3];
                normalArray[0] = Float.parseFloat(split[0]);
                normalArray[1] = Float.parseFloat(split[1]);
                normalArray[2] = Float.parseFloat(split[2]);
                Collections.addAll(normalDataTemp, normalArray);
-           }
-           else if (Objects.equals(splitEverything[lineNum].substring(0, 2), "f "))
-           {
-               String stringBuffer = splitEverything[lineNum].substring(2);
+           } else if (Objects.equals(aSplitEverything.substring(0, 2), "f ")) {
+               String stringBuffer = aSplitEverything.substring(2);
                stringBuffer.replaceAll("\\//", " ");
 
                String[] firstSplit = stringBuffer.split("\\s+");
                String[] finalSplit = new String[9];
                int index = 0;
-               for (String s : firstSplit)
-               {
+               for (String s : firstSplit) {
                    String[] split = s.split("/");
                    finalSplit[index++] = split[0];
                    finalSplit[index++] = split[1];
                    finalSplit[index++] = split[2];
                }
                Integer[] faceValues = new Integer[9];
-               for (int i = 0; i < faceValues.length; i++)
-               {
+               for (int i = 0; i < faceValues.length; i++) {
                    faceValues[i] = Integer.parseInt(finalSplit[i]) - 1;
                }
                vectorDataFinal.add(vectorDataTemp.get(faceValues[0] * 3));
@@ -424,7 +379,6 @@ public class ObjectLoader
 
                textureCoordFinal.add(textureCoordTemp.get((faceValues[7] * 2) + 0));
                textureCoordFinal.add(textureCoordTemp.get((faceValues[7] * 2) + 1));
-               ;
 
                normalDataFinal.add(normalDataTemp.get((faceValues[8] * 3) + 0));
                normalDataFinal.add(normalDataTemp.get((faceValues[8] * 3) + 1));
@@ -457,44 +411,36 @@ public class ObjectLoader
         String everything = FileReader.readFile("objFiles/" + fileName, context);
         String[] splitEverything = everything.split("\n");
 
-        for (int lineNum = 0; lineNum < splitEverything.length; lineNum++)
-        {
-            if (Objects.equals(splitEverything[lineNum].substring(0, 2), "v "))
-            {
-                String stringBuffer = splitEverything[lineNum].substring(2);
+        for (String aSplitEverything : splitEverything) {
+            if (Objects.equals(aSplitEverything.substring(0, 2), "v ")) {
+                String stringBuffer = aSplitEverything.substring(2);
                 String[] split = stringBuffer.split("\\s+");
                 Float[] v = new Float[3];
                 v[0] = Float.parseFloat(split[0]);
                 v[1] = Float.parseFloat(split[1]);
                 v[2] = Float.parseFloat(split[2]);
                 Collections.addAll(vectorDataTemp, v);
-            }
-            else if (Objects.equals(splitEverything[lineNum].substring(0, 2), "vt"))
-            {
-                String stringBuffer = splitEverything[lineNum].substring(3);
+            } else if (Objects.equals(aSplitEverything.substring(0, 2), "vt")) {
+                String stringBuffer = aSplitEverything.substring(3);
                 String[] split = stringBuffer.split("\\s+");
                 Float[] textureCoordsArray = new Float[2];
                 textureCoordsArray[0] = Float.parseFloat(split[0]);
                 textureCoordsArray[1] = Float.parseFloat(split[1]);
                 Collections.addAll(textureCoordTemp, textureCoordsArray);
-            }
-            else if (Objects.equals(splitEverything[lineNum].substring(0, 2), "f "))
-            {
-                String stringBuffer = splitEverything[lineNum].substring(2);
+            } else if (Objects.equals(aSplitEverything.substring(0, 2), "f ")) {
+                String stringBuffer = aSplitEverything.substring(2);
                 stringBuffer.replaceAll("\\//", " ");
 
                 String[] firstSplit = stringBuffer.split("\\s+");
                 String[] finalSplit = new String[6];
                 int index = 0;
-                for (String s : firstSplit)
-                {
+                for (String s : firstSplit) {
                     String[] split = s.split("/");
                     finalSplit[index++] = split[0];
                     finalSplit[index++] = split[1];
                 }
                 Integer[] faceValues = new Integer[6];
-                for (int i = 0; i < faceValues.length; i++)
-                {
+                for (int i = 0; i < faceValues.length; i++) {
                     faceValues[i] = Integer.parseInt(finalSplit[i]) - 1;
                 }
                 vectorDataFinal.add(vectorDataTemp.get(faceValues[0] * 3));

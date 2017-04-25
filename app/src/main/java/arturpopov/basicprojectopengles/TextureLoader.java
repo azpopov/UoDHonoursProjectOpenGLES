@@ -12,7 +12,7 @@ import android.opengl.GLUtils;
  * Created by arturpopov on 10/03/2017.
  */
 
-public class TextureLoader
+class TextureLoader
 {
     //http://www.learnopengles.com/android-lesson-four-introducing-basic-texturing/
     public static int loadTexture(final Context context, final int resourceId)

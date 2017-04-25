@@ -9,11 +9,8 @@ import org.apache.commons.io.IOUtils;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-/**
- * Created by arturpopov on 09/02/2017.
- */
 
-public class FileReader
+class FileReader
 {
     public static String readFile(String resourcePath, Context context)
     {

@@ -14,15 +14,9 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
-/**
- * Created by arturpopov on 31/01/2017.
- */
-
 public class MainActivity extends Activity
 {
     private GLSurfaceView mglSurfaceView;
-    private Context mContext;
-    private MainRenderer mainRenderer;
     private int options = 0;
 
     @Override
@@ -48,7 +42,7 @@ public class MainActivity extends Activity
     {
 
         mglSurfaceView = new MainSurfaceView(this);
-        mContext = this;
+        Context mContext = this;
         //Version Check
         final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         final ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
@@ -64,7 +58,7 @@ public class MainActivity extends Activity
         else
         {
             mglSurfaceView.setEGLContextClientVersion(2);
-            mainRenderer = new MainRenderer(mContext);
+            MainRenderer mainRenderer = new MainRenderer(mContext);
             mainRenderer.setOptions(options);
             mglSurfaceView.setRenderer(mainRenderer);
 
@@ -85,7 +79,7 @@ public class MainActivity extends Activity
         super.onResume();
         mglSurfaceView.onResume();
     }
-
+    //http://stackoverflow.com/questions/6609414/how-to-programmatically-restart-android-app
     public static void doRestart(Context c) {
         try {
             //check if the context is given

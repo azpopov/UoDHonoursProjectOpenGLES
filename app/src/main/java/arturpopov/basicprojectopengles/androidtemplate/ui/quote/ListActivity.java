@@ -58,12 +58,6 @@ public class ListActivity extends BaseActivity implements ArticleListFragment.Ca
         }
     }
 
-    private void setupToolbar() {
-        final ActionBar ab = getActionBarToolbar();
-        ab.setHomeAsUpIndicator(R.drawable.ic_menu);
-        ab.setDisplayHomeAsUpEnabled(true);
-    }
-
     private void setupDetailFragment() {
         ArticleDetailFragment fragment =  ArticleDetailFragment.newInstance(DummyContent.ITEMS.get(0).id);
         getFragmentManager().beginTransaction().replace(R.id.article_detail_container, fragment).commit();

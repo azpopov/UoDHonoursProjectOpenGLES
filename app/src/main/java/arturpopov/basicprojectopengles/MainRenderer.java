@@ -6,8 +6,6 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import java.util.Random;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -18,35 +16,37 @@ import javax.microedition.khronos.opengles.GL10;
 class MainRenderer implements GLSurfaceView.Renderer
 {
     public static long polygonCounter = 0;
-    double frameRate, startTime, endTime, elapsedTime;
+    private double startTime;
+    private double elapsedTime;
     //Matrices
-    private float[] mViewMatrix = new float[16];
-    private float[] mProjectionMatrix = new float[16];
-    private float[] mModelMatrix = new float[16];
-    private float[] mMVPMatrix = new float[16];
-    private float[] mVPMatrix = new float[16];
+    private final float[] mViewMatrix = new float[16];
+    private final float[] mProjectionMatrix = new float[16];
+    private final float[] mModelMatrix = new float[16];
+    private final float[] mMVPMatrix = new float[16];
+    private final float[] mVPMatrix = new float[16];
 
-    private Context mContext;
+    private final Context mContext;
 
-    ObjectContainerDefault terrain;
+    private ObjectContainerDefault terrain;
 
 
 
-    ObjectContainerDefault fireplaceObj;
+    private ObjectContainerDefault fireplaceObj;
 
-    ObjectContainerDefault trees;
-    ObjectContainerDefault grass;
-    ObjectContainer stump;
-    Skybox skybox;
+    private ObjectContainerDefault trees;
+    private ObjectContainerDefault grass;
+    private ObjectContainer stump;
+    private Skybox skybox;
     //Shader Handles
     @SuppressWarnings("FieldCanBeLocal")
     private int programDefaultHandle, programNormalMapHandle,  programObjDefaultHandle;
 
     //Uniform Handles
     private int mMVPMatrixHandle, u_ViewMatrix_NormalMapHandle, u_ModelMatrix_NormalMapHandle, u_NormalMatrix_NormalMapHandle, u_LightPositionWorldSpace_NormalMapHandle, u_MVPMatrix_NormalMapHandle, u_ViewPositionWorldSpace_NormalMapHandle;
-    private int u_MVPMatrix_ObjDefaultHandle, u_ViewMatrix_ObjDefaultHandle, u_ModelMatrix_ObjDefaultHandle, u_Option_ObjDefaultHandle, u_LightPositionWorldSpace_ObjDefaultHandle, u_ViewPositionWorldSpace_ObjDefaultHandle, u_NormalMatrix_ObjDefaultHandle,u_ShadowProjMatrix_ObjDefaultHandle, u_EmitMode_ObjDefaultHandle;
-    public float eyeX, eyeY, eyeZ;
-    private float[] mLightProjectionMatrix = new float[16];
+    private int u_MVPMatrix_ObjDefaultHandle, u_ViewMatrix_ObjDefaultHandle, u_ModelMatrix_ObjDefaultHandle, u_Option_ObjDefaultHandle, u_LightPositionWorldSpace_ObjDefaultHandle, u_ViewPositionWorldSpace_ObjDefaultHandle, u_NormalMatrix_ObjDefaultHandle, u_EmitMode_ObjDefaultHandle;
+    public float eyeX;
+    public float eyeY;
+    private final float[] mLightProjectionMatrix = new float[16];
     private int normalAlphaID = R.drawable.particule_normaleastwind;
     private int colourDepthID = R.drawable.particule_colour_depth3;
     private int quantizedID = R.drawable.whiteyellow;
@@ -59,11 +59,10 @@ class MainRenderer implements GLSurfaceView.Renderer
         this.mContext = mContext;
     }
 
-    //ParticleGenerator particleGenerator;
     CelShadedParticleGenerator celShadedParticleGenerator;
 
     //OPTIONS
-    int optionVariationOnL = 0;
+    private int optionVariationOnL = 0;
     @Override
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config)
     {
@@ -75,7 +74,6 @@ class MainRenderer implements GLSurfaceView.Renderer
 
         eyeX = 0.0f;
         eyeY = 0.0f;
-        eyeZ = 3.f;
 
 
         BuildShaders();
@@ -124,7 +122,6 @@ class MainRenderer implements GLSurfaceView.Renderer
         u_LightPositionWorldSpace_ObjDefaultHandle = GLES20.glGetUniformLocation(programObjDefaultHandle, "u_LightPositionWorldSpace");
         u_NormalMatrix_ObjDefaultHandle = GLES20.glGetUniformLocation(programObjDefaultHandle, "u_NormalMatrix");
         u_EmitMode_ObjDefaultHandle = GLES20.glGetUniformLocation(programObjDefaultHandle, "u_EmitMode");
-        u_ShadowProjMatrix_ObjDefaultHandle = GLES20.glGetUniformLocation(programObjDefaultHandle, "uShadowProjMatrix");
         u_ViewPositionWorldSpace_ObjDefaultHandle = GLES20.glGetUniformLocation(programObjDefaultHandle, "u_ViewPositionWorldSpace");
         u_Option_ObjDefaultHandle = GLES20.glGetUniformLocation(programObjDefaultHandle, "u_Option");
     }
@@ -158,47 +155,34 @@ class MainRenderer implements GLSurfaceView.Renderer
     {
         Log.d(LogTag.COUNTER, "triangles in scene in scene: " + polygonCounter);
         float[] viewPosition = {0.f, 0.5f, 3.f};
-        eyeX = Math.min(eyeX, 10.f);
-        eyeX = Math.max(eyeX, -10.f);
-        eyeY = Math.min(eyeY, 20.f);
-        eyeY = Math.max(eyeY, -10.f);
-        Matrix.setLookAtM(mViewMatrix, 0,
-                viewPosition[0], viewPosition[1], viewPosition[2], //EYE x,y,z
-                eyeX / 10, eyeY / 10, 0.0f, //LOOKING DIRECTION x,y,z
-                0.0f, 1.0f, 0.0f); //Define 'UP' direction)
-        Matrix.translateM(mViewMatrix, 0, 0.0f, 0.0f, 0.f);
+        calculcateViewMatrix(viewPosition);
 
 
         float[] lightPosition = new float[]{ 0.f, 1.f, -1.f, 1.0f};
-
+        float[] normalMatrix = new float[16];
+        float[] normalMatrixInverted = new float[16];
+        float[] lightPositionWorldSpace = new float[4];
 
         Matrix.setIdentityM(mVPMatrix, 0);
         Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
-
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
-
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
+
         skybox.renderSkybox(mViewMatrix, mProjectionMatrix);
         celShadedParticleGenerator.drawQueuedParticles(mVPMatrix, mViewMatrix, lightPosition);
 
-
+        //Calculate required matrices
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.translateM(mModelMatrix, 0, 0.0f, -1.2f, 0.0f);
-
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-
-        float[] normalMatrix = new float[16];
         Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-        float[] normalMatrixInverted = new float[16];
         Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
         Matrix.setIdentityM(normalMatrix, 0);
         Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
-
-        float[] lightPositionWorldSpace = new float[4];
         Matrix.multiplyMV(lightPositionWorldSpace, 0, mModelMatrix, 0, lightPosition, 0);
         Matrix.multiplyMV(lightPositionWorldSpace, 0, mViewMatrix, 0, lightPositionWorldSpace, 0);
-
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+        //Set Up and Draw
         updateObjDefaultUniforms(lightPositionWorldSpace, normalMatrix, viewPosition, 0);
         terrain.draw(programObjDefaultHandle);
 
@@ -206,20 +190,18 @@ class MainRenderer implements GLSurfaceView.Renderer
         Matrix.translateM(mModelMatrix, 0, 0.f, -1.2f, 0.f);
         Matrix.scaleM(mModelMatrix, 0 , 0.1f, 0.1f, 0.1f);
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-
         normalMatrix = new float[16];
         Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
         normalMatrixInverted = new float[16];
         Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
         Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
-
         lightPositionWorldSpace = new float[4];
         Matrix.multiplyMV(lightPositionWorldSpace, 0, mModelMatrix, 0, lightPosition, 0);
         Matrix.multiplyMV(lightPositionWorldSpace, 0, mViewMatrix, 0, lightPositionWorldSpace, 0);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
         updateObjDefaultUniforms(lightPositionWorldSpace, normalMatrix,viewPosition, 0);
         fireplaceObj.draw(programObjDefaultHandle);
-        int err = GLES20.GL_INVALID_OPERATION  ;
+        int err;
         while((err = GLES20.glGetError()) != GLES20.GL_NO_ERROR)
         {
             Log.d(LogTag.FRAMEBUFFER, "Error is "+err);
@@ -227,13 +209,11 @@ class MainRenderer implements GLSurfaceView.Renderer
         GLES20.glUniform1i(u_EmitMode_ObjDefaultHandle, 1);
         updateObjDefaultUniforms(lightPosition, normalMatrix, viewPosition, 0);
 
-        //lightSourceObj.draw(programObjDefaultHandle);
         GLES20.glUniform1i(u_EmitMode_ObjDefaultHandle, 0);
 
 
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.translateM(mModelMatrix, 0, 0.0f, -1.0f, 0.0f);
-        //Matrix.scaleM(mModelMatrix, 0, 0.1f, 0.1f, 0.1f);
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
 
         normalMatrix = new float[16];
@@ -277,6 +257,18 @@ class MainRenderer implements GLSurfaceView.Renderer
         double fps = 1000 / elapsedTime;
         Log.d(LogTag.FRAMERATE, "FrameRate is " + fps + " fps");
         startTime = System.currentTimeMillis();
+    }
+
+    private void calculcateViewMatrix(float[] viewPosition) {
+        eyeX = Math.min(eyeX, 10.f);
+        eyeX = Math.max(eyeX, -10.f);
+        eyeY = Math.min(eyeY, 20.f);
+        eyeY = Math.max(eyeY, -10.f);
+        Matrix.setLookAtM(mViewMatrix, 0,
+                viewPosition[0], viewPosition[1], viewPosition[2], //EYE x,y,z
+                eyeX / 10, eyeY / 10, 0.0f, //LOOKING DIRECTION x,y,z
+                0.0f, 1.0f, 0.0f); //Define 'UP' direction)
+        Matrix.translateM(mViewMatrix, 0, 0.0f, 0.0f, 0.f);
     }
 
     private void updateDefaultUniforms()
@@ -332,12 +324,12 @@ class MainRenderer implements GLSurfaceView.Renderer
                 quantizedID = R.drawable.greytintwhitecenterwithgradient;
                 bias = new float[]{ 0.2f, -.2f, 0.f};
                 skyboxIDs = new int[]{
-                        R.drawable.standart_sky_right1,
-                        R.drawable.standart_sky_left2,
-                        R.drawable.standart_sky_top3,
-                        R.drawable.standart_sky_bottom4,
-                        R.drawable.standart_sky_back6,
-                        R.drawable.standart_sky_front5
+                        R.drawable.green_nebula_right1,
+                        R.drawable.green_nebula_left2,
+                        R.drawable.green_nebula_top3,
+                        R.drawable.green_nebula_bottom4,
+                        R.drawable.green_nebula_back6,
+                        R.drawable.green_nebula_front5
                 };
                 break;
 

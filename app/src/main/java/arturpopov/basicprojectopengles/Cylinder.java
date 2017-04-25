@@ -48,7 +48,7 @@ public class Cylinder implements IPrimitive
         setSize(length, radius);
     }
 
-    public void setSize(int length, int radius)
+    private void setSize(int length, int radius)
     {
         this.length = length;
         this.radius = radius;
@@ -62,7 +62,6 @@ public class Cylinder implements IPrimitive
         mVerticeBuffer = ByteBuffer.allocateDirect(vetriceData.length * BYTES_PER_FLOAT)
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
         mVerticeBuffer.put(vetriceData).position(0);
-       // vetriceData = null;
 
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[0]);
         GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mVerticeBuffer.capacity() * BYTES_PER_FLOAT,
@@ -185,7 +184,7 @@ public class Cylinder implements IPrimitive
         }
     }
 
-    public void setColours(float r, float g, float b, float a)
+    private void setColours(float r, float g, float b, float a)
     {
         this.r = r;
         this.g = g;

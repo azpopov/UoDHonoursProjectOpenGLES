@@ -17,7 +17,7 @@ public class LogUtil {
     }
 
 
-    public static String makeLogTag(String str) {
+    private static String makeLogTag(String str) {
         if (str.length() > MAX_TAG_LENGTH - LOG_PREFIX_LENGTH) {
             return LOG_PREFIX + str.substring(0, MAX_TAG_LENGTH - LOG_PREFIX_LENGTH - 1);
         }

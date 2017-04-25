@@ -13,11 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Created by arturpopov on 11/03/2017.
- */
-
-public class CelShadedParticleGenerator
+class CelShadedParticleGenerator
 {
     private static final int BYTES_PER_FLOAT = 4;
 
@@ -30,8 +26,8 @@ public class CelShadedParticleGenerator
     private final Context mContext;
     private int programHandle;
 
-    private int[] mArrayVertexHandles = new int[NUMBER_HANDLES];
-    private int[] mArrayUniformHandles = new int[UNIFORM_COUNT];
+    private final int[] mArrayVertexHandles = new int[NUMBER_HANDLES];
+    private final int[] mArrayUniformHandles = new int[UNIFORM_COUNT];
     private int textureColourActiveID, textureNormalAlphaActiveID, textureCelShadingActiveID;
     private List<Particle> mParticleContainer = new ArrayList<>();
 
@@ -39,12 +35,12 @@ public class CelShadedParticleGenerator
     private double mLastTime;
     private double deltaTime;
     private int lastUsedParticleIndex = 0;
-    private float spread = 0.1f;
-    private Random rnd = new Random();
+    private final float spread = 0.1f;
+    private final Random rnd = new Random();
     private int queuedParticleGeneration;
 
 
-    int optionVariation = 0;
+    private int optionVariation = 0;
     private float[] bias = new float[]{0.f, 0.f, 0.f};
 
     CelShadedParticleGenerator(Context mContext)
@@ -142,12 +138,12 @@ public class CelShadedParticleGenerator
         );
 
 
-        GLES30.glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
-        GLES30.glVertexAttribDivisor(1, 1); // positions : one per quad (its center)                 -> 1
+        GLES30.glVertexAttribDivisor(0, 0);
+        GLES30.glVertexAttribDivisor(1, 1);
 
         GLES30.glDrawArraysInstanced(GLES30.GL_TRIANGLE_STRIP, 0, 4, particuleCount);
-        GLES30.glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
-        GLES30.glVertexAttribDivisor(1, 0); // positions : one per quad (its center)                 -> 1
+        GLES30.glVertexAttribDivisor(0, 0);
+        GLES30.glVertexAttribDivisor(1, 0);
 
         GLES30.glDisable(GLES30.GL_BLEND);
         GLES30.glDisable(GLES20.GL_DEPTH_TEST);
@@ -164,6 +160,7 @@ public class CelShadedParticleGenerator
         GLES30.glBufferSubData(GLES30.GL_ARRAY_BUFFER, 0, particuleCount * BYTES_PER_FLOAT * 4, mParticulePositionBuffer);
     }
 
+    @SuppressWarnings("PointlessArithmeticExpression")
     private int simulateParticles(float[] cameraPosition)
     {
         int particuleCount = 0;
@@ -179,7 +176,6 @@ public class CelShadedParticleGenerator
                     //gravity
                     float gravity = p.speed[1] + 9.81f * (float) deltaTime; //define gravity here
                     p.speed[1] = gravity * 0.8f; //Adjust gravity strength
-                    //p.speed = new float[]{p.speed[0] + bias[0],p.speed[1] + bias[1],p.speed[2] + bias[2] };
                     float rebinder = 1.0f;
                     if(p.halfLife > p.timeToLive)
                         rebinder = -0.2f;
@@ -216,7 +212,6 @@ public class CelShadedParticleGenerator
 
     private void generateNewParticles(int particuleCount)
     {
-        //int newParticles = (int)(deltaTime * 50);
         double newParticles = (MAX_PARTICLES - particuleCount) * deltaTime;
         if(newParticles > PARTICLE_SPAWN_LIMIT)
             newParticles = PARTICLE_SPAWN_LIMIT;
@@ -260,7 +255,7 @@ public class CelShadedParticleGenerator
         float[] cameraPosition = Arrays.copyOfRange(inverseView, 12, inverseView.length);
         int particuleCount;
         particuleCount = simulateParticles(cameraPosition);
-        generateQueuedParticles(particuleCount);
+        generateQueuedParticles();
 
         if(optionVariation != 0)
         {
@@ -276,10 +271,8 @@ public class CelShadedParticleGenerator
 
     }
 
-    private void generateQueuedParticles(int particuleCount)
+    private void generateQueuedParticles()
     {
-
-        //int newParticles = (int)(deltaTime * 50);
         if(queuedParticleGeneration <= 0)
         {
             return;
@@ -384,7 +377,7 @@ public class CelShadedParticleGenerator
     }
 
 
-    int findUnusedParticle()
+    private int findUnusedParticle()
     {
         int result = 0;
 

@@ -1,17 +1,11 @@
 package arturpopov.basicprojectopengles;
 
 import android.content.Context;
-import android.graphics.Point;
-import android.graphics.PointF;
 import android.opengl.GLSurfaceView;
 import android.support.v4.view.VelocityTrackerCompat;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 
 /**
  * Created by arturpopov on 31/01/2017.
@@ -22,7 +16,6 @@ public class MainSurfaceView extends GLSurfaceView {
 
 
     private VelocityTracker mVelocityTracker = null;
-    private float timeSinceDown = 0;
     private long timePressed;
 
     public MainSurfaceView(Context context) {
@@ -38,7 +31,7 @@ public class MainSurfaceView extends GLSurfaceView {
         int pointerId = event.getPointerId(index);
 
 
-        if(event != null && mRenderer != null)
+        if(mRenderer != null)
         {
             switch(action)
             {

@@ -2,12 +2,10 @@ package arturpopov.basicprojectopengles.androidtemplate.ui.base;
 
 import android.app.Fragment;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import arturpopov.basicprojectopengles.MainActivity;
 import arturpopov.basicprojectopengles.R;
@@ -34,7 +32,7 @@ public class BaseFragment extends Fragment {
      * @param dummyItem
      * @return the inflated view
      */
-    public View inflateAndBind(LayoutInflater inflater, ViewGroup container, int layout, final DummyContent.DummyItem dummyItem) {
+    protected View inflateAndBind(LayoutInflater inflater, ViewGroup container, int layout, final DummyContent.DummyItem dummyItem) {
         View view = inflater.inflate(layout, container, false);
         ButterKnife.bind(this, view);
 
@@ -53,7 +51,7 @@ public class BaseFragment extends Fragment {
         return view;
     }
     /** Called when the user taps the Send button */
-    public void sendMessage(View view, DummyContent.DummyItem dummyItem) {
+    private void sendMessage(View view, DummyContent.DummyItem dummyItem) {
         Intent intent = new Intent(getActivity(), MainActivity.class);
         intent.putExtra("LEVEL", dummyItem.id);
         startActivity(intent);

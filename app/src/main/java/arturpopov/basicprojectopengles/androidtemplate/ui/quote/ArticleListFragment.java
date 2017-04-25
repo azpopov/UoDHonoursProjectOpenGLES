@@ -88,7 +88,7 @@ public class ArticleListFragment extends ListFragment {
     /**
      * Called when the fragment attaches to the context
      */
-    protected void onAttachToContext(Context context) {
+    private void onAttachToContext(Context context) {
         if (!(context instanceof Callback)) {
             throw new IllegalStateException("Activity must implement callback interface.");
         }

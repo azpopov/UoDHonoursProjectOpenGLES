@@ -43,11 +43,6 @@ class ShaderBuilder
         GLES30.glGetProgramiv(programHandle, GLES20.GL_INFO_LOG_LENGTH, length, 0);
         if(linkStatus[0] == 0)
         {
-            int err;
-            while((err = GLES30.glGetError()) != GLES30.GL_NO_ERROR)
-            {
-                int err2 = err;
-            }
             String infoLog;
             infoLog = GLES30.glGetProgramInfoLog(programHandle);
             Log.d(LogTag.SHADERS, "Error Creating Program." + infoLog);
@@ -73,7 +68,7 @@ class ShaderBuilder
 
 
 
-    public static int LoadVertexShader(String shaderName, Context context)
+    private static int LoadVertexShader(String shaderName, Context context)
     {
         int vertexShaderHandle = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
         String vertexShader = FileReader.readFile(context.getResources().getString(R.string.relativeShaderPath) + shaderName + ".vert", context);
@@ -99,7 +94,7 @@ class ShaderBuilder
         }
         return vertexShaderHandle;
     }
-    public static int LoadFragmentShader(String shaderName, Context context)
+    private static int LoadFragmentShader(String shaderName, Context context)
     {
         int fragmentShaderHandle = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
         String fragmentShader = FileReader.readFile(context.getResources().getString(R.string.relativeShaderPath) + shaderName + ".frag", context);

@@ -1,6 +1,5 @@
 package arturpopov.basicprojectopengles;
 
-import android.graphics.Shader;
 import android.opengl.GLES20;
 import android.opengl.GLES30;
 import android.util.Log;
@@ -9,25 +8,24 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import javax.microedition.khronos.opengles.GL;
-
 import static arturpopov.basicprojectopengles.IPrimitive.BYTES_PER_FLOAT;
 
 /**
  * Created by arturpopov on 23/03/2017.
  */
 
-public class ShadowMapping
+class ShadowMapping
 {
     private static final int NUMBER_OF_HANDLES = 4;
     private static final int FRAME_BUFFER_HANDLE = 0, RENDER_TARGET_TEXTURE = 1, DEPTH_BUFFER_HANDLE = 2, QUAD_VERTEX_BUFFER = 3;
-    int[] handles = new int[NUMBER_OF_HANDLES];
+    private final int[] handles = new int[NUMBER_OF_HANDLES];
 
-    int shadow_mvpMatrixUniform;
+      private int shadow_mvpMatrixUniform;
 
-    public int width = 888, height = 540;
+    private final int width = 888;
+    private final int height = 540;
 
-    static final float g_quad_vertex_buffer_data[] = {
+    private static final float[] g_quad_vertex_buffer_data = {
         -1.0f, -1.0f, 0.0f,
         1.0f, -1.0f, 0.0f,
         -1.0f,  1.0f, 0.0f,
@@ -38,7 +36,7 @@ public class ShadowMapping
 
     private int mFullScreenQuadProgram;
 
-    private int[] quadHandles = new int[2];
+    private final int[] quadHandles = new int[2];
     void createREnderColourFrameBuffer()
     {
         GLES20.glGenFramebuffers(1, handles, FRAME_BUFFER_HANDLE);
@@ -115,7 +113,6 @@ public class ShadowMapping
         for (ObjectContainerDefault obj: arrayObjects)
         {
             obj.drawPosition();
-            obj.mShadowSampleTextureHandle = handles[RENDER_TARGET_TEXTURE];
         }
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);

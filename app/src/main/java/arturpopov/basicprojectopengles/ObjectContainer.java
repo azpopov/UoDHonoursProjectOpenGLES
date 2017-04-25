@@ -18,9 +18,12 @@ public class ObjectContainer implements IPrimitive
 {
     private FloatBuffer mVerticeBuffer, mTexCoordBuffer, mNormalBuffer, mTangentBuffer, mBiTangentBuffer;
     private Integer verticeHandle, texCoordHandle, normalHandle, tangentHandle, biTangentHandle;
-    public Integer mNormalMapTextureDataHandle, mDiffuseTextureDataHandle, mNormalMapTextureUniform, mDiffuseTextureUniform;
+    private Integer mNormalMapTextureDataHandle;
+    private Integer mDiffuseTextureDataHandle;
+    private Integer mNormalMapTextureUniform;
+    private Integer mDiffuseTextureUniform;
 
-    private int[] buffers = new int[6];
+    private final int[] buffers = new int[6];
 
     public void initialize(String fileName, Context context, int textureDefault, int textureNormalMap)
     {

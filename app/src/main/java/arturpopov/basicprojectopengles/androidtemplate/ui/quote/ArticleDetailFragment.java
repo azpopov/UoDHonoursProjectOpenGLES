@@ -1,9 +1,7 @@
 package arturpopov.basicprojectopengles.androidtemplate.ui.quote;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,7 +14,6 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
-import arturpopov.basicprojectopengles.MainActivity;
 import arturpopov.basicprojectopengles.R;
 import butterknife.Bind;
 import arturpopov.basicprojectopengles.androidtemplate.dummy.DummyContent;
