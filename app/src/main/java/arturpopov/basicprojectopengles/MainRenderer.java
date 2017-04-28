@@ -4,6 +4,7 @@ import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.provider.Settings;
 import android.util.Log;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -16,6 +17,7 @@ import javax.microedition.khronos.opengles.GL10;
 class MainRenderer implements GLSurfaceView.Renderer
 {
     public static long polygonCounter = 0;
+    public static int polygonCounter2= 0;
     private double startTime;
     private double elapsedTime;
     //Matrices
@@ -31,11 +33,12 @@ class MainRenderer implements GLSurfaceView.Renderer
 
 
 
-    private ObjectContainerDefault fireplaceObj;
+    private ObjectContainerDefault fireplaceObj[] = new ObjectContainerDefault[2];
 
     private ObjectContainerDefault trees;
     private ObjectContainerDefault grass;
-    private ObjectContainer stump;
+    private ObjectContainer stump[] = new ObjectContainer[2];
+
     private Skybox skybox;
     //Shader Handles
     @SuppressWarnings("FieldCanBeLocal")
@@ -52,6 +55,9 @@ class MainRenderer implements GLSurfaceView.Renderer
     private int quantizedID = R.drawable.whiteyellow;
     private int[] skyboxIDs;
     private float[] bias = new float[]{0.f, 0.f, 0.f};
+
+    double timeRenderingStarted;
+    public static int clicks = 0;
 
 
     MainRenderer(Context mContext)
@@ -78,30 +84,40 @@ class MainRenderer implements GLSurfaceView.Renderer
 
         BuildShaders();
 
-        fireplaceObj =  new ObjectContainerDefault();
-        fireplaceObj.initialize("fireplace.obj", mContext, R.drawable.fireplace);
+        //fireplaceObj =  new ObjectContainerDefault();
+        //fireplaceObj.initialize("fireplace.obj", mContext, R.drawable.fireplace);
 
-        terrain = new ObjectContainerDefault();
-        terrain.initializeTerrain("terrain.obj", mContext, R.drawable.terrain_texture);
+        //terrain = new ObjectContainerDefault();
+        //terrain.initializeTerrain("terrain.obj", mContext, R.drawable.terrain_texture);
 
-        trees = new ObjectContainerDefault();
-        trees.initialize("scenetrees.obj", mContext, R.drawable.pine);
+        //trees = new ObjectContainerDefault();
+        //trees.initialize("scenetrees.obj", mContext, R.drawable.pine);
 
-        grass = new ObjectContainerDefault();
-        grass.initialize("grass.obj", mContext, R.drawable.grass_texture);
+        //grass = new ObjectContainerDefault();
+        //grass.initialize("grass.obj", mContext, R.drawable.grass_texture);
 
-        stump = new ObjectContainer();
-        stump.initialize("pine_stump.obj", mContext, R.drawable.tree_stomp_colmap, R.drawable.tree_stomp_normap);
+        for (int i = 0; i < stump.length; i++){
+            stump[i] = new ObjectContainer();
+             stump[i].initialize("pine_stump.obj", mContext, R.drawable.tree_stomp_colmap, R.drawable.tree_stomp_normap);
+        }
+
+        for (int i = 0; i < fireplaceObj.length; i++){
+            fireplaceObj[i] = new ObjectContainerDefault();
+            fireplaceObj[i].initialize("fireplace.obj", mContext, R.drawable.fireplace);
+        }
 
         defineUniformHandles();
         celShadedParticleGenerator = new CelShadedParticleGenerator(mContext);
 
         celShadedParticleGenerator.create(normalAlphaID, colourDepthID, quantizedID, optionVariationOnL, bias );
 
-        skybox = new Skybox();
+        //skybox = new Skybox();
 
-        skybox.setFaceTextures(skyboxIDs[0],skyboxIDs[1],skyboxIDs[2],skyboxIDs[3],skyboxIDs[4],skyboxIDs[5]);
-        skybox.initialize(mContext);
+        //skybox.setFaceTextures(skyboxIDs[0],skyboxIDs[1],skyboxIDs[2],skyboxIDs[3],skyboxIDs[4],skyboxIDs[5]);
+        //skybox.initialize(mContext);
+
+
+        timeRenderingStarted = System.currentTimeMillis();
     }
 
     private void defineUniformHandles()
@@ -153,9 +169,12 @@ class MainRenderer implements GLSurfaceView.Renderer
     @Override
     public void onDrawFrame(GL10 glUnused)
     {
-        Log.d(LogTag.COUNTER, "triangles in scene in scene: " + polygonCounter);
+        double elapsedTime = System.currentTimeMillis() - timeRenderingStarted;
+        Log.d(LogTag.FRAMERATE, "time elapsed: "+  (elapsedTime));
+        Log.d(LogTag.FRAMERATE, "triangles in scene in scene: " + polygonCounter);
         float[] viewPosition = {0.f, 0.5f, 3.f};
         calculcateViewMatrix(viewPosition);
+
 
 
         float[] lightPosition = new float[]{ 0.f, 1.f, -1.f, 1.0f};
@@ -163,44 +182,19 @@ class MainRenderer implements GLSurfaceView.Renderer
         float[] normalMatrixInverted = new float[16];
         float[] lightPositionWorldSpace = new float[4];
 
-        Matrix.setIdentityM(mVPMatrix, 0);
-        Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
+        Matrix.setIdentityM(mVPMatrix, 0);
+        Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+        celShadedParticleGenerator.drawStressParticles(mVPMatrix, mViewMatrix, lightPosition);
+/*
         skybox.renderSkybox(mViewMatrix, mProjectionMatrix);
         celShadedParticleGenerator.drawQueuedParticles(mVPMatrix, mViewMatrix, lightPosition);
 
-        //Calculate required matrices
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 0.0f, -1.2f, 0.0f);
-        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-        Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-        Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
-        Matrix.setIdentityM(normalMatrix, 0);
-        Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
-        Matrix.multiplyMV(lightPositionWorldSpace, 0, mModelMatrix, 0, lightPosition, 0);
-        Matrix.multiplyMV(lightPositionWorldSpace, 0, mViewMatrix, 0, lightPositionWorldSpace, 0);
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-        //Set Up and Draw
-        updateObjDefaultUniforms(lightPositionWorldSpace, normalMatrix, viewPosition, 0);
-        terrain.draw(programObjDefaultHandle);
 
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 0.f, -1.2f, 0.f);
-        Matrix.scaleM(mModelMatrix, 0 , 0.1f, 0.1f, 0.1f);
-        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-        normalMatrix = new float[16];
-        Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-        normalMatrixInverted = new float[16];
-        Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
-        Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
-        lightPositionWorldSpace = new float[4];
-        Matrix.multiplyMV(lightPositionWorldSpace, 0, mModelMatrix, 0, lightPosition, 0);
-        Matrix.multiplyMV(lightPositionWorldSpace, 0, mViewMatrix, 0, lightPositionWorldSpace, 0);
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-        updateObjDefaultUniforms(lightPositionWorldSpace, normalMatrix,viewPosition, 0);
-        fireplaceObj.draw(programObjDefaultHandle);
+
+
         int err;
         while((err = GLES20.glGetError()) != GLES20.GL_NO_ERROR)
         {
@@ -231,26 +225,72 @@ class MainRenderer implements GLSurfaceView.Renderer
         trees.draw(programObjDefaultHandle);
 
         grass.draw(programObjDefaultHandle);
-
+        */
+        /*
+        //Calculate required matrices
         Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, -3.0f, -1.0f, 0.5f);
-        Matrix.rotateM(mModelMatrix, 0, -90, 0, 1.f, 0);
-        Matrix.scaleM(mModelMatrix, 0, 0.5f, 0.5f, 0.5f);
+        Matrix.translateM(mModelMatrix, 0, 0.0f, -1.2f, 0.0f);
         Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-
-        normalMatrix = new float[16];
         Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-        normalMatrixInverted = new float[16];
         Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
+        Matrix.setIdentityM(normalMatrix, 0);
         Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
-
-
-        lightPositionWorldSpace = new float[4];
         Matrix.multiplyMV(lightPositionWorldSpace, 0, mModelMatrix, 0, lightPosition, 0);
         Matrix.multiplyMV(lightPositionWorldSpace, 0, mViewMatrix, 0, lightPositionWorldSpace, 0);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-        updateNormalMappingUniforms(lightPosition, viewPosition, normalMatrix);
-        stump.draw(programNormalMapHandle);
+        //Set Up and Draw
+        updateObjDefaultUniforms(lightPositionWorldSpace, normalMatrix, viewPosition, 0);
+        terrain.draw(programObjDefaultHandle);
+        */
+
+        for(int i = 0; i < clicks; i++)
+        {
+            if(i >= stump.length)
+                break;
+            Matrix.setIdentityM(mModelMatrix, 0);
+            Matrix.translateM(mModelMatrix, 0, -3.0f + i, -1.0f, 0.5f);
+            Matrix.rotateM(mModelMatrix, 0, -90, 0, 1.f, 0);
+            Matrix.scaleM(mModelMatrix, 0, 0.5f, 0.5f, 0.5f);
+            Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+
+            normalMatrix = new float[16];
+            Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+            normalMatrixInverted = new float[16];
+            Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
+            Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
+
+
+            lightPositionWorldSpace = new float[4];
+            Matrix.multiplyMV(lightPositionWorldSpace, 0, mModelMatrix, 0, lightPosition, 0);
+            Matrix.multiplyMV(lightPositionWorldSpace, 0, mViewMatrix, 0, lightPositionWorldSpace, 0);
+            Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+            updateNormalMappingUniforms(lightPosition, viewPosition, normalMatrix);
+            stump[i].draw(programNormalMapHandle);
+            Log.d(LogTag.FRAMERATE, "just drew: "+ i);
+        }
+
+
+        for(int i = 0; i < clicks; i++)
+        {
+            if(i >= fireplaceObj.length)
+                break;
+            Matrix.setIdentityM(mModelMatrix, 0);
+            Matrix.translateM(mModelMatrix, 0, -5.0f +i, -1.2f, 0.f);
+            Matrix.scaleM(mModelMatrix, 0 , 0.1f, 0.1f, 0.1f);
+            Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+            normalMatrix = new float[16];
+            Matrix.multiplyMM(normalMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+            normalMatrixInverted = new float[16];
+            Matrix.invertM(normalMatrixInverted, 0, normalMatrix, 0);
+            Matrix.transposeM(normalMatrix, 0, normalMatrixInverted, 0);
+            lightPositionWorldSpace = new float[4];
+            Matrix.multiplyMV(lightPositionWorldSpace, 0, mModelMatrix, 0, lightPosition, 0);
+            Matrix.multiplyMV(lightPositionWorldSpace, 0, mViewMatrix, 0, lightPositionWorldSpace, 0);
+            Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+            updateObjDefaultUniforms(lightPositionWorldSpace, normalMatrix,viewPosition, 0);
+            fireplaceObj[i].draw(programObjDefaultHandle);
+            Log.d(LogTag.FRAMERATE, "just drew: "+ i);
+        }
 
 
         elapsedTime = System.currentTimeMillis() - startTime;

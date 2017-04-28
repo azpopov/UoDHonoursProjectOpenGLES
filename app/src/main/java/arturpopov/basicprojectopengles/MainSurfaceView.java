@@ -44,7 +44,8 @@ public class MainSurfaceView extends GLSurfaceView {
                     mVelocityTracker.addMovement(event);
                    break;
                 case MotionEvent.ACTION_UP:
-                    mRenderer.celShadedParticleGenerator.queueSmokePuff(10);
+                    //mRenderer.celShadedParticleGenerator.queueSmokePuff(10);
+                    mRenderer.clicks++;
                     if(System.currentTimeMillis() - timePressed > 5000)
                         MainActivity.doRestart(getContext());
                     Log.d(LogTag.TOUCH_EVENT, "CLICK");

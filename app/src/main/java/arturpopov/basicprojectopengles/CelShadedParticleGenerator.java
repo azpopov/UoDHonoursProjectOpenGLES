@@ -20,7 +20,7 @@ class CelShadedParticleGenerator
     private static final int VERTEX_ARRAY_ID_INDEX = 0, BILLBOARD_BUFFER_HANDLE_INDEX = 1, PARTICULE_POSITION_HANDLE_INDEX = 2;
     private static final int CAMERA_RIGHT_WORLDSPACE_HANDLE_INDEX = 0, CAMERA_UP_WORLDSPACE_HANDLE_INDEX = 1, VIEW_PROJECTION_MATRIX_HANDLE_INDEX = 2, TEXTURE_COLOUR_SAMPLER_HANDLE_INDEX = 3, TEXTURE_NORMAL_DEPTH_SAMPLER_HANDLE_INDEX = 4, VIEW_MATRIX_HANDLE_INDEX = 5, TEXTURE_CEL_SHADING_SAMPLER_HANDLE_INDEX = 6, VARIABLE_L_OPTION_HANDLE_INDEX = 7, LIGHT_POSITION_WORLD_SPACE_HANDLE_INDEX = 8;
     private static final int NUMBER_HANDLES = 3, UNIFORM_COUNT = 9;
-    private static final int MAX_PARTICLES = 1000;
+    private static final int MAX_PARTICLES = 600;
     private static final int PARTICLE_SPAWN_LIMIT = 10;
 
     private final Context mContext;
@@ -201,7 +201,6 @@ class CelShadedParticleGenerator
                 } else
                 {
                     p.distanceCamera = -1.f;
-                    MainRenderer.polygonCounter--;
                 }
                 particuleCount++;
 
@@ -215,7 +214,7 @@ class CelShadedParticleGenerator
         double newParticles = (MAX_PARTICLES - particuleCount) * deltaTime;
         if(newParticles > PARTICLE_SPAWN_LIMIT)
             newParticles = PARTICLE_SPAWN_LIMIT;
-        MainRenderer.polygonCounter += newParticles;
+
         for(int i = 0; i < newParticles; i++)
         {
             int particleIndex = findUnusedParticle();
@@ -268,7 +267,6 @@ class CelShadedParticleGenerator
 
         updateUniforms(viewProjectionMatrix, viewMatrix, lightPositionWorldSpace);
         setVertexAttributes(particuleCount);
-
     }
 
     private void generateQueuedParticles()
@@ -300,6 +298,60 @@ class CelShadedParticleGenerator
         }
     }
 
+    public void drawStressParticles(float[] viewProjectionMatrix, float[] viewMatrix, float[] lightPositionWorldSpace)
+    {
+        GLES30.glUseProgram(programHandle);
+        GLES30.glEnable(GLES30.GL_DEPTH_TEST);
+        GLES30.glDepthFunc(GLES30.GL_GREATER);
+
+        GLES30.glBindVertexArray(mArrayVertexHandles[VERTEX_ARRAY_ID_INDEX]);
+
+        double currentTime = System.nanoTime();
+
+        deltaTime = (currentTime - mLastTime) / 1000000000;
+        mLastTime = currentTime;
+
+        float[] inverseView = MathUtilities.getInverse(viewMatrix);
+        float[] cameraPosition = Arrays.copyOfRange(inverseView, 12, inverseView.length);
+        int particuleCount;
+        particuleCount = simulateParticles(cameraPosition);
+        generateStressParticles();
+
+        if(optionVariation != 0)
+        {
+            GLES30.glUniform1i(mArrayUniformHandles[VARIABLE_L_OPTION_HANDLE_INDEX], optionVariation);
+        }
+
+        mParticleContainer = Particle.sortParticles(mParticleContainer);
+
+        updateBuffers(particuleCount);
+
+        updateUniforms(viewProjectionMatrix, viewMatrix, lightPositionWorldSpace);
+        setVertexAttributes(particuleCount);
+
+        MainRenderer.polygonCounter2 = particuleCount;
+
+    }
+    public void generateStressParticles()
+    {
+        double newParticles = deltaTime * MainRenderer.clicks;
+        MainRenderer.polygonCounter += newParticles;
+        for(int i = 0; i < newParticles; i++)
+        {
+            int particleIndex = findUnusedParticle();
+            mParticleContainer.get(particleIndex).setLifeSpan(10.f);
+            mParticleContainer.get(particleIndex).position = new float[]{0.f, -0.7f, 0.f};
+            float spreadF = spread;
+            float[] mainDirection = new float[]{0.f, 0.05f, 0.1f};
+            float[] rndDirection = MathUtilities.GetRandomSphericalDirection(rnd);
+            mParticleContainer.get(particleIndex).speed = new float[]{
+                    mainDirection[0] + rndDirection[0]*spreadF,
+                    mainDirection[1] + rndDirection[1]*spreadF,
+                    mainDirection[2] + rndDirection[2]*spreadF,
+            };
+            mParticleContainer.get(particleIndex).size = 0.3f;
+        }
+    }
 
 
     private void setupBuffers(float[] squareVertexData)
