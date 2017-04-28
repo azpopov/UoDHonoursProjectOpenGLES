@@ -25,8 +25,8 @@ public class DummyContent {
     public static final Map<String, DummyItem> ITEM_MAP = new HashMap<>(6);
 
     static {
-        addItem(new DummyItem("1", R.drawable.p1, "Grey Smoke, Colour Non Uniform", "Steve Jobs", "Focusing is about saying No."));
-        addItem(new DummyItem("2", R.drawable.p2, "Addition of bias", "Napoleon Hill","A quitter never wins and a winner never quits."));
+        addItem(new DummyItem("1", R.drawable.p1, "Grey Classic", "Grey Classic", "\nIn this scene, a manually tuned normal map is used alongside the traditional colours of smoke"));
+        addItem(new DummyItem("2", R.drawable.p2, "Addition of Bias", "Addition of Bias",""));
         addItem(new DummyItem("3", R.drawable.p3, "Uniform White Colour Smoke", "Pablo Picaso", "Action is the foundational key to all success."));
         addItem(new DummyItem("4", R.drawable.p4, "Generated Normals", "Napoleon Hill","Our only limitations are those we set up in our own minds."));
         addItem(new DummyItem("5", R.drawable.p5, "Five Solid Colours & Noise Texture", "Addition of Noise","The addition of noise to the Colour texture."));

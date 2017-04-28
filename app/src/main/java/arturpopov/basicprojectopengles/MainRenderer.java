@@ -27,15 +27,15 @@ class MainRenderer implements GLSurfaceView.Renderer
 
     private final Context mContext;
 
-    private ObjectContainerDefault terrain;
+    private TexturedObject terrain;
 
 
 
-    private ObjectContainerDefault fireplaceObj;
+    private TexturedObject fireplaceObj;
 
-    private ObjectContainerDefault trees;
-    private ObjectContainerDefault grass;
-    private ObjectContainer stump;
+    private TexturedObject trees;
+    private TexturedObject grass;
+    private NormalMappedObject stump;
     private Skybox skybox;
     //Shader Handles
     @SuppressWarnings("FieldCanBeLocal")
@@ -78,19 +78,19 @@ class MainRenderer implements GLSurfaceView.Renderer
 
         BuildShaders();
 
-        fireplaceObj =  new ObjectContainerDefault();
+        fireplaceObj =  new TexturedObject();
         fireplaceObj.initialize("fireplace.obj", mContext, R.drawable.fireplace);
 
-        terrain = new ObjectContainerDefault();
+        terrain = new TexturedObject();
         terrain.initializeTerrain("terrain.obj", mContext, R.drawable.terrain_texture);
 
-        trees = new ObjectContainerDefault();
+        trees = new TexturedObject();
         trees.initialize("scenetrees.obj", mContext, R.drawable.pine);
 
-        grass = new ObjectContainerDefault();
+        grass = new TexturedObject();
         grass.initialize("grass.obj", mContext, R.drawable.grass_texture);
 
-        stump = new ObjectContainer();
+        stump = new NormalMappedObject();
         stump.initialize("pine_stump.obj", mContext, R.drawable.tree_stomp_colmap, R.drawable.tree_stomp_normap);
 
         defineUniformHandles();

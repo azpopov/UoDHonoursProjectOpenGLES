@@ -300,8 +300,6 @@ class CelShadedParticleGenerator
         }
     }
 
-
-
     private void setupBuffers(float[] squareVertexData)
     {
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mArrayVertexHandles[BILLBOARD_BUFFER_HANDLE_INDEX]);
@@ -320,7 +318,6 @@ class CelShadedParticleGenerator
         GLES30.glGenBuffers(1, mArrayVertexHandles, BILLBOARD_BUFFER_HANDLE_INDEX);
         GLES30.glGenBuffers(1, mArrayVertexHandles, PARTICULE_POSITION_HANDLE_INDEX);
     }
-
 
     private void defineUniformHandles(int toLoadTextureNormalDepthID, int toLoadTextureColourID, int toLoadTextureCelShading)
     {
@@ -344,7 +341,6 @@ class CelShadedParticleGenerator
         textureCelShadingActiveID = GLES30.glGetUniformLocation(programHandle, "textureCelShading");
 
     }
-
 
     private void updateUniforms(float[] viewProjectionMatrix, float[] viewMatrix, float[] lightPositionWorldSpace)
     {
@@ -376,7 +372,6 @@ class CelShadedParticleGenerator
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mArrayUniformHandles[TEXTURE_CEL_SHADING_SAMPLER_HANDLE_INDEX]);
     }
 
-
     private int findUnusedParticle()
     {
         int result = 0;
@@ -404,6 +399,5 @@ class CelShadedParticleGenerator
         }
         return result;
     }
-
 
 }

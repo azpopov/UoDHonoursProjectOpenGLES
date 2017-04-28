@@ -14,7 +14,7 @@ import java.util.ArrayList;
  * Created by arturpopov on 10/02/2017.
  */
 
-public class ObjectContainer implements IPrimitive
+public class NormalMappedObject implements IPrimitive
 {
     private FloatBuffer mVerticeBuffer, mTexCoordBuffer, mNormalBuffer, mTangentBuffer, mBiTangentBuffer;
     private Integer verticeHandle, texCoordHandle, normalHandle, tangentHandle, biTangentHandle;

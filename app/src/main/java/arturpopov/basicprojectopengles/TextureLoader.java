@@ -80,7 +80,6 @@ class TextureLoader
                 Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), textureIDs[i], options);
 
                 Matrix mirrorMatrix = new Matrix();
-                //mirrorMatrix.preScale(-1.0f, 1.0f);
 
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mirrorMatrix, false);
                 GLES30.glTexParameteri(GLES20.GL_TEXTURE_CUBE_MAP, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
