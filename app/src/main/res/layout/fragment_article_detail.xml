@@ -79,33 +79,6 @@
 
             </android.support.v7.widget.CardView>
 
-            <android.support.v7.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/card_margin"
-                android:layout_marginLeft="@dimen/card_margin"
-                android:layout_marginRight="@dimen/card_margin">
-
-                <LinearLayout
-                    style="@style/Widget.CardContent"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/article_detail_more_info"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/lorem_ipsum" />
-
-                </LinearLayout>
-
-            </android.support.v7.widget.CardView>
-
 
         </LinearLayout>
 
@@ -117,7 +90,7 @@
         android:layout_width="wrap_content"
         app:layout_anchor="@id/appbar"
         app:layout_anchorGravity="bottom|right|end"
-        android:src="@drawable/ic_discuss"
+        android:src="@drawable/ic_done"
         android:layout_margin="@dimen/fab_margin"
         android:clickable="true"/>
 
