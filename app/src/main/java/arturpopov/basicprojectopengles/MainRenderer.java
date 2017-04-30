@@ -49,7 +49,7 @@ class MainRenderer implements GLSurfaceView.Renderer
     private final float[] mLightProjectionMatrix = new float[16];
     private int normalAlphaID = R.drawable.particule_normaleastwind;
     private int colourDepthID = R.drawable.particule_colour_depth3;
-    private int quantizedID = R.drawable.whiteyellow;
+    private int quantizedID = R.drawable.greytintwhitecenter;
     private int[] skyboxIDs;
     private float[] bias = new float[]{0.f, 0.f, 0.f};
 
@@ -322,7 +322,7 @@ class MainRenderer implements GLSurfaceView.Renderer
                 normalAlphaID = R.drawable.particule_normaleastwind;
                 colourDepthID = R.drawable.particule_colour_depth2;
                 quantizedID = R.drawable.greytintwhitecenterwithgradient;
-                bias = new float[]{ 0.2f, -.2f, 0.f};
+                bias = new float[]{ 0.4f, -.2f, 0.f};
                 skyboxIDs = new int[]{
                         R.drawable.green_nebula_right1,
                         R.drawable.green_nebula_left2,
@@ -352,7 +352,7 @@ class MainRenderer implements GLSurfaceView.Renderer
                 normalAlphaID = R.drawable.particule_normal;
                 colourDepthID = R.drawable.particule_colour_depth3;
                 quantizedID = R.drawable.gredgreenblacktellow;
-                bias = new float[]{ 0.2f, -.2f, 0.f};
+                bias = new float[]{ 0.3f, -.1f, 0.f};
                 skyboxIDs = new int[]{
                         R.drawable.green_nebula_right1,
                         R.drawable.green_nebula_left2,

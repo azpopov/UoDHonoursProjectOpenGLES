@@ -182,8 +182,8 @@ class CelShadedParticleGenerator
                     p.position = new float[]
                             {
                                     p.position[0] + ((p.speed[0] + bias[0])* (float) deltaTime) * rebinder,
-                                    p.position[1] + ((p.speed[1] + bias[0]) * (float) deltaTime) ,
-                                    p.position[2] + ((p.speed[2] + bias[0])* (float) deltaTime) * rebinder,
+                                    p.position[1] + ((p.speed[1] + bias[1]) * (float) deltaTime) ,
+                                    p.position[2] + ((p.speed[2] + bias[2])* (float) deltaTime) * rebinder,
                             };
                     p.distanceCamera = MathUtilities.squaredLengthVector3(new float[]
                             {

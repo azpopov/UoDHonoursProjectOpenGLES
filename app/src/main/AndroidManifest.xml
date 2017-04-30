@@ -24,11 +24,6 @@
             android:name=".MainActivity"
             android:exported="true">
         </activity>
-        <activity
-            android:name=".menu_activity"
-            android:label="@string/title_activity_menu_activity"
-            android:theme="@style/Base.Theme">
-        </activity>
         <activity android:name=".androidtemplate.ui.quote.ArticleDetailActivity"
             android:label=""
             android:parentActivityName=".androidtemplate.ui.quote.ListActivity"/>
