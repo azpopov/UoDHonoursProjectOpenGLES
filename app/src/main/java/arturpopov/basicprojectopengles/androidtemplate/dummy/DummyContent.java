@@ -28,7 +28,7 @@ public class DummyContent {
         addItem(new DummyItem("1", R.drawable.p1, "Grey Classic", "Grey Classic", "\n\nIn this scene, a manually tuned normal map is used alongside the traditional colours of smoke"));
         addItem(new DummyItem("2", R.drawable.p2, "Addition of Bias", "Addition of Bias","\nA demonstration of the effect particles exhibit when a variable direction bias is added to the particle simulation and a set of textures at an attempt to simulate the stencil shadow effect. "));
         addItem(new DummyItem("3", R.drawable.p3, "Uniform White Smoke", "Uniform White Smoke", "\nA departure from the usual colour scheme to make a more complex visual scene. The colour depth texture has been replace with a white filled RGB to produce an effect close to McGuire's"));
-        addItem(new DummyItem("4", R.drawable.p4, "Yellow Generated Map", "Yellow Generated Map","\nAttempts to create a complex colour scheme with yellow and red as the colours of choice (colour scene demo in figure \\ref{img:attenuatioCurveDemo}). Additionally, the unmodified generated normal map and the same colour depth texture as in option three was used."));
+        addItem(new DummyItem("4", R.drawable.p4, "Yellow Generated Map", "Yellow Generated Map","\nAttempts to create a complex colour scheme with yellow and red as the colours of choice. Additionally, the unmodified generated normal map and the same colour depth texture as in option three was used."));
     }
 
     private static void addItem(DummyItem item) {
