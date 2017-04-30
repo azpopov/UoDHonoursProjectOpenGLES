@@ -352,7 +352,6 @@ class MainRenderer implements GLSurfaceView.Renderer
                 normalAlphaID = R.drawable.particule_normal;
                 colourDepthID = R.drawable.particule_colour_depth3;
                 quantizedID = R.drawable.gredgreenblacktellow;
-                bias = new float[]{ 0.3f, -.1f, 0.f};
                 skyboxIDs = new int[]{
                         R.drawable.green_nebula_right1,
                         R.drawable.green_nebula_left2,
